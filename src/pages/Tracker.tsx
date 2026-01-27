@@ -19,6 +19,7 @@ import { CyclePhaseEducation } from "@/components/CyclePhaseEducation";
 import { MenopauseEducation } from "@/components/MenopauseEducation";
 import { PregnancyEducation } from "@/components/PregnancyEducation";
 import { PostpartumEducation } from "@/components/PostpartumEducation";
+import { PostBirthSupportEducation } from "@/components/PostBirthSupportEducation";
 import { DailyRhythm } from "@/components/DailyRhythm";
 import { BodyChangingEducation } from "@/components/BodyChangingEducation";
 import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
@@ -890,6 +891,7 @@ export default function Tracker() {
             <CardContent className="space-y-4">
               {/* Educational section */}
               <PostpartumEducation />
+              <PostBirthSupportEducation />
               <div>
                 <Label>Sleep Quality:</Label>
                 <Select value={postpartumSleep} onValueChange={setPostpartumSleep}>

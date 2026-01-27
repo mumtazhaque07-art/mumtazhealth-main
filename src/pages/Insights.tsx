@@ -14,6 +14,7 @@ import { DoshaLearningJourney } from "@/components/DoshaLearningJourney";
 import { FeelingPatterns } from "@/components/FeelingPatterns";
 import { MentalWellbeingEducation } from "@/components/MentalWellbeingEducation";
 import { EmotionalWhatWorked } from "@/components/EmotionalWhatWorked";
+import { PostBirthSupportEducation } from "@/components/PostBirthSupportEducation";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
 
@@ -277,6 +278,11 @@ export default function Insights() {
             )}
           </div>
         )}
+
+        {/* Post-Birth Support Section */}
+        <div className="mt-8">
+          <PostBirthSupportEducation />
+        </div>
 
         {/* Mental & Emotional Wellbeing Section */}
         <div className="mt-8">
