@@ -46,6 +46,13 @@ export function usePregnancySafeMode(): PregnancySafeModeState {
           const isPregnant = profile.life_stage === 'pregnancy' || 
                             profile.pregnancy_status === 'pregnant';
           
+          // Check for postpartum phases (including new specific types)
+          const isPostpartum = profile.life_stage === 'postpartum' ||
+                              profile.life_stage === 'postpartum_natural' ||
+                              profile.life_stage === 'postpartum_csection' ||
+                              profile.life_stage === 'pregnancy_loss' ||
+                              profile.life_stage === 'emotional_support';
+          
           setLifeStage(profile.life_stage);
           setIsPregnancySafeMode(isPregnant);
           setTrimester(isPregnant ? profile.current_trimester : null);

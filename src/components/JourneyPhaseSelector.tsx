@@ -4,7 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Heart, Sparkles, Zap, Leaf, Baby, 
-  Activity, Sun, Moon, Compass, ArrowRight
+  Activity, Sun, Moon, Compass, ArrowRight,
+  Feather, HandHeart, Stethoscope
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +46,12 @@ const PRIMARY_FOCUS_OPTIONS = [
     label: "Fertility awareness", 
     icon: Sparkles,
     description: "Understanding your fertile patterns"
+  },
+  { 
+    value: "emotional_wellbeing", 
+    label: "Emotional wellbeing", 
+    icon: HandHeart,
+    description: "Mental and emotional support"
   },
 ];
 
@@ -92,10 +99,34 @@ const LIFE_PHASE_OPTIONS = [
     description: "Expecting a baby"
   },
   { 
-    value: "postpartum", 
-    label: "Postpartum recovery", 
+    value: "postpartum_natural", 
+    label: "Post-birth (vaginal)", 
     icon: Leaf,
-    description: "Recovering after childbirth"
+    description: "Recovering after natural birth"
+  },
+  { 
+    value: "postpartum_csection", 
+    label: "Post-birth (C-section)", 
+    icon: Stethoscope,
+    description: "Recovering after caesarean"
+  },
+  { 
+    value: "postpartum", 
+    label: "Post-birth recovery (general)", 
+    icon: Leaf,
+    description: "Ongoing recovery after childbirth"
+  },
+  { 
+    value: "pregnancy_loss", 
+    label: "Experienced loss", 
+    icon: Feather,
+    description: "Miscarriage or pregnancy loss"
+  },
+  { 
+    value: "emotional_support", 
+    label: "Emotional support needed", 
+    icon: HandHeart,
+    description: "Processing feelings after birth or loss"
   },
   { 
     value: "not_sure", 
