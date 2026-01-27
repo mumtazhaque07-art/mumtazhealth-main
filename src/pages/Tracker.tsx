@@ -878,8 +878,8 @@ export default function Tracker() {
           </Card>
         )}
 
-        {/* Postpartum Tracking - Only show for postpartum life stage */}
-        {lifeStage === 'postpartum' && (
+        {/* Postpartum Tracking - Show for all postpartum-related life stages */}
+        {(lifeStage === 'postpartum' || lifeStage === 'postpartum_natural' || lifeStage === 'postpartum_csection' || lifeStage === 'pregnancy_loss' || lifeStage === 'emotional_support') && (
           <Card className="mb-6 bg-wellness-sage/10 border-wellness-sage/20">
             <CardHeader>
               <CardTitle className="text-xl text-wellness-taupe">1. Your Postpartum Recovery</CardTitle>

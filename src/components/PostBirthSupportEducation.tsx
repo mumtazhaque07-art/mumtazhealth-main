@@ -328,9 +328,19 @@ export function PostBirthSupportEducation() {
       setUserDosha(data.primary_dosha.toLowerCase());
     }
     
-    // Auto-select phase based on life_stage if postpartum
-    if (data?.life_stage === 'postpartum') {
-      setSelectedPhase('postpartum_recovery');
+    // Auto-select phase based on life_stage
+    if (data?.life_stage) {
+      const stageToPhaseMap: Record<string, PostBirthPhase> = {
+        'postpartum': 'postpartum_recovery',
+        'postpartum_natural': 'natural_birth',
+        'postpartum_csection': 'csection',
+        'pregnancy_loss': 'miscarriage_loss',
+        'emotional_support': 'emotional_support'
+      };
+      const mappedPhase = stageToPhaseMap[data.life_stage];
+      if (mappedPhase) {
+        setSelectedPhase(mappedPhase);
+      }
     }
   };
 
