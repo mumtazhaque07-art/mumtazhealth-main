@@ -24,3 +24,5 @@ export { PCOSEducation } from "../PCOSEducation";
 export { ArthritisEducation } from "../ArthritisEducation";
 export { MentalWellbeingEducation } from "../MentalWellbeingEducation";
 export { EmotionalWhatWorked } from "../EmotionalWhatWorked";
+export { PostBirthSupportEducation } from "../PostBirthSupportEducation";
+export { PostpartumEducation } from "../PostpartumEducation";
