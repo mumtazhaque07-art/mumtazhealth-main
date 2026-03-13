@@ -15,6 +15,8 @@ import { FeelingPatterns } from "@/components/FeelingPatterns";
 import { MentalWellbeingEducation } from "@/components/MentalWellbeingEducation";
 import { EmotionalWhatWorked } from "@/components/EmotionalWhatWorked";
 import { PostBirthSupportEducation } from "@/components/PostBirthSupportEducation";
+import { WellnessTrendCharts } from "@/components/WellnessTrendCharts";
+import { WellnessExport } from "@/components/WellnessExport";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
 
@@ -278,6 +280,16 @@ export default function Insights() {
             )}
           </div>
         )}
+
+        {/* Wellness Trend Charts */}
+        <div className="mt-8">
+          <WellnessTrendCharts />
+        </div>
+
+        {/* Data Export */}
+        <div className="mt-6">
+          <WellnessExport />
+        </div>
 
         {/* Post-Birth Support Section */}
         <div className="mt-8">

@@ -251,6 +251,7 @@ export function FirstTimeQuickCheckIn({ onComplete, onStartFullOnboarding }: Fir
         <div className="w-full max-w-2xl animate-in fade-in slide-in-from-right-4 duration-500">
           <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm overflow-hidden">
             <CardHeader className="text-center space-y-3 sm:space-y-4 pb-3 sm:pb-4 pt-6 sm:pt-8 px-4 sm:px-6">
+              <Logo size="sm" className="mx-auto" />
               <div className="flex justify-center">
                 <div className="p-2.5 sm:p-3 rounded-full bg-gradient-to-br from-wellness-lilac/20 to-wellness-sage/20">
                   <Heart className="h-6 w-6 sm:h-8 sm:w-8 text-wellness-lilac" />
@@ -325,6 +326,7 @@ export function FirstTimeQuickCheckIn({ onComplete, onStartFullOnboarding }: Fir
         <div className="w-full max-w-2xl animate-in fade-in slide-in-from-right-4 duration-500">
           <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm overflow-hidden">
             <CardHeader className="text-center space-y-3 sm:space-y-4 pb-3 sm:pb-4 pt-6 sm:pt-8 px-4 sm:px-6">
+              <Logo size="sm" className="mx-auto" />
               <div className="flex justify-center">
                 <div className="p-3 sm:p-4 rounded-full bg-gradient-to-br from-wellness-lilac/20 to-wellness-sage/20 text-3xl sm:text-4xl">
                   {primaryFeelingData?.emoji || "💫"}

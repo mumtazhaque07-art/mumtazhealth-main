@@ -64,6 +64,18 @@ import threeLegPlank from "@/assets/poses/three-leg-plank.jpeg";
 import highLungeTwist from "@/assets/poses/high-lunge-twist.jpeg";
 import babyCobraBlocks from "@/assets/poses/baby-cobra-blocks.jpeg";
 import birdDogStretch from "@/assets/poses/bird-dog-stretch.jpeg";
+// Additional pose images (pregnancy, postpartum, menstrual, recovery phases)
+import eagleArmsSeated from "@/assets/poses/eagle-arms-seated.jpeg";
+import recliningFigureFour from "@/assets/poses/reclined-figure-four.jpeg";
+import supportedFishPose from "@/assets/poses/supported-fish-pose.jpeg";
+import halfMoonPose from "@/assets/poses/half-moon-pose.jpeg";
+import warriorThree from "@/assets/poses/warrior-three.jpeg";
+import locustPose from "@/assets/poses/locust-pose.jpeg";
+import fishPoseLegsUp from "@/assets/poses/fish-pose-legs-up.jpeg";
+// Additional poses for universal + restorative content
+import forearmReclinedHero from "@/assets/poses/forearm-reclined-hero.jpeg";
+import compassPose from "@/assets/poses/compass-pose.jpeg";
+import revolvedHeadToKnee from "@/assets/poses/revolved-head-to-knee.jpeg";
 import { Navigation } from "@/components/Navigation";
 import { ContentGridSkeleton } from "@/components/ContentSkeleton";
 import { DailyReminderButton } from "@/components/DailyReminderButton";
@@ -744,6 +756,7 @@ const ContentLibrary = () => {
           <img 
             src={getContentImage(item.content_type, item.tags, item.image_url)}
             alt={item.title}
+            loading="lazy"
             className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
           />
           {isLocked && (
@@ -870,6 +883,18 @@ const ContentLibrary = () => {
     '/src/assets/joint-care-breathwork.jpg': jointCareBreathwork,
     '/src/assets/joint-care-functional.jpg': jointCareFunctional,
     '/src/assets/blood-sugar-energy-support.jpg': bloodSugarEnergySupport,
+    // Additional poses for pregnancy, menstrual, postpartum & recovery phases
+    '/src/assets/poses/eagle-arms-seated.jpeg': eagleArmsSeated,
+    '/src/assets/poses/reclined-figure-four.jpeg': recliningFigureFour,
+    '/src/assets/poses/supported-fish-pose.jpeg': supportedFishPose,
+    '/src/assets/poses/half-moon-pose.jpeg': halfMoonPose,
+    '/src/assets/poses/warrior-three.jpeg': warriorThree,
+    '/src/assets/poses/locust-pose.jpeg': locustPose,
+    '/src/assets/poses/fish-pose-legs-up.jpeg': fishPoseLegsUp,
+    // Universal + restorative poses
+    '/src/assets/poses/forearm-reclined-hero.jpeg': forearmReclinedHero,
+    '/src/assets/poses/compass-pose.jpeg': compassPose,
+    '/src/assets/poses/revolved-head-to-knee.jpeg': revolvedHeadToKnee,
   };
 
   const resolveImageUrl = (imageUrl: string | null | undefined): string | null => {
@@ -942,6 +967,27 @@ const ContentLibrary = () => {
     }
     if (tags?.some(tag => ['bird-dog', 'balance', 'core-stability', 'all-fours'].includes(tag))) {
       return birdDogStretch;
+    }
+    if (tags?.some(tag => ['eagle-arms', 'shoulder-tension', 'prenatal-arms', 'neck-relief'].includes(tag))) {
+      return eagleArmsSeated;
+    }
+    if (tags?.some(tag => ['reclined-figure-four', 'figure-four', 'sciatica', 'piriformis', 'hip-release'].includes(tag))) {
+      return recliningFigureFour;
+    }
+    if (tags?.some(tag => ['supported-fish', 'restorative-backbend', 'chest-opening', 'heart-opener'].includes(tag))) {
+      return supportedFishPose;
+    }
+    if (tags?.some(tag => ['half-moon', 'ardha-chandrasana', 'side-balance', 'ovulation-flow'].includes(tag))) {
+      return halfMoonPose;
+    }
+    if (tags?.some(tag => ['warrior-three', 'virabhadrasana-iii', 'single-leg-balance', 'follicular-energy'].includes(tag))) {
+      return warriorThree;
+    }
+    if (tags?.some(tag => ['locust', 'salabhasana', 'back-strengthening', 'bone-density-pose'].includes(tag))) {
+      return locustPose;
+    }
+    if (tags?.some(tag => ['fish-pose', 'matsyasana', 'thyroid-support', 'chest-lift'].includes(tag))) {
+      return fishPoseLegsUp;
     }
 
     // Check for joint care specific images based on tags
@@ -1376,6 +1422,7 @@ const ContentLibrary = () => {
                           <img
                             src={getContentImage(item.content_type, item.tags, item.image_url)}
                             alt={item.title}
+                            loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                           {item.duration_minutes && (
@@ -1680,6 +1727,7 @@ const ContentLibrary = () => {
                   <img 
                     src={getContentImage(item.content_type, item.tags, item.image_url)}
                     alt={item.title}
+                    loading="lazy"
                     className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
                   />
                   {isLocked && (
@@ -1957,6 +2005,7 @@ const ContentLibrary = () => {
                         <img 
                           src={getContentImage(item.content_type, item.tags, item.image_url)}
                           alt={item.title}
+                          loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
                         />
                         {isLocked && (
@@ -2140,6 +2189,7 @@ const ContentLibrary = () => {
                         <img 
                           src={getContentImage(item.content_type, item.tags, item.image_url)}
                           alt={item.title}
+                          loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
                         />
                         {isLocked && (
@@ -2450,6 +2500,7 @@ const ContentLibrary = () => {
                         <img 
                           src={getContentImage(item.content_type, item.tags, item.image_url)}
                           alt={item.title}
+                          loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
                         />
                         {isLocked && (
@@ -2905,6 +2956,7 @@ const ContentLibrary = () => {
                         <img 
                           src={getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url)}
                           alt={selectedContent.title}
+                          loading="lazy"
                           className="w-full rounded-lg"
                         />
                       </div>

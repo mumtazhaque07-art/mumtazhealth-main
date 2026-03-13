@@ -100,12 +100,32 @@ export function SubscriptionManagement() {
     }
   };
 
-  const handleUpgrade = (tierId: string) => {
-    // For now, show a message about upcoming payment integration
-    toast.info(
-      `Upgrade to ${tierId.charAt(0).toUpperCase() + tierId.slice(1)} coming soon! We're setting up secure payments.`,
-      { duration: 5000 }
-    );
+  const handleUpgrade = async (tierId: string) => {
+    // Stripe price IDs will be configured once Stripe products are created
+    // For now, show a coming-soon message as a fallback
+    const priceId = undefined; // Replace with actual Stripe price ID mapping
+
+    if (!priceId) {
+      toast.info(
+        `Upgrade to ${tierId.charAt(0).toUpperCase() + tierId.slice(1)} coming soon! We're finalising our payment setup.`,
+        { duration: 5000 }
+      );
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: { priceId },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
+      toast.error("Unable to start checkout. Please try again.");
+    }
   };
 
   const handleCancelSubscription = async () => {

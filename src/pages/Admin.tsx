@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, Video, Upload, Edit, Trash2, Plus, Image } from "lucide-react";
+import { ArrowLeft, Calendar, Video, Upload, Edit, Trash2, Plus, Image, Users, Activity, Heart, BookOpen, TrendingUp, CheckCircle } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { AdminPoseImageUploader } from "@/components/AdminPoseImageUploader";
 
@@ -89,6 +89,31 @@ export default function Admin() {
   const [uploading, setUploading] = useState(false);
   const [uploadingAnimation, setUploadingAnimation] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newContent, setNewContent] = useState({
+    title: "",
+    description: "",
+    content_type: "yoga",
+    tier_requirement: "free",
+    difficulty_level: "beginner",
+    is_premium: false,
+    is_active: true,
+  });
+
+  // ── Stats state ──────────────────────────────────────────────────────────
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    onboardedUsers: 0,
+    totalEntries: 0,
+    totalSaves: 0,
+    totalCheckIns: 0,
+    totalCompletions: 0,
+    byLifeStage: [] as { stage: string; count: number }[],
+    topContent: [] as { title: string; saves: number }[],
+    recentUsers: [] as { username: string; created_at: string }[],
+  });
+  const [statsLoading, setStatsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -139,6 +164,7 @@ export default function Admin() {
     setIsAdmin(true);
     loadProfiles();
     loadContent();
+    loadStats();
   };
 
   const loadProfiles = async () => {
@@ -195,6 +221,87 @@ export default function Admin() {
     }
     
     setContentList(data || []);
+  };
+
+  const loadStats = async () => {
+    setStatsLoading(true);
+    try {
+      const [
+        { count: totalUsers },
+        { count: onboardedUsers },
+        { count: totalEntries },
+        { count: totalSaves },
+        { count: totalCheckIns },
+        { count: totalCompletions },
+        { data: lifeStageData },
+        { data: recentUsersData },
+        { data: topSavedData },
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('user_wellness_profiles').select('*', { count: 'exact', head: true }).eq('onboarding_completed', true),
+        supabase.from('wellness_entries').select('*', { count: 'exact', head: true }),
+        supabase.from('user_saved_content').select('*', { count: 'exact', head: true }),
+        supabase.from('quick_checkin_logs').select('*', { count: 'exact', head: true }),
+        supabase.from('user_content_progress').select('*', { count: 'exact', head: true }).eq('completed', true),
+        supabase.from('user_wellness_profiles').select('life_stage').not('life_stage', 'is', null),
+        supabase.from('profiles').select('username, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('user_saved_content').select('content_id').limit(200),
+      ]);
+
+      // Tally life stages
+      const stageCounts: Record<string, number> = {};
+      (lifeStageData || []).forEach((row: any) => {
+        if (row.life_stage) {
+          stageCounts[row.life_stage] = (stageCounts[row.life_stage] || 0) + 1;
+        }
+      });
+      const byLifeStage = Object.entries(stageCounts)
+        .map(([stage, count]) => ({ stage, count }))
+        .sort((a, b) => b.count - a.count);
+
+      // Tally top saved content
+      const contentCounts: Record<string, number> = {};
+      (topSavedData || []).forEach((row: any) => {
+        if (row.content_id) {
+          contentCounts[row.content_id] = (contentCounts[row.content_id] || 0) + 1;
+        }
+      });
+      const topContentIds = Object.entries(contentCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([id]) => id);
+
+      let topContent: { title: string; saves: number }[] = [];
+      if (topContentIds.length > 0) {
+        const { data: contentTitles } = await supabase
+          .from('wellness_content')
+          .select('id, title')
+          .in('id', topContentIds);
+        topContent = topContentIds.map((id) => ({
+          title: contentTitles?.find((c: any) => c.id === id)?.title || 'Unknown',
+          saves: contentCounts[id],
+        }));
+      }
+
+      setStats({
+        totalUsers: totalUsers || 0,
+        onboardedUsers: onboardedUsers || 0,
+        totalEntries: totalEntries || 0,
+        totalSaves: totalSaves || 0,
+        totalCheckIns: totalCheckIns || 0,
+        totalCompletions: totalCompletions || 0,
+        byLifeStage,
+        topContent,
+        recentUsers: (recentUsersData || []).map((u: any) => ({
+          username: u.username,
+          created_at: u.created_at,
+        })),
+      });
+    } catch (err) {
+      console.error('Error loading stats:', err);
+    } finally {
+      setStatsLoading(false);
+    }
   };
 
   const handleVideoUpload = async (contentId: string) => {
@@ -318,6 +425,45 @@ export default function Admin() {
     }
   };
 
+  const handleCreateContent = async () => {
+    if (!newContent.title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('wellness_content')
+        .insert({
+          title: newContent.title.trim(),
+          description: newContent.description.trim() || null,
+          content_type: newContent.content_type,
+          tier_requirement: newContent.tier_requirement,
+          difficulty_level: newContent.difficulty_level,
+          is_premium: newContent.is_premium,
+          is_active: newContent.is_active,
+        });
+
+      if (error) throw error;
+
+      toast.success('Content created successfully');
+      loadContent();
+      setCreateDialogOpen(false);
+      setNewContent({
+        title: "",
+        description: "",
+        content_type: "yoga",
+        tier_requirement: "free",
+        difficulty_level: "beginner",
+        is_premium: false,
+        is_active: true,
+      });
+    } catch (error) {
+      console.error('Error creating content:', error);
+      toast.error('Failed to create content');
+    }
+  };
+
   const handleResetUser = async (userId: string) => {
     if (!userId) {
       toast.error("Please select a user first");
@@ -411,11 +557,192 @@ export default function Admin() {
           </CardHeader>
         </Card>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="stats" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="stats">📊 Statistics</TabsTrigger>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="content">Content Management</TabsTrigger>
           </TabsList>
+
+          {/* ── Statistics Tab ──────────────────────────────────────────────── */}
+          <TabsContent value="stats" className="space-y-6">
+            {statsLoading ? (
+              <div className="flex items-center justify-center py-16 text-wellness-taupe">
+                Loading statistics…
+              </div>
+            ) : (
+              <>
+                {/* ── Headline metric cards ── */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <Card className="border-mumtaz-lilac/20 bg-gradient-to-br from-mumtaz-lilac/10 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-mumtaz-lilac">
+                        <Users className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Total Users</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.totalUsers}</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-wellness-sage/20 bg-gradient-to-br from-wellness-sage/10 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-wellness-sage">
+                        <CheckCircle className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Onboarded</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.onboardedUsers}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {stats.totalUsers > 0 ? Math.round((stats.onboardedUsers / stats.totalUsers) * 100) : 0}% completion rate
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-wellness-taupe/20 bg-gradient-to-br from-wellness-taupe/10 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-wellness-taupe">
+                        <Activity className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Wellness Entries</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.totalEntries}</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-mumtaz-lilac/20 bg-gradient-to-br from-mumtaz-lilac/8 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-mumtaz-lilac">
+                        <Heart className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Saved Content</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.totalSaves}</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-wellness-sage/20 bg-gradient-to-br from-wellness-sage/8 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-wellness-sage">
+                        <TrendingUp className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Check-ins</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.totalCheckIns}</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-wellness-taupe/20 bg-gradient-to-br from-wellness-taupe/8 to-background shadow">
+                    <CardContent className="pt-5 pb-4 flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-wellness-taupe">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Completions</span>
+                      </div>
+                      <p className="text-4xl font-bold text-mumtaz-plum">{stats.totalCompletions}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* ── Lower row: Life Stage · Top Content · Recent Users ── */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+                  {/* Life stage breakdown */}
+                  <Card className="border-wellness-taupe/20 shadow">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base text-wellness-taupe flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Users by Life Stage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {stats.byLifeStage.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No data yet</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {stats.byLifeStage.map(({ stage, count }) => (
+                            <div key={stage} className="flex items-center justify-between">
+                              <span className="text-sm capitalize text-wellness-taupe">
+                                {stage.replace(/_/g, ' ')}
+                              </span>
+                              <span className="text-sm font-semibold bg-mumtaz-lilac/15 text-mumtaz-plum px-2 py-0.5 rounded-full">
+                                {count}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Top saved content */}
+                  <Card className="border-wellness-taupe/20 shadow">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base text-wellness-taupe flex items-center gap-2">
+                        <Heart className="w-4 h-4" />
+                        Most Saved Content
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {stats.topContent.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No data yet</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {stats.topContent.map(({ title, saves }, i) => (
+                            <div key={title} className="flex items-start justify-between gap-2">
+                              <span className="text-sm text-wellness-taupe leading-snug">
+                                <span className="text-muted-foreground mr-1">{i + 1}.</span>
+                                {title}
+                              </span>
+                              <span className="text-sm font-semibold bg-wellness-sage/15 text-wellness-taupe px-2 py-0.5 rounded-full shrink-0">
+                                {saves}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Recent sign-ups */}
+                  <Card className="border-wellness-taupe/20 shadow">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base text-wellness-taupe flex items-center gap-2">
+                        <Activity className="w-4 h-4" />
+                        Recent Sign-ups
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {stats.recentUsers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No users yet</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {stats.recentUsers.map(({ username, created_at }) => (
+                            <div key={username} className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-medium text-mumtaz-plum truncate">
+                                {username}
+                              </span>
+                              <span className="text-xs text-muted-foreground shrink-0">
+                                {new Date(created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                </div>
+
+                {/* Refresh button */}
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadStats}
+                    className="border-mumtaz-lilac/30 text-mumtaz-plum hover:bg-mumtaz-lilac/10"
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Refresh Stats
+                  </Button>
+                </div>
+              </>
+            )}
+          </TabsContent>
 
           <TabsContent value="users" className="space-y-6">
 
@@ -530,11 +857,108 @@ export default function Admin() {
 
           <TabsContent value="content" className="space-y-6">
             <Card className="border-wellness-taupe/20 shadow-lg">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-2xl text-wellness-taupe flex items-center gap-2">
                   <Video className="w-6 h-6" />
                   Wellness Content Library
                 </CardTitle>
+                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="gap-1.5">
+                      <Plus className="w-4 h-4" />
+                      New Content
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Create New Content</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Title *</Label>
+                        <Input
+                          value={newContent.title}
+                          onChange={(e) => setNewContent({ ...newContent, title: e.target.value })}
+                          placeholder="e.g. Gentle Morning Yoga Flow"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Textarea
+                          value={newContent.description}
+                          onChange={(e) => setNewContent({ ...newContent, description: e.target.value })}
+                          placeholder="A gentle yoga flow to start your day..."
+                          rows={3}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Content Type</Label>
+                          <Select
+                            value={newContent.content_type}
+                            onValueChange={(v) => setNewContent({ ...newContent, content_type: v })}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="yoga">Yoga</SelectItem>
+                              <SelectItem value="nutrition">Nutrition</SelectItem>
+                              <SelectItem value="ayurveda">Ayurveda</SelectItem>
+                              <SelectItem value="meditation">Meditation</SelectItem>
+                              <SelectItem value="breathwork">Breathwork</SelectItem>
+                              <SelectItem value="education">Education</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Tier</Label>
+                          <Select
+                            value={newContent.tier_requirement}
+                            onValueChange={(v) => setNewContent({ ...newContent, tier_requirement: v })}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="basic">Basic</SelectItem>
+                              <SelectItem value="standard">Standard</SelectItem>
+                              <SelectItem value="premium">Premium</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Difficulty</Label>
+                          <Select
+                            value={newContent.difficulty_level}
+                            onValueChange={(v) => setNewContent({ ...newContent, difficulty_level: v })}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="beginner">Beginner</SelectItem>
+                              <SelectItem value="intermediate">Intermediate</SelectItem>
+                              <SelectItem value="advanced">Advanced</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2 flex flex-col justify-end">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={newContent.is_premium}
+                              onChange={(e) => setNewContent({ ...newContent, is_premium: e.target.checked })}
+                              className="rounded"
+                            />
+                            <span className="text-sm">Premium content</span>
+                          </label>
+                        </div>
+                      </div>
+                      <Button onClick={handleCreateContent} className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Content
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -553,6 +977,16 @@ export default function Admin() {
                               <span className="px-2 py-1 bg-wellness-sage/20 text-wellness-taupe text-xs rounded-full">
                                 {content.content_type}
                               </span>
+                              {content.is_premium && (
+                                <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                  Premium
+                                </span>
+                              )}
+                              {!content.is_active && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                  Inactive
+                                </span>
+                              )}
                             </div>
                             <p className="text-sm text-muted-foreground">
                               {content.description}

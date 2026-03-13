@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { Calendar, TrendingUp, Plus, Activity } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import {
@@ -198,7 +199,9 @@ export default function ConditionTracker() {
     }));
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="container mx-auto p-6 max-w-6xl pt-20">
       <div className="mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-wellness-lilac to-wellness-sage bg-clip-text text-transparent mb-2">
           Condition Symptom Tracker
@@ -403,6 +406,7 @@ export default function ConditionTracker() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }

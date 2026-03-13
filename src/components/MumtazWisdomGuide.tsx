@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChatMarkdown } from "@/components/ChatMarkdown";
 
 interface Message {
   role: "user" | "assistant";
@@ -160,11 +161,6 @@ export function MumtazWisdomGuide() {
     }
   }, [messages, loading]);
 
-  // Don't render on auth pages to avoid interference with CTAs
-  if (isAuthPage) {
-    return null;
-  }
-
   const fetchUserProfile = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -178,22 +174,19 @@ export function MumtazWisdomGuide() {
 
       const { data: wellnessProfile } = await supabase
         .from("user_wellness_profiles")
-        .select("*")
+        .select("primary_dosha, secondary_dosha, life_stage, life_phases, primary_focus, current_trimester, spiritual_preference")
         .eq("user_id", user.id)
         .single();
 
-      // Cast to any to access new columns that may not be in types yet
-      const wp = wellnessProfile as any;
-      
       setUserProfile({
         username: profile?.username || "friend",
-        primaryDosha: wp?.primary_dosha || undefined,
-        secondaryDosha: wp?.secondary_dosha || undefined,
-        lifeStage: wp?.life_stage || undefined,
-        lifePhases: wp?.life_phases || undefined,
-        primaryFocus: wp?.primary_focus || undefined,
-        pregnancyTrimester: wp?.current_trimester || undefined,
-        spiritualPreference: wp?.spiritual_preference || undefined,
+        primaryDosha: wellnessProfile?.primary_dosha || undefined,
+        secondaryDosha: wellnessProfile?.secondary_dosha || undefined,
+        lifeStage: wellnessProfile?.life_stage || undefined,
+        lifePhases: wellnessProfile?.life_phases || undefined,
+        primaryFocus: wellnessProfile?.primary_focus || undefined,
+        pregnancyTrimester: wellnessProfile?.current_trimester || undefined,
+        spiritualPreference: wellnessProfile?.spiritual_preference || undefined,
       });
     } catch (error) {
       console.error("[CHATBOT_UI_ERROR] Error fetching profile:", error);
@@ -447,6 +440,12 @@ export function MumtazWisdomGuide() {
     }
   };
 
+  // Don't render on auth pages to avoid interference with CTAs
+  // This must come AFTER all hooks to comply with React's rules of hooks
+  if (isAuthPage) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -559,7 +558,11 @@ export function MumtazWisdomGuide() {
                           : "bg-muted"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      {message.role === "assistant" ? (
+                        <ChatMarkdown content={message.content} className="break-words" />
+                      ) : (
+                        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      )}
                     </div>
                   </div>
                 ))}

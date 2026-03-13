@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Download, Calendar } from "lucide-react";
+import { Navigation } from "@/components/Navigation";
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -261,7 +262,8 @@ export default function MonthlySummary() {
 
   return (
     <div className="min-h-screen bg-wellness-beige">
-      <div className="max-w-6xl mx-auto p-4 pb-8">
+      <Navigation />
+      <div className="max-w-6xl mx-auto p-4 pb-8 pt-20">
         {/* Header */}
         <Card className="mb-6 bg-wellness-warm border-wellness-taupe/20 shadow-lg">
           <CardHeader>

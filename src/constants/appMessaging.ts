@@ -31,7 +31,8 @@ export const WELCOME_MESSAGES = {
   eveningGreeting: "Good evening — time to wind down and restore",
   
   // Entry points
-  entryPrompt: "How would you like to continue today?",
+  entryPrompt: "How would you like to get started today?",
+  returningEntryPrompt: "How would you like to continue today?",
   quickCheckInInvite: "Tell me how you're feeling right now — it only takes a moment",
   exploreInvite: "Browse yoga, nutrition, and wellness content at your own pace",
   trackingInvite: "Begin understanding your patterns and rhythms",

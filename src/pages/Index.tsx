@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Calendar, BookOpen, BarChart3, User, Sparkles, TrendingUp, Download, Users, Flower2, Activity, Clock, ArrowRight, Waves } from "lucide-react";
+import { Heart, Calendar, BookOpen, BarChart3, User, Sparkles, TrendingUp, Users, Flower2, Activity, Clock, ArrowRight, Waves } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { FavoritesQuickAccess } from "@/components/FavoritesQuickAccess";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
 import { ConfidenceJourney } from "@/components/ConfidenceJourney";
 import { ConfidenceMilestones } from "@/components/ConfidenceMilestones";
+import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { LifeStageCheckInPrompt } from "@/components/LifeStageCheckInPrompt";
 import { WelcomeEntryDialog } from "@/components/WelcomeEntryDialog";
 import { InBetweenPhaseBanner } from "@/components/InBetweenPhaseBanner";
@@ -147,6 +148,16 @@ const Index = () => {
 
       setUserProfile(profile);
       setWellnessProfile(wellness);
+
+      // If the user is logged in but hasn't completed onboarding
+      // and hasn't done a quick check-in, send them to onboarding.
+      // This handles new Google Sign-In users and any returning user
+      // who hasn't finished setting up their profile.
+      const quickCheckInDone = localStorage.getItem('mumtaz_quick_checkin_completed') === 'true';
+      if (!wellness?.onboarding_completed && !quickCheckInDone) {
+        navigate("/onboarding");
+        return;
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -620,45 +631,54 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Install to Home Screen prompt — appears when browser detects app is installable */}
+      <InstallPromptBanner />
+
       {/* Welcome Entry Dialog */}
       <WelcomeEntryDialog open={showEntryDialog} onOpenChange={setShowEntryDialog} />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-wellness-sage-light via-background to-wellness-lilac-light py-16 md:py-28">
+      <section className="relative overflow-hidden bg-gradient-to-br from-wellness-sage-light via-background to-wellness-lilac-light py-12 md:py-20">
         <div className="container mx-auto px-4">
-          {/* Logo at top */}
-          <div className="flex justify-center mb-12 md:mb-16">
-            <Logo size="2xl" className="opacity-95" />
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
-            {/* Left: Copy */}
-            <div className="text-center lg:text-left order-2 lg:order-1">
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-                A Safe Space for Your Wellness Journey
+          <div className="grid lg:grid-cols-2 gap-10 items-center max-w-7xl mx-auto">
+            {/* Left: Logo + Copy */}
+            <div className="text-center lg:text-left order-2 lg:order-1 flex flex-col gap-6">
+              {/* Logo — branded lockup with name visible */}
+              <div className="flex justify-center lg:justify-start items-center gap-3">
+                <Logo size="lg" showText={false} className="opacity-100" />
+                <div className="flex flex-col leading-tight">
+                  <span className="font-bold text-mumtaz-plum text-2xl sm:text-3xl tracking-tight font-accent">Mumtaz Health</span>
+                  <span className="text-muted-foreground text-sm tracking-wide">Empowering Your Journey</span>
+                </div>
+              </div>
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
+                Your Body. Your Phase.<br />Your Journey.
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                Every woman's journey is unique. Built on 30+ years of holistic expertise in Yoga, Ayurveda, and 
-                spiritual guidance — this app evolves with you through every phase of life.
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                30+ years of Ayurvedic wisdom and lived experience, brought together for you. No pressure, no comparison — just gentle support for wherever you are right now.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button 
+                <Button
                   size="lg"
                   onClick={openEntryDialog}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
                 >
-                  <Download className="mr-2 h-5 w-5" />
                   Get Started
                 </Button>
-                <Button 
+                <Button
                   size="lg"
                   variant="outline"
-                  onClick={openEntryDialog}
+                  onClick={() => navigate("/auth")}
                   className="border-2 border-primary/50 text-foreground hover:bg-primary/10 text-lg px-8 py-6"
                 >
-                  <Users className="mr-2 h-5 w-5" />
-                  Join the Community
+                  Sign In
                 </Button>
+              </div>
+              {/* Credential badges — builds trust at a glance */}
+              <div className="flex flex-wrap gap-2 justify-center lg:justify-start pt-1">
+                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">Ayurvedic Practitioner</span>
+                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">International Yoga Teacher Trainer</span>
+                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">30+ Years Experience</span>
               </div>
             </div>
 
@@ -666,9 +686,9 @@ const Index = () => {
             <div className="flex justify-center lg:justify-end order-1 lg:order-2">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-3xl blur-3xl"></div>
-                <img 
-                  src={founderPortrait} 
-                  alt="Founder portrait - A warm, welcoming guide on your wellness journey" 
+                <img
+                  src={founderPortrait}
+                  alt="Founder portrait - A warm, welcoming guide on your wellness journey"
                   className="relative rounded-3xl shadow-2xl w-full max-w-md object-cover aspect-[3/4]"
                 />
               </div>
@@ -678,37 +698,52 @@ const Index = () => {
       </section>
 
       {/* Founder's Story Section */}
-      <section className="py-20 md:py-32 bg-card">
+      <section className="py-16 md:py-24 bg-card">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8">
-              A Safe Space Without Judgment
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              From Mumtaz, With Love
             </h2>
-            <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
-              <p>
-                Built on 30+ years of holistic expertise. I am an <strong>Ayurvedic Practitioner</strong> (focusing 
-                on holistic lifestyle, nutrition, and tailored herbal remedies), an <strong>International Yoga 
-                Teacher Trainer</strong>, and a specialist in <strong>transformational work</strong> including inner 
-                child healing and hands-on rehabilitation.
-              </p>
-              <p>
-                I created Mumtaz Health because I have faced many challenges myself and have been honoured to 
-                support countless women through their unique journeys — fertility, pregnancy, postpartum, 
-                menopause, recovery, and beyond. This app reflects my personalized, one-size-does-not-fit-all 
-                approach to women's holistic wellness.
-              </p>
-              <p className="text-2xl font-semibold text-foreground italic">
-                "I'm here to support, not judge. Your journey is yours, and you are not alone."
-              </p>
-              <p>
-                This isn't just knowledge from books — it's wisdom earned through lived experience, deep study, 
-                and decades of walking alongside women just like you. While I may not have experienced everything 
-                personally, I have held space for many who have.
-              </p>
-              <p className="text-base text-muted-foreground/80 italic">
-                This app offers supportive guidance and is not a substitute for professional medical advice. 
-                Please consult your healthcare provider for medical concerns.
-              </p>
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              I built this app because I have lived many of these experiences myself — and I have been honoured to walk alongside countless women through fertility, pregnancy, postpartum, menopause, and everything in between.
+            </p>
+            <p className="text-2xl font-semibold text-foreground italic">
+              "I'm here to support, not judge. Your journey is yours — and you are not alone."
+            </p>
+            <p className="text-sm text-muted-foreground/70 italic">
+              This app offers supportive guidance and is not a substitute for professional medical advice.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof — Women's Voices */}
+      {/* REPLACE THESE QUOTES with real testimonials from women you have supported */}
+      <section className="py-16 md:py-20 bg-gradient-to-br from-wellness-sage-light/40 to-wellness-lilac-light/40">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-center text-sm uppercase tracking-widest text-muted-foreground/60 mb-10 font-medium">
+              What women are saying
+            </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-border/40 flex flex-col gap-4">
+                <p className="text-foreground/80 leading-relaxed italic">
+                  "For the first time I feel like something was designed for me — not just for anyone. It actually gets where I am in life."
+                </p>
+                <p className="text-sm text-muted-foreground font-medium">— Fatima, 42, perimenopause</p>
+              </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-border/40 flex flex-col gap-4">
+                <p className="text-foreground/80 leading-relaxed italic">
+                  "I came back from my mat after two years postpartum. Mumtaz's guidance made it feel safe, not scary."
+                </p>
+                <p className="text-sm text-muted-foreground font-medium">— Sarah, 34, postpartum recovery</p>
+              </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-border/40 flex flex-col gap-4">
+                <p className="text-foreground/80 leading-relaxed italic">
+                  "I didn't know how much I needed someone to say 'this phase is real' — and actually explain why my body feels this way."
+                </p>
+                <p className="text-sm text-muted-foreground font-medium">— Amina, 49, menopause journey</p>
+              </div>
             </div>
           </div>
         </div>
@@ -813,54 +848,24 @@ const Index = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 md:py-32 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5">
+      <section className="py-20 md:py-28 bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8">
-              Begin Your Journey — At Your Own Pace
+          <div className="max-w-2xl mx-auto text-center space-y-8">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              Ready when you are.
             </h2>
-            <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              This app is here to support your understanding, self-compassion, and growth. 
-              Explore at your own pace — there's no rush, no comparison, just gentle guidance.
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              No rush. No comparison. Just a gentle space to start — at whatever pace feels right for you today.
             </p>
-            <p className="text-lg text-muted-foreground mb-12 leading-relaxed">
-              As you continue using the app, you'll unlock more tailored insights suited to where you are right now. 
-              Changing phases is natural and not a failure — it's simply the next chapter of your story.
-            </p>
-
-            <div className="grid sm:grid-cols-3 gap-6 mb-12">
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={openEntryDialog}
-                className="border-2 border-primary/50 hover:bg-primary/10 h-auto py-6 flex flex-col gap-2"
-              >
-                <Users className="h-6 w-6" />
-                <span className="font-semibold">Join Our Online<br />Study Groups</span>
-              </Button>
-
-              <Button 
-                size="lg"
-                variant="outline"
-                onClick={openEntryDialog}
-                className="border-2 border-accent/50 hover:bg-accent/10 h-auto py-6 flex flex-col gap-2"
-              >
-                <Sparkles className="h-6 w-6" />
-                <span className="font-semibold">Explore Wellness<br />Retreats</span>
-              </Button>
-
-              <Button 
-                size="lg"
-                onClick={openEntryDialog}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground h-auto py-6 flex flex-col gap-2 shadow-lg"
-              >
-                <Download className="h-6 w-6" />
-                <span className="font-semibold">Get Started<br />with Mumtaz Health</span>
-              </Button>
-            </div>
-
-            <p className="text-lg text-foreground italic font-medium">
-              Your journey is unique and worthy of celebration. I'm here to walk alongside you.
+            <Button
+              size="lg"
+              onClick={openEntryDialog}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-12 py-6 shadow-lg hover:shadow-xl transition-all"
+            >
+              Begin Your Journey
+            </Button>
+            <p className="text-base text-foreground/70 italic">
+              "Your journey is unique and worthy of celebration. I'm here to walk alongside you."
             </p>
           </div>
         </div>

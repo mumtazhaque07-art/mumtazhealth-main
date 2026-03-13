@@ -51,12 +51,15 @@ export function HomeNavigation({ className, username }: HomeNavigationProps) {
       
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link 
-          to="/" 
-          className="flex items-center gap-2.5 transition-all duration-300 hover:scale-105 hover:opacity-80"
+        <Link
+          to="/"
+          className="flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:opacity-80"
         >
-          <Logo size="sm" showText={false} />
-          <span className="font-semibold text-foreground text-base sm:text-lg">Mumtaz Health</span>
+          <Logo size="nav" showText={false} />
+          <div className="flex flex-col leading-tight">
+            <span className="font-bold text-mumtaz-plum text-xl sm:text-2xl tracking-tight font-accent">Mumtaz Health</span>
+            <span className="text-muted-foreground text-xs hidden sm:block tracking-wide">Empowering Your Journey</span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}

@@ -139,7 +139,7 @@ export function ReturningUserWelcome({ onClose }: ReturningUserWelcomeProps) {
             {WELCOME_MESSAGES.returningUser}{username ? `, ${username}` : ""}!
           </DialogTitle>
           <DialogDescription className="text-base">
-            {JOURNEY_MESSAGES.phaseEvolution} {WELCOME_MESSAGES.entryPrompt}
+            {JOURNEY_MESSAGES.phaseEvolution} {WELCOME_MESSAGES.returningEntryPrompt}
           </DialogDescription>
         </DialogHeader>
 

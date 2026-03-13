@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { z } from "zod";
-import { KeyRound, Mail, Shield, LogOut, Smartphone, Monitor, Globe } from "lucide-react";
-import { Session } from "@supabase/supabase-js";
+import { KeyRound, Mail, Shield, LogOut, Smartphone, Monitor, Globe, AlertTriangle } from "lucide-react";
 
 const emailSchema = z.string().trim().email({ message: "Please enter a valid email" });
 const passwordSchema = z.string().min(6, { message: "Password must be at least 6 characters" });
@@ -23,12 +22,16 @@ interface SessionInfo {
 export function AccountSettings() {
   const [email, setEmail] = useState("");
   const [currentEmail, setCurrentEmail] = useState("");
+  // Password change fields — current password required for security
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingPassword, setLoadingPassword] = useState(false);
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
+  // Confirmation state for destructive action
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   useEffect(() => {
     fetchUserData();
@@ -42,7 +45,7 @@ export function AccountSettings() {
         setEmail(user.email);
       }
 
-      // Fetch current session info
+      // Fetch current session info — show only device type, not raw user agent string
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSessions([{
@@ -93,13 +96,34 @@ export function AccountSettings() {
     setLoadingPassword(true);
 
     try {
+      // Validate new password
       passwordSchema.parse(newPassword);
 
       if (newPassword !== confirmPassword) {
-        toast.error("Passwords do not match");
+        toast.error("New passwords do not match");
+        setLoadingPassword(false);
         return;
       }
 
+      if (!currentPassword) {
+        toast.error("Please enter your current password to confirm this change");
+        setLoadingPassword(false);
+        return;
+      }
+
+      // Re-authenticate with current password before allowing the change
+      const { error: reAuthError } = await supabase.auth.signInWithPassword({
+        email: currentEmail,
+        password: currentPassword,
+      });
+
+      if (reAuthError) {
+        toast.error("Your current password is incorrect. Please try again.");
+        setLoadingPassword(false);
+        return;
+      }
+
+      // Current password verified — now update to new password
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -107,6 +131,7 @@ export function AccountSettings() {
       if (error) throw error;
 
       toast.success("Password updated successfully");
+      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
@@ -133,6 +158,7 @@ export function AccountSettings() {
       toast.error("Failed to sign out from all devices");
     } finally {
       setLoadingSessions(false);
+      setShowSignOutConfirm(false);
     }
   };
 
@@ -192,7 +218,7 @@ export function AccountSettings() {
         </CardContent>
       </Card>
 
-      {/* Change Password */}
+      {/* Change Password — requires current password verification */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
@@ -200,36 +226,55 @@ export function AccountSettings() {
             Change Password
           </CardTitle>
           <CardDescription>
-            Choose a strong password with at least 6 characters.
+            You must enter your current password to set a new one. Choose a strong password with at least 6 characters.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdatePassword} className="space-y-4">
+            {/* Current password — security verification */}
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="currentPassword">Current Password</Label>
               <Input
-                id="newPassword"
+                id="currentPassword"
                 type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter your current password"
                 disabled={loadingPassword}
+                autoComplete="current-password"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                disabled={loadingPassword}
-              />
+
+            <div className="border-t border-border pt-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="At least 6 characters"
+                  disabled={loadingPassword}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Repeat new password"
+                  disabled={loadingPassword}
+                  autoComplete="new-password"
+                />
+              </div>
             </div>
+
             <Button
               type="submit"
-              disabled={loadingPassword || !newPassword || !confirmPassword}
+              disabled={loadingPassword || !currentPassword || !newPassword || !confirmPassword}
               className="w-full sm:w-auto"
             >
               {loadingPassword ? "Updating..." : "Update Password"}
@@ -280,19 +325,53 @@ export function AccountSettings() {
             </div>
           )}
 
-          <div className="pt-4 border-t border-border">
-            <Button
-              variant="destructive"
-              onClick={handleSignOutAll}
-              disabled={loadingSessions}
-              className="w-full sm:w-auto gap-2"
-            >
-              <LogOut className="w-4 h-4" />
-              {loadingSessions ? "Signing out..." : "Sign Out All Devices"}
-            </Button>
-            <p className="text-xs text-muted-foreground mt-2">
-              This will sign you out from all devices, including this one.
-            </p>
+          <div className="pt-4 border-t border-border space-y-3">
+            {/* Confirmation step before destructive action */}
+            {showSignOutConfirm ? (
+              <div className="p-4 rounded-lg bg-destructive/8 border border-destructive/20 space-y-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-destructive font-medium">
+                    This will sign you out from all devices, including this one. You will need to sign back in.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleSignOutAll}
+                    disabled={loadingSessions}
+                    className="gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {loadingSessions ? "Signing out..." : "Yes, sign out everywhere"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSignOutConfirm(false)}
+                    disabled={loadingSessions}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowSignOutConfirm(true)}
+                  disabled={loadingSessions}
+                  className="w-full sm:w-auto gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out All Devices
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  This will sign you out from all devices, including this one.
+                </p>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -384,10 +384,17 @@ export default function Onboarding() {
   if (step === "initial_choice" || step === "quick_checkin") {
     console.log('[Onboarding] Rendering FirstTimeQuickCheckIn');
     return (
-      <FirstTimeQuickCheckIn 
-        onComplete={() => {
-          console.log('[Onboarding] Quick check-in complete, navigating to dashboard');
-          navigate("/");
+      <FirstTimeQuickCheckIn
+        onComplete={async () => {
+          console.log('[Onboarding] Quick check-in complete, checking auth status');
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            console.log('[Onboarding] User authenticated, navigating to dashboard');
+            navigate("/");
+          } else {
+            console.log('[Onboarding] User not authenticated, redirecting to sign up');
+            navigate("/auth?from=quick-checkin");
+          }
         }}
         onStartFullOnboarding={() => {
           console.log('[Onboarding] Starting full onboarding from quick check-in');
