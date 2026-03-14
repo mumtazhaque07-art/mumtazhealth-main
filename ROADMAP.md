@@ -40,8 +40,8 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 | 5 | PWA install prompt | Surface "Add to Home Screen" for mobile users | 🟡 HIGH | ✅ Done |
 | 6 | Credibility landing page | Testimonials, press badges, credentials on Auth.tsx | 🟡 HIGH | ✅ Done |
 | 7 | RLS security audit | Confirm all Supabase tables are secured | 🔴 CRITICAL | ✅ Done |
-| 8 | Custom domain | Set up mumtazhealth.com — Vercel deployment from GitHub | 🔴 CRITICAL | ⏳ Mumtaz action |
-| 9 | Google Sign In | Configure OAuth in Supabase + Google Cloud Console | 🟡 HIGH | ⏳ Mumtaz action |
+| 8 | Custom domain | Set up mumtazhealth.app — Vercel deployment from GitHub | 🔴 CRITICAL | ✅ Done |
+| 9 | Google Sign In | Configure OAuth in Supabase + Google Cloud Console | 🟡 HIGH | ✅ Done |
 
 ### Phase 2 — Revenue & Core Experience (Weeks 4–12)
 | # | Feature | Description | Priority | Status |
@@ -82,8 +82,8 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 
 ## 🚀 Deployment Goals
 
-- [ ] Custom domain: TBC (mumtazhealth.com recommended)
-- [ ] Hosting provider: TBC (Vercel or Netlify recommended for React/Vite)
+- [x] Custom domain: mumtazhealth.app
+- [x] Hosting provider: Vercel
 - [ ] App Store (iOS): Phase 4
 - [ ] Google Play (Android): Phase 4
 
@@ -91,11 +91,11 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 
 ## 📊 Supabase / Backend Tasks
 
-- [ ] Fix hardcoded auth URL in Auth.tsx
-- [ ] Confirm all RLS policies are secure
-- [ ] Set up Supabase Storage buckets (profile photos, pose images)
-- [ ] Set email templates for auth (confirm, reset password)
-- [ ] Add VITE_APP_URL environment variable
+- [x] Fix hardcoded auth URL in Auth.tsx
+- [x] Confirm all RLS policies are secure
+- [x] Set up Supabase Storage buckets (profile photos, pose images)
+- [x] Set email templates for auth (confirm, reset password)
+- [x] Add VITE_APP_URL environment variable
 - [ ] Connect MumtazWisdomGuide to AI via Edge Function
 
 ---
@@ -141,7 +141,8 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 | 7 Mar 2026 | PWA fully set up — manifest.json created, sw.js upgraded, index.html updated, install banner confirmed working |
 | 7 Mar 2026 | Database security audit — all 21 Supabase tables confirmed RLS-enabled |
 | 7 Mar 2026 | Image lazy loading — confirmed already in place on all ContentLibrary images |
-| 7 Mar 2026 | Google sign-in button hidden pending OAuth configuration in Supabase |
+| 14 Mar 2026 | Google Sign-in enabled and configured in Supabase + Google Cloud |
+| 14 Mar 2026 | Vercel deployment completed with custom domain (mumtazhealth.app) connected |
 
 ---
 
