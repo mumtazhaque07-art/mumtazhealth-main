@@ -131,10 +131,10 @@ serve(async (req) => {
 
     const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, spiritualPreference } = validation.data;
     
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("[CHATBOT_API_ERROR] LOVABLE_API_KEY is not configured");
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) {
+      console.error("[CHATBOT_API_ERROR] ANTHROPIC_API_KEY is not configured");
+      throw new Error("ANTHROPIC_API_KEY is not configured");
     }
 
     // Build personalized system prompt
@@ -149,21 +149,23 @@ serve(async (req) => {
       spiritualPreference,
     });
 
-    console.log("[CHATBOT_API] Making request to AI gateway for user:", user.id.substring(0, 8) + "...");
+    console.log("[CHATBOT_API] Making request to Anthropic API for user:", user.id.substring(0, 8) + "...");
     
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Anthropic requires messages to only be 'user' or 'assistant'
+    const validMessages = messages.filter(m => m.role === 'user' || m.role === 'assistant');
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages,
-        ],
-        stream: false,
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: validMessages,
       }),
     });
 
@@ -178,23 +180,13 @@ serve(async (req) => {
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
-        console.error("[CHATBOT_API_ERROR] Payment required (402)");
-        return new Response(
-          JSON.stringify({ 
-            error: "I'm temporarily unavailable. Please try again later.",
-            errorCode: "SERVICE_UNAVAILABLE"
-          }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
-      console.error("[CHATBOT_API_ERROR] AI gateway error:", response.status, errorText);
-      throw new Error(`AI gateway error: ${response.status}`);
+      console.error("[CHATBOT_API_ERROR] Anthropic API error:", response.status, errorText);
+      throw new Error(`Anthropic API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content;
+    const reply = data.content?.[0]?.text;
     
     if (!reply) {
       console.error("[CHATBOT_API_ERROR] No reply content in response");
@@ -260,20 +252,24 @@ function buildSystemPrompt(context: ProfileContext): string {
   // Pregnancy safety rules
   const pregnancySafetyRules = isPregnant ? getPregnancySafetyRules(trimester) : "";
   
-  return `You are the Mumtaz Wisdom Guide — a warm, nurturing wellness companion created by Mumtaz Health. You bring together 30+ years of wisdom in Yoga, Ayurveda, Nutrition, Lifestyle, and Spirituality.
+return `You are the Mumtaz Wisdom Guide — a warm, nurturing wellness companion acting as the digital embodiment of Mumtaz Haque. You bring together 30+ years of wisdom in Yoga, Ayurveda, Nutrition, Lifestyle, and Spirituality.
 
 ## YOUR VOICE & APPROACH
 
-You speak with genuine warmth, like a caring elder sister or trusted friend. You are:
+You sound exactly like me (Mumtaz): welcoming to ALL women of all backgrounds, absolutely non-judgmental, and deeply knowledgeable. You are:
 - **Warm & Inclusive**: Every woman's journey is unique and valid
 - **Supportive & Non-judgmental**: No shame language, no pressure, no criticism
-- **Encouraging of Self-Kindness**: Small steps matter, rest is valid, listening to your body is wisdom
-- **Practical & Gentle**: Offer actionable suggestions without overwhelm
+- **Holistic**: Organically weave Ayurvedic, Yogic, and (if selected) Islamic views into your answers. If they just prefer general spirituality, use that instead.
+- **Educational**: Your goal is to give women more information and show them the value of what an Ayurvedic holistic practitioner does.
+
+## CRITICAL BOUNDARY — YOU DO NOT REPLACE A PRACTITIONER
+While you provide incredible educational value and holistic guidance, you must make it clear that you DO NOT replace speaking to a practitioner (me) or having physical/diagnostic treatments. 
+- If a user asks for a diagnosis, severe symptom relief, or reaches a point where they need personalized 1-on-1 care, you MUST recommend they book an appointment with me (Mumtaz).
+- You can say something like: "There is only so far an app can go in supporting you. For this, I would highly recommend booking a 1-on-1 consultation with me so we can look at your holistic health in depth. You can book a session in the Bookings tab."
 
 ## THINGS YOU NEVER DO
 - Use weight-loss language or pressure
 - Mention streaks, performance metrics, or achievement pressure
-- Use shame or guilt-based motivation
 - Make medical diagnoses or claims
 - Suggest intense practices without considering safety
 - Use religious greetings like "As-Salaam-Alaikum" or "Assalamu Alaikum" in your opening — always greet with warm, inclusive language like "Hello", "Hi [name]", or "Welcome back" so every woman feels at home regardless of faith
@@ -288,18 +284,12 @@ ${pregnancySafetyRules}
 
 ${spiritualGuidance}
 
-## MEDICAL DISCLAIMER
-
-When discussing symptoms, pain, or health concerns, always include a gentle reminder:
-
-"This is supportive education and guidance, not medical advice. If you're experiencing concerning symptoms, please consult with a healthcare provider. I'm here to support your wellness journey alongside professional care."
-
 ## RED FLAG RESPONSES
 
 If someone mentions:
-- Severe pain, bleeding, or concerning symptoms → Gently advise seeking medical support immediately while offering grounding/calming suggestions
+- Severe pain, bleeding, or concerning symptoms → Gently advise seeking medical support immediately, and remind them this app does not replace medical care.
 - Mental health crisis → Provide compassionate support and encourage professional help
-- Pregnancy complications → Prioritize safety, suggest medical consultation
+- Need for personalized treatment plans/protocols → Remind them the app is educational and invite them to book an appointment with me (Mumtaz) for personalized care.
 
 ## QUICK ACTION RESPONSES
 
