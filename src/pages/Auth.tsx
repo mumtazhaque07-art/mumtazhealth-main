@@ -887,27 +887,36 @@ export default function Auth() {
 
                 {isResetPassword && (
                   <div className="space-y-4 w-full">
-                    <div className="p-4 bg-mumtaz-lilac/10 border border-mumtaz-lilac/20 rounded-lg">
-                      <div className="flex items-start gap-3">
-                        <Mail className="w-5 h-5 text-mumtaz-lilac mt-0.5 flex-shrink-0" />
-                        <p className="text-sm text-muted-foreground">
-                          {resetEmailSent
-                            ? "Check your inbox and spam folder for the reset link."
-                            : "If this email exists in our system, we'll send you a password reset link."}
-                        </p>
+                    {!resetEmailSent ? (
+                      <div className="p-4 bg-mumtaz-lilac/10 border border-mumtaz-lilac/20 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <Mail className="w-5 h-5 text-mumtaz-lilac mt-0.5 flex-shrink-0" />
+                          <p className="text-sm text-muted-foreground">
+                            If this email exists in our system, we'll send you a password reset link.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    {resetEmailSent && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full h-11 gap-2 border-mumtaz-lilac/30 hover:bg-mumtaz-lilac/10"
-                        onClick={handleResendResetEmail}
-                        disabled={loading || resendCooldown > 0}
-                      >
-                        <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-                        {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Reset Email"}
-                      </Button>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="p-4 bg-mumtaz-lilac/10 border border-mumtaz-lilac/20 rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <Mail className="w-5 h-5 text-mumtaz-lilac mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-muted-foreground">
+                              Check your inbox and spam folder for the reset link.
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-11 gap-2 border-mumtaz-lilac/30 hover:bg-mumtaz-lilac/10"
+                          onClick={handleResendResetEmail}
+                          disabled={loading || resendCooldown > 0}
+                        >
+                          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                          {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Reset Email"}
+                        </Button>
+                      </div>
                     )}
                     <Button
                       type="button"
