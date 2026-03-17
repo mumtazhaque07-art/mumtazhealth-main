@@ -754,67 +754,67 @@ export default function Auth() {
                             <KeyRound className="w-3.5 h-3.5 mr-1" />
                             Forgot password?
                           </Button>
-                        </div>
                       </div>
                     )}
-                    {/* Primary CTA */}
-                    <div className="pt-2">
-                      <Button
-                        type="submit"
-                        className={`w-full h-14 text-base font-semibold transition-all duration-200 ${
-                          isAdminLogin
-                            ? "bg-destructive hover:bg-destructive/90"
-                            : "bg-mumtaz-lilac hover:bg-mumtaz-lilac/90 hover:shadow-md"
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        disabled={loading || !isFormValid()}
-                      >
-                        {loading ? (
-                          <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Please wait...</>
-                        ) : (
-                          getButtonLabel()
-                        )}
-                      </Button>
-                    </div>
+                  </div>
+                )}
 
-                    {/* Admin Setup Helper */}
-                    {isAdminSetupMode && (
-                      <div className="pt-4 border-t border-wellness-taupe/10 mt-4">
-                        {session ? (
-                          <div className="space-y-3">
-                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
-                              <p className="text-sm font-medium text-green-800">You are signed in as {session.user.email}</p>
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full h-12 border-destructive text-destructive hover:bg-destructive/10 shadow-sm"
-                              onClick={handleAdminEscalation}
-                              disabled={loading}
-                            >
-                              {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Shield className="w-5 h-5 mr-2" />}
-                              Yes, Make Me Admin Now
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
-                            <p className="text-sm font-medium text-amber-800 mb-1">Step 1: Sign in above first</p>
-                            <p className="text-xs text-amber-700">Once signed in, this button will activate to grant your admin rights.</p>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="w-full mt-2 h-10 border border-dashed border-amber-300 opacity-50 cursor-not-allowed"
-                              disabled
-                            >
-                              <Shield className="w-4 h-4 mr-2" />
-                              Waiting for Sign-in...
-                            </Button>
-                          </div>
-                        )}
-                        <p className="text-[10px] text-center text-muted-foreground mt-2">
-                          Admin setup mode is active. This is only for the Mumtaz Health founding team.
-                        </p>
+                {/* Primary CTA */}
+                <div className="pt-2">
+                  <Button
+                    type="submit"
+                    className={`w-full h-14 text-base font-semibold transition-all duration-200 ${
+                      isAdminLogin
+                        ? "bg-destructive hover:bg-destructive/90"
+                        : "bg-mumtaz-lilac hover:bg-mumtaz-lilac/90 hover:shadow-md"
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    disabled={loading || !isFormValid()}
+                  >
+                    {loading ? (
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Please wait...</>
+                    ) : (
+                      getButtonLabel()
+                    )}
+                  </Button>
+                </div>
+
+                {/* Admin Setup Helper */}
+                {isAdminSetupMode && (
+                  <div className="pt-4 border-t border-wellness-taupe/10 mt-4">
+                    {session ? (
+                      <div className="space-y-3">
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
+                          <p className="text-sm font-medium text-green-800">You are signed in as {session.user.email}</p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-12 border-destructive text-destructive hover:bg-destructive/10 shadow-sm"
+                          onClick={handleAdminEscalation}
+                          disabled={loading}
+                        >
+                          {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Shield className="w-5 h-5 mr-2" />}
+                          Yes, Make Me Admin Now
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-center">
+                        <p className="text-sm font-medium text-amber-800 mb-1">Step 1: Sign in above first</p>
+                        <p className="text-xs text-amber-700">Once signed in, this button will activate to grant your admin rights.</p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="w-full mt-2 h-10 border border-dashed border-amber-300 opacity-50 cursor-not-allowed"
+                          disabled
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          Waiting for Sign-in...
+                        </Button>
                       </div>
                     )}
+                    <p className="text-[10px] text-center text-muted-foreground mt-2">
+                      Admin setup mode is active. This is only for the Mumtaz Health founding team.
+                    </p>
                   </div>
                 )}
               </CardContent>
