@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface CyclePhaseEducationProps {
   selectedPhase: string;
   lifeStage?: string;
+  isMenarcheJourney?: boolean;
 }
 
 interface PhaseInfo {
@@ -69,7 +70,30 @@ const PHASE_EDUCATION: Record<string, PhaseInfo> = {
   },
 };
 
-export function CyclePhaseEducation({ selectedPhase, lifeStage }: CyclePhaseEducationProps) {
+const MENARCHE_EDUCATION: Record<string, Partial<PhaseInfo>> = {
+  Menstrual: {
+    meaning: "Your body is taking a quiet break. It's totally normal to feel a bit more tired or want to stay in your comfy clothes. This is a special time to be extra kind to yourself.",
+    energyMood: "You might feel like staying in or being quiet today. It's okay if you feel a little more emotional or just want some 'me time'.",
+    bodyResponse: "Your body is doing some amazing work! Drinking warm water, eating cozy foods, and using a hot water bottle for any tummy 'tightness' can feel really good.",
+  },
+  Follicular: {
+    meaning: "You're entering a 'fresh start' phase. Most girls start to feel their energy coming back little by little. It's like the beginning of springtime for your body.",
+    energyMood: "You might notice you're feeling more cheerful or excited to try new things. It's a great time for hobbies or hanging out with friends.",
+    bodyResponse: "Your body is getting stronger and more ready for activity. It's a fun time to be active and eat fresh, colorful foods.",
+  },
+  Ovulatory: {
+    meaning: "This is when you're likely feeling the most 'super-powered'! Your energy is at its highest, and you might feel extra confident.",
+    energyMood: "You might feel very social and happy. It's usually the time of the month when you feel most like yourself.",
+    bodyResponse: "You have plenty of energy for sports, dancing, or whatever you love to do. Your skin and hair might even look extra sparkly too!",
+  },
+  Luteal: {
+    meaning: "Your body is starting to slow down and get ready for your next period. It's like the sun is starting to set on this cycle.",
+    energyMood: "You might feel a bit more sensitive or 'cranky' than usual - that's just your hormones talking! Be extra patient with yourself.",
+    bodyResponse: "You might notice your tummy feels a bit full (bloating) or your skin has a few breakouts. Warm baths and extra sleep are your best friends right now.",
+  },
+};
+
+export function CyclePhaseEducation({ selectedPhase, lifeStage, isMenarcheJourney }: CyclePhaseEducationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userDosha, setUserDosha] = useState<string | null>(null);
 
@@ -153,7 +177,7 @@ export function CyclePhaseEducation({ selectedPhase, lifeStage }: CyclePhaseEduc
           <div className="space-y-2">
             <h4 className="font-medium text-wellness-taupe text-sm">What this phase means</h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {phaseInfo.meaning}
+              {isMenarcheJourney ? (MENARCHE_EDUCATION[selectedPhase]?.meaning || phaseInfo.meaning) : phaseInfo.meaning}
             </p>
           </div>
 
@@ -161,7 +185,7 @@ export function CyclePhaseEducation({ selectedPhase, lifeStage }: CyclePhaseEduc
           <div className="space-y-2">
             <h4 className="font-medium text-wellness-taupe text-sm">How energy and mood may feel</h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {phaseInfo.energyMood}
+              {isMenarcheJourney ? (MENARCHE_EDUCATION[selectedPhase]?.energyMood || phaseInfo.energyMood) : phaseInfo.energyMood}
             </p>
           </div>
 
@@ -169,7 +193,7 @@ export function CyclePhaseEducation({ selectedPhase, lifeStage }: CyclePhaseEduc
           <div className="space-y-2">
             <h4 className="font-medium text-wellness-taupe text-sm">How your body may respond</h4>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {phaseInfo.bodyResponse}
+              {isMenarcheJourney ? (MENARCHE_EDUCATION[selectedPhase]?.bodyResponse || phaseInfo.bodyResponse) : phaseInfo.bodyResponse}
             </p>
           </div>
 

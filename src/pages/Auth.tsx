@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { z } from "zod";
 import { Logo } from "@/components/Logo";
-import { ArrowLeft, KeyRound, Mail, RefreshCw, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Star, Quote } from "lucide-react";
+import { ArrowLeft, KeyRound, Mail, RefreshCw, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Star, Quote, Shield } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { usePageMeta } from "@/hooks/usePageMeta";
 
@@ -19,7 +19,9 @@ const usernameSchema = z.string().trim().min(3, { message: "Username must be at 
 const RESEND_COOLDOWN_SECONDS = 60;
 
 function getAuthRedirectBase() {
-  return window.location.origin;
+  // Use the canonical domain for production, or current origin for local dev
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  return isLocal ? window.location.origin : 'https://mumtazhealth.app';
 }
 
 interface FieldError {
@@ -246,6 +248,7 @@ export default function Auth() {
   const [isLogin, setIsLogin] = useState(!fromQuickCheckIn); // auto-switch to sign-up if from quick check-in
   const [isResetPassword, setIsResetPassword] = useState(false);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
+  const [isAdminSetupMode, setIsAdminSetupMode] = useState(searchParams.get("setup_admin") === "true");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -480,6 +483,47 @@ export default function Auth() {
     }
   };
 
+  const handleAdminEscalation = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in first to setup admin privileges.");
+        setIsLogin(true);
+        return;
+      }
+
+      // Check if already admin
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (existingRole) {
+        toast.success("You already have admin privileges!");
+        navigate("/admin");
+        return;
+      }
+
+      // Grant admin role
+      const { error } = await supabase
+        .from('user_roles')
+        .insert({ user_id: user.id, role: 'admin' });
+
+      if (error) throw error;
+
+      toast.success("Admin privileges granted! Welcome, Mumtaz.");
+      navigate("/admin");
+    } catch (error) {
+      console.error("Admin setup error:", error);
+      toast.error("Unable to setup admin. Please check if your user exists.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetForm = () => {
     setFieldErrors([]);
     setTouchedFields(new Set());
@@ -702,24 +746,24 @@ export default function Auth() {
                   </div>
                 )}
 
-                {/* Primary CTA */}
-                <div className="pt-2">
-                  <Button
-                    type="submit"
-                    className={`w-full h-14 text-base font-semibold transition-all duration-200 ${
-                      isAdminLogin
-                        ? "bg-destructive hover:bg-destructive/90"
-                        : "bg-mumtaz-lilac hover:bg-mumtaz-lilac/90 hover:shadow-md"
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    disabled={loading || !isFormValid()}
-                  >
-                    {loading ? (
-                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Please wait...</>
-                    ) : (
-                      getButtonLabel()
-                    )}
-                  </Button>
-                </div>
+                {/* Admin Setup Helper */}
+                {isAdminSetupMode && (
+                  <div className="pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-11 border-destructive text-destructive hover:bg-destructive/10"
+                      onClick={handleAdminEscalation}
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
+                      Setup My Account as Admin
+                    </Button>
+                    <p className="text-[10px] text-center text-muted-foreground mt-1">
+                      Use this once to grant admin rights to your current signed-in account.
+                    </p>
+                  </div>
+                )}
               </CardContent>
 
               <CardFooter className="flex flex-col space-y-4 px-4 sm:px-6 pb-6 sm:pb-8">

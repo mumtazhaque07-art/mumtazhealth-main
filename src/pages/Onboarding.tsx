@@ -16,7 +16,7 @@ import { FirstTimeQuickCheckIn } from "@/components/FirstTimeQuickCheckIn";
 import { CycleChangesOnboarding } from "@/components/CycleChangesOnboarding";
 import { JourneyPhaseSelector } from "@/components/JourneyPhaseSelector";
 import { ConditionsSelector } from "@/components/ConditionsSelector";
-
+import { Checkbox } from "@/components/ui/checkbox";
 type OnboardingStep = 
   | "initial_choice" | "quick_checkin"
   | "intro1" | "intro2" | "intro3" | "intro4" | "intro5" 
@@ -139,6 +139,9 @@ const IntroScreen = ({
       {currentIntro && totalIntros && (
         <IntroProgressIndicator current={currentIntro} total={totalIntros} />
       )}
+      <div className="flex justify-center mb-4">
+        <Logo size="md" showText={false} />
+      </div>
       <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm overflow-hidden">
         <CardHeader className="text-center space-y-4 sm:space-y-6 pb-3 sm:pb-4 pt-8 sm:pt-10 px-4 sm:px-6 relative">
           {onSkip && (
@@ -219,8 +222,15 @@ export default function Onboarding() {
   const [primaryDosha, setPrimaryDosha] = useState("");
   const [secondaryDosha, setSecondaryDosha] = useState("");
   const [spiritualPreference, setSpiritualPreference] = useState("both");
-  const [pregnancyStatus, setPregnancyStatus] = useState("not_pregnant");
-  const [dueDate, setDueDate] = useState("");
+  const [pregnancyStatus, setPregnancyStatus] = useState<string>("");
+  const [dueDate, setDueDate] = useState<string>("");
+  
+  // New Inclusivity fields
+  const [pregnancyConceptionType, setPregnancyConceptionType] = useState<string>("natural");
+  const [pregnancyMultiples, setPregnancyMultiples] = useState<string>("singleton");
+  const [isSurrogate, setIsSurrogate] = useState<boolean>(false);
+  const [postpartumDeliveryType, setPostpartumDeliveryType] = useState<string>("natural");
+  const [isMenarcheJourney, setIsMenarcheJourney] = useState<boolean>(false);
   const [yogaStyle, setYogaStyle] = useState("");
   const [cyclePhase, setCyclePhase] = useState("");
   const [energyLevel, setEnergyLevel] = useState("");
@@ -335,6 +345,11 @@ export default function Onboarding() {
         spiritual_preference: spiritualPreference,
         pregnancy_status: pregnancyStatus,
         due_date: pregnancyStatus === "pregnant" ? dueDate : null,
+        pregnancy_conception_type: pregnancyStatus === "pregnant" ? pregnancyConceptionType : null,
+        pregnancy_multiples: pregnancyStatus === "pregnant" ? pregnancyMultiples : null,
+        is_surrogate: pregnancyStatus === "pregnant" ? isSurrogate : false,
+        postpartum_delivery_type: (pregnancyStatus === "postpartum" || lifeStage === "postpartum") ? postpartumDeliveryType : null,
+        is_menarche_journey: (lifeStage === "menstrual_cycle") ? isMenarcheJourney : false,
         current_trimester: currentTrimester,
         preferred_yoga_style: yogaStyle,
         focus_areas: focusAreas.length > 0 ? focusAreas : null,
@@ -1407,6 +1422,32 @@ export default function Onboarding() {
                 </RadioGroup>
               </div>
 
+              {lifeStage === 'menstrual_cycle' && (
+                <div className="space-y-4 p-4 bg-wellness-lilac/5 border border-wellness-lilac/20 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="pt-0.5">
+                      <Checkbox 
+                        id="menarche-journey" 
+                        checked={isMenarcheJourney}
+                        onCheckedChange={(checked) => setIsMenarcheJourney(checked as boolean)}
+                        className="border-wellness-lilac text-wellness-lilac focus-visible:ring-wellness-lilac"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label 
+                        htmlFor="menarche-journey" 
+                        className="text-sm font-semibold leading-none cursor-pointer text-foreground"
+                      >
+                        I am just starting my period journey (Menarche)
+                      </Label>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Select this if you are a young girl or parent helping a daughter navigate her first few cycles. We'll simplify the guidance and focus on gentle empowerment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             <div className="space-y-2">
               <Label>How would you describe your energy levels today?</Label>
               <RadioGroup value={energyLevel} onValueChange={setEnergyLevel}>
@@ -1649,7 +1690,14 @@ export default function Onboarding() {
                 setSelectedConditions(conditions);
                 setStep("spiritual");
               }}
-              onBack={() => setStep("doshaResults")}
+              onBack={() => {
+                // If menstrual_cycle, go back to cycle step
+                if (lifeStage === 'menstrual_cycle') {
+                  setStep("cycle");
+                } else {
+                  setStep("doshaResults");
+                }
+              }}
               onSkip={() => setStep("spiritual")}
               initialConditions={selectedConditions}
             />
@@ -1926,18 +1974,110 @@ export default function Onboarding() {
               </RadioGroup>
 
             {pregnancyStatus === "pregnant" && (
-              <div className="space-y-4">
+              <div className="space-y-6 mt-4 p-5 bg-wellness-lilac/5 border border-wellness-lilac/20 rounded-xl">
                 <div className="space-y-2">
-                  <Label htmlFor="due_date">Due Date</Label>
+                  <Label htmlFor="due_date" className="text-base font-semibold text-foreground">What is your estimated Due Date?</Label>
                   <Input
                     id="due_date"
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
+                    className="border-wellness-lilac/30 focus-visible:ring-wellness-lilac"
                   />
-                  <p className="text-xs text-muted-foreground">
-                    We'll calculate your trimester and provide tailored guidance for each stage
+                  <p className="text-xs text-muted-foreground mt-1">
+                    This allows us to tailor your journey week-by-week.
                   </p>
+                </div>
+                
+                <div className="pt-4 border-t border-border/50">
+                  <Label className="text-sm font-semibold text-foreground mb-3 block">Your Unique Journey (Optional)</Label>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Every path to motherhood is sacred. Sharing these details helps us provide the most supportive and accurate guidance for your unique body.
+                  </p>
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-foreground">Conception Journey</Label>
+                      <RadioGroup 
+                        value={pregnancyConceptionType} 
+                        onValueChange={setPregnancyConceptionType}
+                        className="flex flex-wrap gap-3"
+                      >
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                          <RadioGroupItem value="natural" id="concept-natural" />
+                          <Label htmlFor="concept-natural" className="cursor-pointer">Natural</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                          <RadioGroupItem value="ivf" id="concept-ivf" />
+                          <Label htmlFor="concept-ivf" className="cursor-pointer">IVF / Assisted</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs font-medium text-foreground">Expecting</Label>
+                      <RadioGroup 
+                        value={pregnancyMultiples} 
+                        onValueChange={setPregnancyMultiples}
+                        className="flex flex-wrap gap-3"
+                      >
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                          <RadioGroupItem value="singleton" id="mult-single" />
+                          <Label htmlFor="mult-single" className="cursor-pointer">One Baby</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                          <RadioGroupItem value="twins" id="mult-twins" />
+                          <Label htmlFor="mult-twins" className="cursor-pointer">Twins</Label>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                          <RadioGroupItem value="triplets" id="mult-trips" />
+                          <Label htmlFor="mult-trips" className="cursor-pointer">Triplets+</Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="flex items-center space-x-3 bg-background border px-4 py-3 rounded-lg mt-2">
+                       <Checkbox 
+                         id="surrogate" 
+                         checked={isSurrogate}
+                         onCheckedChange={(c) => setIsSurrogate(c as boolean)}
+                         className="border-wellness-lilac text-wellness-lilac"
+                       />
+                       <div className="grid gap-1.5 leading-none">
+                         <Label htmlFor="surrogate" className="text-sm font-medium cursor-pointer">
+                           I am a gestational surrogate
+                         </Label>
+                         <p className="text-xs text-muted-foreground">
+                           We'll tailor our emotional and physical guidance to support your incredible gift.
+                         </p>
+                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {pregnancyStatus === "postpartum" && (
+              <div className="space-y-6 mt-4 p-5 bg-wellness-lilac/5 border border-wellness-lilac/20 rounded-xl">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-foreground">Delivery Method</Label>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    This helps us provide safe recovery wait times and appropriate physical guidance for your unique healing journey.
+                  </p>
+                  <RadioGroup 
+                    value={postpartumDeliveryType} 
+                    onValueChange={setPostpartumDeliveryType}
+                    className="flex flex-wrap gap-3"
+                  >
+                    <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                      <RadioGroupItem value="natural" id="delivery-natural" />
+                      <Label htmlFor="delivery-natural" className="cursor-pointer">Vaginal Delivery</Label>
+                    </div>
+                    <div className="flex items-center space-x-2 bg-background border px-3 py-2 rounded-lg">
+                      <RadioGroupItem value="cesarean" id="delivery-cesarean" />
+                      <Label htmlFor="delivery-cesarean" className="cursor-pointer">Cesarean / Surgery</Label>
+                    </div>
+                  </RadioGroup>
                 </div>
               </div>
             )}
@@ -2205,7 +2345,8 @@ export default function Onboarding() {
         localStorage.setItem('mumtaz_pending_onboarding', JSON.stringify({
           userName, lifeStage, primaryDosha, secondaryDosha,
           spiritualPreference, pregnancyStatus, dueDate, yogaStyle,
-          focusAreas, primaryFocus, lifePhases
+          focusAreas, primaryFocus, lifePhases, isMenarcheJourney,
+          postpartumDeliveryType, selectedConditions
         }));
         localStorage.setItem('mumtaz_return_path', '/');
         setShowSignInPrompt(true);

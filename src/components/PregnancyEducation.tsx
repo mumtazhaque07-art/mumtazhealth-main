@@ -33,6 +33,7 @@ import {
 
 interface PregnancyEducationProps {
   trimester: string;
+  week?: number | null;
 }
 
 interface TrimesterInfo {
@@ -242,25 +243,76 @@ const DoshaVisual = ({ dosha, isUserDosha }: { dosha: string; isUserDosha: boole
   );
 };
 
-// Baby size visual with gentle fruit/nature metaphor
-const BabySizeVisual = ({ trimester, babySize }: { trimester: string; babySize: { metaphor: string; description: string } }) => {
-  const sizeIcons = {
-    "1": "🫘", // seed/bean
-    "2": "🍋", // lemon to mango
-    "3": "🍈", // papaya to watermelon
+// Get exact baby size based on week
+const getBabySizeForWeek = (week: number | null | undefined, trimester: string) => {
+  if (!week || week < 4 || week > 42) {
+    // Fall back to general trimester descriptions if week is missing or out of range
+    if (trimester === "1") return { metaphor: "From a tiny seed to a sweet peach", description: "Your baby is undertaking the most rapid and miraculous growth phase right now.", emoji: "🫘" };
+    if (trimester === "2") return { metaphor: "From a lemon to a grapefruit", description: "Your baby is growing stronger and you may soon feel those beautiful first flutters.", emoji: "🍋" };
+    if (trimester === "3") return { metaphor: "From a squash to a watermelon", description: "Your baby is plumping up, practicing breathing, and preparing to meet you.", emoji: "🍉" };
+    return { metaphor: "Growing every day", description: "Your baby is growing beautifully.", emoji: "🌱" };
+  }
+
+  const sizes: Record<number, { metaphor: string; description: string; emoji: string }> = {
+    4: { metaphor: "The size of a poppy seed", description: "Your baby is tiny but already deeply anchored in their new home.", emoji: "🌱" },
+    5: { metaphor: "The size of an apple seed", description: "The foundation for their tiny heart and nervous system is forming.", emoji: "🍎" },
+    6: { metaphor: "The size of a sweet pea", description: "That tiny heart is beating! A miracle unfolding minute by minute.", emoji: "🫛" },
+    7: { metaphor: "The size of a blueberry", description: "Arm and leg buds are starting to emerge. Growth is proceeding rapidly.", emoji: "🫐" },
+    8: { metaphor: "The size of a raspberry", description: "Fingers and toes are lightly webbed and beginning to form.", emoji: "🍓" },
+    9: { metaphor: "The size of an olive", description: "Tiny joints are developing, and your baby is starting to make small movements.", emoji: "🫒" },
+    10: { metaphor: "The size of a prune", description: "Bones are beginning to harden. The vital organs are all in place.", emoji: "🫐" },
+    11: { metaphor: "The size of a strawberry", description: "Your baby is starting to stretch and kick, though you can't feel it just yet.", emoji: "🍓" },
+    12: { metaphor: "The size of a plum", description: "Reflexes are developing! Your baby might be opening and closing their tiny fingers.", emoji: "🍑" },
+    13: { metaphor: "The size of a peach", description: "Vocal cords are forming. You are officially entering the second trimester!", emoji: "🍑" },
+    14: { metaphor: "The size of a lemon", description: "Your baby can squint, frown, and make tiny facial expressions.", emoji: "🍋" },
+    15: { metaphor: "The size of an apple", description: "Skin is forming, though it is still incredibly thin and translucent.", emoji: "🍎" },
+    16: { metaphor: "The size of an avocado", description: "Your baby's hearing is developing. They may soon be able to hear your voice.", emoji: "🥑" },
+    17: { metaphor: "The size of a pear", description: "The umbilical cord is growing thicker and stronger to nourish your growing baby.", emoji: "🍐" },
+    18: { metaphor: "The size of a bell pepper", description: "If you haven't yet, you may soon feel those first gentle flutters (quickening).", emoji: "🫑" },
+    19: { metaphor: "The size of a large tomato", description: "A protective coating called vernix is forming over their delicate skin.", emoji: "🍅" },
+    20: { metaphor: "The size of a banana", description: "Halfway there! Your baby is practicing swallowing and growing stronger every day.", emoji: "🍌" },
+    21: { metaphor: "The size of a carrot", description: "Your baby's sleep and wake cycles are becoming more established.", emoji: "🥕" },
+    22: { metaphor: "The size of a papaya", description: "Their grip is becoming quite strong, and they may hold onto their umbilical cord.", emoji: "🍈" },
+    23: { metaphor: "The size of a grapefruit", description: "Billions of brain cells are developing. They are increasingly aware of their environment.", emoji: "🍊" },
+    24: { metaphor: "The size of an ear of corn", description: "Lungs are developing the branches of the respiratory tree.", emoji: "🌽" },
+    25: { metaphor: "The size of a rutabaga", description: "Fat is starting to build up, helping to smooth out their skin.", emoji: "🧅" },
+    26: { metaphor: "The size of a zucchini", description: "They submerge themselves in amniotic fluid, taking tiny 'practice breaths'.", emoji: "🥒" },
+    27: { metaphor: "The size of a cauliflower", description: "Your baby can recognize your voice clearly now. Talk and sing to them!", emoji: "🥦" },
+    28: { metaphor: "The size of an eggplant", description: "Welcome to the third trimester! Their eyes can now open and close.", emoji: "🍆" },
+    29: { metaphor: "The size of a butternut squash", description: "Muscles and lungs are maturing rapidly to prepare for the outside world.", emoji: "🫑" },
+    30: { metaphor: "The size of a large cabbage", description: "Amniotic fluid begins to decrease as your baby takes up more and more room.", emoji: "🥬" },
+    31: { metaphor: "The size of a coconut", description: "Your baby is putting on healthy weight, getting plumper and rounder.", emoji: "🥥" },
+    32: { metaphor: "The size of an acorn squash", description: "Almost all major organs are fully formed, except the lungs which are still maturing.", emoji: "🎃" },
+    33: { metaphor: "The size of a pineapple", description: "Your baby's skull bones are still separate and flexible to allow for delivery.", emoji: "🍍" },
+    34: { metaphor: "The size of a cantaloupe", description: "Their central nervous system is maturing and their lungs are nearly fully developed.", emoji: "🍈" },
+    35: { metaphor: "The size of a honeydew", description: "Kidneys are fully developed, and the liver can process some waste products.", emoji: "🍈" },
+    36: { metaphor: "The size of a romaine lettuce", description: "Your baby is getting ready to drop lower into your pelvis as birth approaches.", emoji: "🥬" },
+    37: { metaphor: "The size of a winter melon", description: "Your baby is considered 'early term' and is practicing all the skills needed for birth.", emoji: "🍈" },
+    38: { metaphor: "The size of a small pumpkin", description: "Organ function continues to refine. Your little one is nearly ready to meet you.", emoji: "🎃" },
+    39: { metaphor: "The size of a mini-watermelon", description: "Your baby is considered 'full term' and is waiting for the perfect moment to arrive.", emoji: "🍉" },
+    40: { metaphor: "The size of a jackfruit", description: "Your due date is here! Remember, babies arrive on their own beautiful timeline.", emoji: "🍉" },
+    41: { metaphor: "Still growing safely", description: "Your baby is just perfectly cozy and taking a little extra time to prepare for the world.", emoji: "🍉" },
+    42: { metaphor: "Any day now", description: "Your baby is fully cooked and ready to go. Hang in there!", emoji: "🍉" },
   };
+
+  return sizes[week] || sizes[40];
+};
+
+// Baby size visual with gentle fruit/nature metaphor
+const BabySizeVisual = ({ trimester, week }: { trimester: string; week?: number | null }) => {
+  const dynamicSize = getBabySizeForWeek(week, trimester);
 
   return (
     <div className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-wellness-lilac/5 to-wellness-sage/5 border border-wellness-lilac/15">
       <div className="flex-shrink-0 w-12 h-12 rounded-full bg-white dark:bg-card flex items-center justify-center text-2xl shadow-sm">
-        {sizeIcons[trimester as keyof typeof sizeIcons] || "🌱"}
+        {dynamicSize.emoji}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground/90 mb-1">
-          {babySize.metaphor}
+          {dynamicSize.metaphor}
         </p>
         <p className="text-xs text-muted-foreground leading-relaxed">
-          {babySize.description}
+          {dynamicSize.description}
         </p>
       </div>
     </div>
@@ -316,9 +368,10 @@ const LifestyleSuggestionCard = ({
   );
 };
 
-export function PregnancyEducation({ trimester }: PregnancyEducationProps) {
+export function PregnancyEducation({ trimester, week }: PregnancyEducationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userDosha, setUserDosha] = useState<string | null>(null);
+  const [userSpiritualPreference, setUserSpiritualPreference] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -331,12 +384,15 @@ export function PregnancyEducation({ trimester }: PregnancyEducationProps) {
 
     const { data } = await supabase
       .from('user_wellness_profiles')
-      .select('primary_dosha')
+      .select('primary_dosha, spiritual_preference')
       .eq('user_id', user.id)
       .maybeSingle();
 
     if (data?.primary_dosha) {
       setUserDosha(data.primary_dosha.toLowerCase());
+    }
+    if (data?.spiritual_preference) {
+      setUserSpiritualPreference(data.spiritual_preference);
     }
   };
 
@@ -369,11 +425,7 @@ export function PregnancyEducation({ trimester }: PregnancyEducationProps) {
     title: `This phase of your pregnancy`,
     subtitle: trimesterInfo.subtitle,
     description: trimesterInfo.meaning,
-    babySize: {
-      metaphor: trimesterInfo.babySize.metaphor,
-      emoji: trimester === "1" ? "🫘" : trimester === "2" ? "🍋" : "🍈",
-      description: trimesterInfo.babySize.description,
-    },
+    babySize: getBabySizeForWeek(week, trimester),
     whatYouMayNotice: [
       trimesterInfo.energyMood,
       trimesterInfo.bodyResponse,
@@ -527,6 +579,41 @@ export function PregnancyEducation({ trimester }: PregnancyEducationProps) {
               })}
             </div>
           </div>
+
+          {/* Special Islamic Pre-birth Traditions (Third Trimester only) */}
+          {trimester === "3" && userSpiritualPreference === "islamic" && (
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <div className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-mumtaz-plum" />
+                <h4 className="font-semibold text-foreground text-base text-mumtaz-plum">Prophetic Traditions for Birth</h4>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                As you near delivery, these beautiful Islamic practices can help bring spiritual ease and blessings to you and your baby.
+              </p>
+              <div className="space-y-3">
+                <div className="bg-mumtaz-plum/5 border border-mumtaz-plum/10 p-4 rounded-xl">
+                  <h5 className="font-medium text-foreground text-sm mb-1">1. Reciting Surah Maryam</h5>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    It is highly recommended to recite or listen to Surah Maryam during the later stages of pregnancy and labor. It reminds us of Maryam (Mary)'s strength and faith during her miraculous birth, bringing profound peace.
+                  </p>
+                </div>
+                <div className="bg-wellness-sage/5 border border-wellness-sage/20 p-4 rounded-xl">
+                  <h5 className="font-medium text-foreground text-sm mb-1">2. Du'as for Ease</h5>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Make abundant Du'a for an easy delivery. A powerful prophetic du'a is: <br/><br/>
+                    <em className="text-foreground/80 font-medium">"Allahumma la sahla illa ma ja'altahu sahla, wa anta taj'alul-hazna idha shi'ta sahla."</em><br/><br/>
+                    (O Allah, there is no ease except in that which You have made easy, and You make the difficulty, if You wish, easy.)
+                  </p>
+                </div>
+                <div className="bg-wellness-lilac/10 border border-wellness-lilac/20 p-4 rounded-xl">
+                  <h5 className="font-medium text-foreground text-sm mb-1">3. Preparing for Adhan & Tahneek</h5>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    When the baby arrives, it is a Sunnah to gently recite the **Adhan** in their right ear and the **Iqamah** in their left. Another beautiful tradition is **Tahneek**: gently rubbing a softened piece of date on the baby's upper palate before their first feed.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Pregnancy-safe pose cards */}
           <PregnancySafePoseGrid 

@@ -641,21 +641,21 @@ const Index = () => {
       <section className="relative overflow-hidden bg-gradient-to-br from-wellness-sage-light via-background to-wellness-lilac-light py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-10 items-center max-w-7xl mx-auto">
-            {/* Left: Logo + Copy */}
-            <div className="text-center lg:text-left order-2 lg:order-1 flex flex-col gap-6">
+            {/* Left: Logo + Copy - order-1 on mobile */}
+            <div className="text-center lg:text-left order-1 flex flex-col gap-6">
               {/* Logo — branded lockup with name visible */}
-              <div className="flex justify-center lg:justify-start items-center gap-3">
-                <Logo size="lg" showText={false} className="opacity-100" />
-                <div className="flex flex-col leading-tight">
-                  <span className="font-bold text-mumtaz-plum text-2xl sm:text-3xl tracking-tight font-accent">Mumtaz Health</span>
-                  <span className="text-muted-foreground text-sm tracking-wide">Empowering Your Journey</span>
+              <div className="flex flex-col lg:items-start items-center gap-4">
+                <Logo size="xl" showText={false} className="opacity-100" />
+                <div className="flex flex-col leading-tight text-center lg:text-left">
+                  <span className="font-bold text-mumtaz-plum text-3xl sm:text-4xl tracking-tight font-accent">Mumtaz Health</span>
+                  <span className="text-muted-foreground text-sm sm:text-base tracking-wide">Empowering Your Journey</span>
                 </div>
               </div>
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                 Your Body. Your Phase.<br />Your Journey.
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                30+ years of Ayurvedic wisdom and lived experience, brought together for you. No pressure, no comparison — just gentle support for wherever you are right now.
+                As the founder and practitioner of Mumtaz Health, I bring 30+ years of Ayurvedic wisdom and lived experience to guide you. This app provides supportive advice for your wellness journey—not medical diagnosis, medication, or treatment. No pressure, just gentle support for wherever you are right now.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
@@ -676,14 +676,14 @@ const Index = () => {
               </div>
               {/* Credential badges — builds trust at a glance */}
               <div className="flex flex-wrap gap-2 justify-center lg:justify-start pt-1">
-                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">Ayurvedic Practitioner</span>
+                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">Ayurvedic Practitioner & Guide</span>
                 <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">International Yoga Teacher Trainer</span>
-                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">30+ Years Experience</span>
+                <span className="text-xs text-muted-foreground bg-primary/5 border border-primary/15 rounded-full px-3 py-1.5">30+ Years Wisdom</span>
               </div>
             </div>
 
-            {/* Right: Founder Portrait */}
-            <div className="flex justify-center lg:justify-end order-1 lg:order-2">
+            {/* Right: Founder Portrait - order-2 on mobile */}
+            <div className="flex justify-center lg:justify-end order-2">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-accent/20 to-primary/20 rounded-3xl blur-3xl"></div>
                 <img
@@ -705,14 +705,17 @@ const Index = () => {
               From Mumtaz, With Love
             </h2>
             <p className="text-xl text-muted-foreground leading-relaxed">
-              I built this app because I have lived many of these experiences myself — and I have been honoured to walk alongside countless women through fertility, pregnancy, postpartum, menopause, and everything in between.
+              I am here to walk alongside you as an advisor and practitioner. This space is designed for supportive guidance—please always consult with your physician for medical concerns. You are also welcome to book a personal session with me for deeper, one-on-one wellness support.
             </p>
             <p className="text-2xl font-semibold text-foreground italic">
               "I'm here to support, not judge. Your journey is yours — and you are not alone."
             </p>
-            <p className="text-sm text-muted-foreground/70 italic">
-              This app offers supportive guidance and is not a substitute for professional medical advice.
-            </p>
+            <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 mt-6">
+              <p className="text-sm text-destructive font-medium uppercase tracking-wider mb-2">Legal Disclaimer</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                The content provided by Mumtaz Health and its founder is for informational and educational purposes only. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+              </p>
+            </div>
           </div>
         </div>
       </section>

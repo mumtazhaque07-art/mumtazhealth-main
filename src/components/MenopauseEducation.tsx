@@ -194,7 +194,7 @@ const STAGE_EDUCATION: Record<string, StageInfo> = {
     subtitle: "The wisdom years",
     meaning: "You are now in a stage traditionally honoured as the 'wisdom years.' Your body has completed its transition, and this can be a time of deep inner peace and clarity.",
     energyMood: "Many women find their mood stabilises and a new sense of calm emerges. Energy may feel more consistent, though gentle self-care remains important.",
-    bodyResponse: "Focus shifts to maintaining bone health, joint mobility, and heart wellness. Your body thrives with nourishing movement, warm foods, and self-massage practices.",
+    bodyResponse: "Focus shifts to maintaining bone health, joint mobility, and heart wellness. Your body thrives with nourishing movement, warm foods, and self-massage practices. Special attention to arthritis-friendly exercises helps keep your joints supple.",
     visualTheme: {
       gradient: "from-wellness-sage/20 via-wellness-sage/10 to-wellness-lilac/5",
       borderColor: "border-wellness-sage/40",
@@ -203,22 +203,22 @@ const STAGE_EDUCATION: Record<string, StageInfo> = {
     },
     doshaGuidance: {
       vata: { 
-        text: "Vata naturally increases with age. Warm, oily foods, regular routines, and gentle yoga help maintain balance and vitality.",
-        suggestions: ["Warm, nourishing soups", "Regular abhyanga", "Gentle, grounding yoga"]
+        text: "Vata naturally increases with age, which can show as joint dryness or stiffness (arthritis). Warm, oily foods and regular routines are deeply supportive for joint health.",
+        suggestions: ["Warm, nourishing soups", "Regular abhyanga (joint focus)", "Grounding restorative yoga"]
       },
       pitta: { 
-        text: "Continue with cooling, calming practices. This is a beautiful time to channel your wisdom into meaningful pursuits.",
-        suggestions: ["Creative expression", "Nature connection", "Mindful service"]
+        text: "Continue with cooling, calming practices. If you notice joint inflammation, focus on cooling anti-inflammatory foods like turmeric and ginger.",
+        suggestions: ["Nature connection", "Anti-inflammatory diet", "Mindful cooling breath"]
       },
       kapha: { 
-        text: "Stay active with gentle movement to maintain strength and flexibility. Warming practices and light foods support your wellbeing.",
-        suggestions: ["Daily walking", "Joint mobility work", "Light, warm meals"]
+        text: "Stay active with gentle movement to maintain strength and prevent joint stiffness. Warming practices and light foods support your circulation.",
+        suggestions: ["Daily walking", "Joint mobility sequences", "Invigorating warming meals"]
       },
     },
     lifestyleSuggestions: {
-      yoga: "Gentle strength-building for bone health, joint mobility practices, and restorative poses. Chair yoga can be wonderfully supportive.",
-      rhythm: "Embrace a slower, more intentional pace. This is your time to rest, reflect, and share your wisdom.",
-      breath: "Gentle, nourishing breaths. Focus on softness and ease rather than technique."
+      yoga: "Focus on 'Joint-Loading' for bone health and 'Joint-Mobility' for arthritis support. Chair yoga and wall-supported poses are excellent for stability—never push into sharp pain.",
+      rhythm: "Move gently throughout the day rather than one intense burst. This keeps the joints lubricated. Please discuss any new physical practices with your physician first.",
+      breath: "Focus on 'Soothing Breath' to manage any physical discomfort or joint tenderness. Deep, calm breathing is always safe and supportive."
     },
     libraryTags: ["post-menopause", "joint-care", "grounding"],
   },

@@ -34,6 +34,7 @@ const POSTPARTUM_EDUCATION: PostpartumInfo = {
 export function PostpartumEducation() {
   const [isOpen, setIsOpen] = useState(false);
   const [userDosha, setUserDosha] = useState<string | null>(null);
+  const [deliveryType, setDeliveryType] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserDosha();
@@ -45,12 +46,15 @@ export function PostpartumEducation() {
 
     const { data } = await supabase
       .from('user_wellness_profiles')
-      .select('primary_dosha')
+      .select('primary_dosha, postpartum_delivery_type')
       .eq('user_id', user.id)
       .maybeSingle();
 
     if (data?.primary_dosha) {
       setUserDosha(data.primary_dosha.toLowerCase());
+    }
+    if (data?.postpartum_delivery_type) {
+      setDeliveryType(data.postpartum_delivery_type);
     }
   };
 
@@ -101,6 +105,24 @@ export function PostpartumEducation() {
               You are doing an incredible job, even when it doesn't feel like it.
             </p>
           </div>
+
+          {/* Delivery Specific Guidance */}
+          {deliveryType === "cesarean" && (
+            <div className="p-4 rounded-lg bg-red-50 border border-red-200">
+              <h4 className="font-medium text-red-800 text-sm mb-1">Cesarean Surgery Recovery</h4>
+              <p className="text-sm text-red-700 leading-relaxed">
+                You have undergone major abdominal surgery. Your primary focus must be deep rest to heal your incision and internal tissue. <strong>Do not lift anything heavier than your baby</strong>. Avoid all core-engaging activities, stretching, heavy household chores, or driving until you are officially cleared by your doctor. Ask for and accept help.
+              </p>
+            </div>
+          )}
+          {deliveryType === "natural" && (
+            <div className="p-4 rounded-lg bg-wellness-sage/10 border border-wellness-sage/20">
+              <h4 className="font-medium text-wellness-taupe text-sm mb-1">Vaginal Delivery Recovery</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Your body has gone through an intense physical event. Focus on pelvic floor rest, using ice packs or soothing baths as needed for tearing or swelling. Wait until postpartum bleeding (lochia) has completely stopped and you are cleared by your doctor before resuming any strenuous activity. Let your body guide your pace.
+              </p>
+            </div>
+          )}
 
           {/* What postpartum means */}
           <div className="space-y-2">

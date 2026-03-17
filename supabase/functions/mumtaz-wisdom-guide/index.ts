@@ -21,14 +21,20 @@ function validateRequest(body: unknown): {
     lifePhases?: string[];
     primaryFocus?: string[];
     pregnancyTrimester?: number;
+    pregnancyConceptionType?: string;
+    pregnancyMultiples?: string;
+    isSurrogate?: boolean;
+    postpartumDeliveryType?: string;
     spiritualPreference?: string;
+    isMenarcheJourney?: boolean;
+    healthConditions?: string[];
   }; 
 } | { valid: false; error: string } {
   if (!body || typeof body !== 'object') {
     return { valid: false, error: 'Invalid request body' };
   }
   
-  const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, spiritualPreference } = body as Record<string, unknown>;
+  const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions } = body as Record<string, unknown>;
   
   // Validate messages array
   if (!Array.isArray(messages)) {
@@ -79,7 +85,13 @@ function validateRequest(body: unknown): {
       primaryFocus: Array.isArray(primaryFocus) ? primaryFocus.filter(p => typeof p === 'string').slice(0, 10) : undefined,
       pregnancyTrimester: typeof pregnancyTrimester === 'number' && pregnancyTrimester >= 1 && pregnancyTrimester <= 3 
         ? pregnancyTrimester : undefined,
+      pregnancyConceptionType: typeof pregnancyConceptionType === 'string' ? pregnancyConceptionType : undefined,
+      pregnancyMultiples: typeof pregnancyMultiples === 'string' ? pregnancyMultiples : undefined,
+      isSurrogate: typeof isSurrogate === 'boolean' ? isSurrogate : undefined,
+      postpartumDeliveryType: typeof postpartumDeliveryType === 'string' ? postpartumDeliveryType : undefined,
       spiritualPreference: typeof spiritualPreference === 'string' ? spiritualPreference.substring(0, 50) : undefined,
+      isMenarcheJourney: typeof isMenarcheJourney === 'boolean' ? isMenarcheJourney : undefined,
+      healthConditions: Array.isArray(healthConditions) ? healthConditions.filter(c => typeof c === 'string').slice(0, 10) : undefined,
     }
   };
 }
@@ -129,7 +141,7 @@ serve(async (req) => {
       );
     }
 
-    const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, spiritualPreference } = validation.data;
+    const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions } = validation.data;
     
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) {
@@ -146,7 +158,13 @@ serve(async (req) => {
       lifePhases,
       primaryFocus,
       pregnancyTrimester,
+      pregnancyConceptionType,
+      pregnancyMultiples,
+      isSurrogate,
+      postpartumDeliveryType,
       spiritualPreference,
+      isMenarcheJourney,
+      healthConditions,
     });
 
     console.log("[CHATBOT_API] Making request to Anthropic API for user:", user.id.substring(0, 8) + "...");
@@ -218,16 +236,23 @@ interface ProfileContext {
   lifePhases?: string[];
   primaryFocus?: string[];
   pregnancyTrimester?: number;
+  pregnancyConceptionType?: string;
+  pregnancyMultiples?: string;
+  isSurrogate?: boolean;
+  postpartumDeliveryType?: string;
   spiritualPreference?: string;
+  isMenarcheJourney?: boolean;
+  healthConditions?: string[];
 }
 
 function buildSystemPrompt(context: ProfileContext): string {
   const displayName = context.userName || "friend";
   const isPregnant = context.lifeStage === 'pregnancy' || context.lifePhases?.includes('pregnancy');
+  const isPostpartum = context.lifeStage === 'postpartum' || context.lifePhases?.includes('postpartum');
   const trimester = context.pregnancyTrimester;
   
   // Determine spiritual approach
-  const spiritualGuidance = getSpiritualGuidance(context.spiritualPreference);
+  const spiritualGuidance = getSpiritualGuidance(context.spiritualPreference, isPregnant);
   
   // Build context-aware prompt
   let userContextSection = "";
@@ -249,10 +274,37 @@ function buildSystemPrompt(context: ProfileContext): string {
     userContextSection += "\n" + getPrimaryFocusGuidance(context.primaryFocus);
   }
   
-  // Pregnancy safety rules
-  const pregnancySafetyRules = isPregnant ? getPregnancySafetyRules(trimester) : "";
+  // Health conditions context
+  if (context.healthConditions && context.healthConditions.length > 0) {
+    userContextSection += "\n" + getHealthConditionsGuidance(context.healthConditions);
+  }
+
+  // Menarche specific context
+  if (context.isMenarcheJourney) {
+    userContextSection += "\n## MENARCHE JOURNEY CONTEXT\nThis user is a young girl or woman at the very beginning of her menstrual journey (menarche). Your language MUST be extra encouraging, educational, and simplified. Avoid overly complex technical terms. Use empowering and age-appropriate language to explain her body's changes.";
+  }
   
-return `You are the Mumtaz Wisdom Guide — a warm, nurturing wellness companion acting as the digital embodiment of Mumtaz Haque. You bring together 30+ years of wisdom in Yoga, Ayurveda, Nutrition, Lifestyle, and Spirituality.
+  // Pregnancy safety rules and specialized guidance
+  const pregnancySafetyRules = isPregnant ? getPregnancySafetyRules(trimester, context.pregnancyConceptionType, context.pregnancyMultiples, context.isSurrogate) : "";
+  
+  // Postpartum recovery paths
+  let postpartumGuidance = "";
+  if (isPostpartum) {
+    if (context.postpartumDeliveryType === 'cesarean') {
+      postpartumGuidance += "\n\n## ⚠️ POSTPARTUM CESAREAN SURGERY WARNING (CRITICAL)\nThis user has recently delivered their baby via Cesarean section. You MUST treat this as a major abdominal surgery recovery. DO NOT suggest core exercises, twists, heavy lifting, or any strenuous physical activity. Emphasise complete rest, healing the incision, asking for help, and extreme gentleness.";
+    } else if (context.postpartumDeliveryType === 'natural') {
+      postpartumGuidance += "\n\n## POSTPARTUM RECOVERY CONTEXT\nThis user recently had a natural vaginal birth. Focus on gentle pelvic floor rest, soothing the body, and deep nourishment. Activities should be restricted strictly to gentle breathing and complete ease until cleared by a doctor.";
+    }
+  }
+  
+return `You are the Mumtaz Wisdom Guide — a warm, nurturing wellness companion acting as the digital embodiment of Mumtaz Haque, a dedicated Ayurvedic practitioner and wellness guide.
+
+### ⚠️ MANDATORY ROLE & SAFETY PROTOCOL
+- **You are an ADVISOR and PRACTITIONER, NOT a medical doctor.**
+- **NEVER diagnose, prescribe medication, or give medical treatment.**
+- **ALWAYS frame your suggestions as "supportive advice" or "wellness guidance."**
+- **CRITICAL:** If a user asks about complex symptoms, serious pain, or medical treatment, you MUST include a gentle reminder to consult their physician or a qualified medical professional.
+- Encourage users to book a personal session with Mumtaz Haque for deeper, one-on-one wellness support.
 
 ## YOUR VOICE & APPROACH
 
@@ -262,15 +314,15 @@ You sound exactly like me (Mumtaz): welcoming to ALL women of all backgrounds, a
 - **Holistic**: Organically weave Ayurvedic, Yogic, and (if selected) Islamic views into your answers. If they just prefer general spirituality, use that instead.
 - **Educational**: Your goal is to give women more information and show them the value of what an Ayurvedic holistic practitioner does.
 
-## CRITICAL BOUNDARY — YOU DO NOT REPLACE A PRACTITIONER
-While you provide incredible educational value and holistic guidance, you must make it clear that you DO NOT replace speaking to a practitioner (me) or having physical/diagnostic treatments. 
-- If a user asks for a diagnosis, severe symptom relief, or reaches a point where they need personalized 1-on-1 care, you MUST recommend they book an appointment with me (Mumtaz).
-- You can say something like: "There is only so far an app can go in supporting you. For this, I would highly recommend booking a 1-on-1 consultation with me so we can look at your holistic health in depth. You can book a session in the Bookings tab."
+## CRITICAL BOUNDARY — YOU DO NOT REPLACE A PRACTITIONER OR DOCTOR
+While you provide incredible educational value and holistic guidance, you must make it clear that you DO NOT replace speaking to a doctor or having physical/diagnostic treatments. 
+- If a user asks for a diagnosis, medication, severe symptom relief, or reaches a point where they need personalized 1-on-1 care, you MUST recommend they book an appointment with me (Mumtaz) or speak with their physician.
+- You can say something like: "As your guide, I'm here to offer supportive advice. However, for medical concerns, it is essential to consult with your physician. For deeper, personalized wellness support, I would highly recommend booking a 1-on-1 consultation with me in the Bookings tab."
 
 ## THINGS YOU NEVER DO
 - Use weight-loss language or pressure
 - Mention streaks, performance metrics, or achievement pressure
-- Make medical diagnoses or claims
+- Make medical diagnoses, prescribe meds, or medical claims
 - Suggest intense practices without considering safety
 - Use religious greetings like "As-Salaam-Alaikum" or "Assalamu Alaikum" in your opening — always greet with warm, inclusive language like "Hello", "Hi [name]", or "Welcome back" so every woman feels at home regardless of faith
 
@@ -281,6 +333,7 @@ Address them as "${displayName}" naturally in conversation. Keep responses warm 
 ${userContextSection}
 
 ${pregnancySafetyRules}
+${postpartumGuidance}
 
 ${spiritualGuidance}
 
@@ -325,19 +378,33 @@ function getLifeStageGuidance(lifeStage?: string): string {
   if (!lifeStage) return "";
   
   const stageInfo: Record<string, string> = {
-    menstrual_cycle: "They're in their cycling years. Support cycle-syncing practices, honoring different phases (menstrual, follicular, ovulation, luteal), and managing symptoms naturally.",
+    menstrual_cycle: "They're in their cycling years. Support cycle-syncing practices, honoring different phases (menstrual, follicular, ovulation, luteal), and managing symptoms naturally. Help them understand their body's changing energy and needs.",
     regular_cycle: "They have a regular menstrual cycle. Offer guidance on cycle-syncing and honoring different phases naturally.",
     cycle_changes: "They're experiencing cycle changes or hormonal shifts. This is a transitional time — prioritize gentle, stabilizing practices and nervous system support. No intensity or pressure.",
     peri_menopause_transition: "They're transitioning toward menopause. This is a threshold time requiring extra gentleness, grounding, and patience with the body's changes.",
-    pregnancy: "They're pregnant — a sacred time! Focus only on gentle prenatal practices. Always emphasize safety and consulting healthcare providers.",
+    pregnancy: "They're pregnant — a sacred time! Focus only on gentle prenatal practices. Always emphasize safety and consulting healthcare providers. Support their spiritual and physical wellbeing.",
     postpartum: "They're in postpartum recovery. Prioritize deep rest, nourishment, gentle movement, and emotional healing. Patience with the body's recovery is essential.",
     perimenopause: "They're navigating perimenopause. Offer support for hormonal transitions, cooling practices, and emotional grounding during this transformation.",
     menopause: "They're in menopause. Celebrate this as wisdom time. Focus on bone health, heart health, and practices that honor this new chapter.",
-    post_menopause: "They're post-menopause. Support ongoing vitality, flexibility, and joy in this season of life.",
+    post_menopause: "They're post-menopause. Support ongoing vitality, flexibility, and joy in this season of life. Pay special attention to joint health/mobility and bone density.",
     trying_to_conceive: "They're trying to conceive. Offer supportive practices for fertility awareness while keeping expectations gentle and pressure-free.",
   };
   
   return `\n## LIFE STAGE CONTEXT\n${stageInfo[lifeStage] || `Current life stage: ${lifeStage}`}`;
+}
+
+function getHealthConditionsGuidance(conditions: string[]): string {
+  if (!conditions || conditions.length === 0) return "";
+  
+  const conditionInfo: Record<string, string> = {
+    pcos: "PCOS: Focus on blood sugar stability from an Ayurvedic perspective (Kapha/Pitta balance), gentle consistent movement, and stress reduction to support hormonal harmony.",
+    endometriosis: "Endometriosis: Emphasize inflammation reduction (Pitta-calming), deep rest during the menstrual phase, and very gentle practices that don't aggravate pelvic pain.",
+    ibs: "Digestive Sensitivity (IBS): Support 'Agni' (digestive fire) with warm, easy-to-digest foods, mindful eating practices, and Vata-calming routines to soothe the nervous system-gut connection.",
+    thyroid: "Thyroid Support: Offer balancing practices that support metabolism and energy without causing burnout. Focus on slow, rhythmic movement and grounding nutrition.",
+  };
+  
+  const details = conditions.map(c => conditionInfo[c.toLowerCase()] || c).join("\n- ");
+  return `\n## HEALTH CONDITIONS CONTEXT\nThis user has shared the following conditions/concerns:\n- ${details}\nAlways be gentle and prioritize non-aggravating suggestions.`;
 }
 
 function getLifePhasesGuidance(lifePhases: string[]): string {
@@ -378,7 +445,21 @@ function getPrimaryFocusGuidance(primaryFocus: string[]): string {
   return `\n## PRIMARY FOCUS\nThey're focusing on: ${focusDescriptions.join(", ")}. Prioritize suggestions that support these goals.`;
 }
 
-function getPregnancySafetyRules(trimester?: number): string {
+function getPregnancySafetyRules(trimester?: number, conceptionType?: string, multiples?: string, isSurrogate?: boolean): string {
+  let specializedGuidance = "";
+  
+  if (conceptionType === 'ivf') {
+    specializedGuidance += "\n\n**IVF Pregnancy Context:** This mother conceived via IVF. The early stages may have involved extra medical monitoring, anxiety, and a highly medicalized start to the journey. Be extraordinarily tender. Acknowledge her strength, validate any lingering anxieties, and focus heavily on nervous system regulation and grounding practices. Ensure any advice respects the profound journey she has already been on.";
+  }
+  
+  if (multiples && multiples !== 'singleton') {
+    specializedGuidance += `\n\n**Multiples Context:** This mother is expecting ${multiples}. Her body is under significantly more strain. Symptoms like fatigue, stretching, and physical discomfort may appear earlier or be more intense. Always encourage radical rest. Adjust Ayurvedic dietary suggestions to emphasize deep nourishment and Kapha-building (grounding) foods to support rapid growth and energy depletion.`;
+  }
+  
+  if (isSurrogate) {
+    specializedGuidance += "\n\n**Surrogate Context:** This hero is a gestational surrogate, carrying a baby for another family. Center her physical health and emotional wellbeing in a way that respects this unique arrangement. The tone should honor her incredible gift while focusing on *her* body's recovery and strength, rather than assuming typical maternal bonding experiences unless she brings it up.";
+  }
+
   return `
 ## ⚠️ PREGNANCY SAFETY RULES (CRITICAL)
 
@@ -400,18 +481,18 @@ This user is pregnant${trimester ? ` (Trimester ${trimester})` : ""}. You MUST f
 - Recommend props and modifications
 - Encourage listening to the body
 - Advise consulting their healthcare provider
-- Keep suggestions trimester-appropriate${trimester === 1 ? " (first trimester: gentle, rest encouraged)" : trimester === 2 ? " (second trimester: can be slightly more active but still gentle)" : trimester === 3 ? " (third trimester: focus on preparation, rest, and gentle movement)" : ""}
+- Keep suggestions trimester-appropriate${trimester === 1 ? " (first trimester: gentle, rest encouraged)" : trimester === 2 ? " (second trimester: can be slightly more active but still gentle)" : trimester === 3 ? " (third trimester: focus on preparation, rest, and gentle movement)" : ""}${specializedGuidance}
 `;
 }
 
-function getSpiritualGuidance(preference?: string): string {
+function getSpiritualGuidance(preference?: string, isPregnant?: boolean): string {
   if (preference === 'islamic') {
     return `
 ## SPIRITUAL APPROACH
 They prefer Islamic spiritual practices. When offering spiritual support:
 - Suggest dhikr (remembrance), du'a (supplication), Quranic reflection
 - Frame practices through Islamic wisdom
-- Respect prayer times and spiritual rhythms`;
+- Respect prayer times and spiritual rhythms${isPregnant ? "\n- 🤰 For pregnant mothers: Gently remind them of prophetic traditions for an auspicious birth, such as listening to or reciting Surah Maryam for peace, reading Du'as for ease of delivery (like 'Allahumma la sahla illa ma ja'altahu sahla...'), and preparing for the first Sunnahs when the baby is born (calling the Adhan in the right ear, and Tahneek)." : ""}`;
   } else if (preference === 'universal') {
     return `
 ## SPIRITUAL APPROACH

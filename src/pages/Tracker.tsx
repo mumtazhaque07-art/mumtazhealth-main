@@ -10,9 +10,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { wellnessEntrySchema, validateInput, truncateText } from "@/lib/validation";
-import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings } from "lucide-react";
+import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings, Menu } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Navigation } from "@/components/Navigation";
 import { CyclePhaseHelper } from "@/components/CyclePhaseHelper";
 import { CyclePhaseEducation } from "@/components/CyclePhaseEducation";
@@ -26,6 +34,7 @@ import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
 import { SupportPlanModal } from "@/components/SupportPlan";
 import { GentleSignInPrompt } from "@/components/GentleSignInPrompt";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { CheckInReminder } from "@/components/CheckInReminder";
 
 interface DailyPractice {
   id: string;
@@ -67,7 +76,10 @@ export default function Tracker() {
   const [isMenstrual, setIsMenstrual] = useState(false);
   const [lifeStage, setLifeStage] = useState<string>('');
   const [trimester, setTrimester] = useState<string>('');
+  const [currentWeek, setCurrentWeek] = useState<number | null>(null);
+  const [dueDate, setDueDate] = useState<string | null>(null);
   const [showCycleHelper, setShowCycleHelper] = useState(false);
+  const [isMenarcheJourney, setIsMenarcheJourney] = useState(false);
   
   // Red Day Protocol fields
   const [painLevel, setPainLevel] = useState('');
@@ -166,7 +178,7 @@ export default function Tracker() {
     
     const { data, error } = await supabase
       .from('user_wellness_profiles')
-      .select('onboarding_completed, life_stage, primary_dosha')
+      .select('onboarding_completed, life_stage, primary_dosha, due_date, is_menarche_journey')
       .eq('user_id', user.id)
       .maybeSingle();
     
@@ -181,6 +193,12 @@ export default function Tracker() {
     }
     if (data?.primary_dosha) {
       setUserDosha(data.primary_dosha);
+    }
+    if (data?.due_date) {
+      setDueDate(data.due_date);
+    }
+    if (data?.is_menarche_journey) {
+      setIsMenarcheJourney(data.is_menarche_journey);
     }
     
     // If no profile exists or onboarding not completed, redirect to onboarding
@@ -211,6 +229,32 @@ export default function Tracker() {
   useEffect(() => {
     setIsMenstrual(cyclePhase === 'Menstrual');
   }, [cyclePhase]);
+
+  // Calculate exact pregnancy week and trimester based on due date
+  useEffect(() => {
+    if (lifeStage === 'pregnancy' && dueDate) {
+      const due = new Date(dueDate);
+      const today = new Date(selectedDate);
+      
+      // Standard pregnancy is 280 days (40 weeks) from LMP. Due date is day 280.
+      const diffTime = due.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      const daysAlong = 280 - diffDays;
+      const weeksAlong = Math.floor(daysAlong / 7);
+      
+      if (weeksAlong >= 0 && weeksAlong <= 42) {
+        setCurrentWeek(weeksAlong);
+        
+        let calculatedTrimester = "";
+        if (weeksAlong >= 1 && weeksAlong <= 13) calculatedTrimester = "1";
+        else if (weeksAlong >= 14 && weeksAlong <= 27) calculatedTrimester = "2";
+        else if (weeksAlong >= 28) calculatedTrimester = "3";
+        
+        setTrimester(calculatedTrimester);
+      }
+    }
+  }, [dueDate, selectedDate, lifeStage]);
 
   const checkAdminRole = async () => {
     if (!user) return;
@@ -569,69 +613,86 @@ export default function Tracker() {
                   variant="outline"
                   size="sm"
                   onClick={() => navigate("/admin")}
-                  className="border-wellness-taupe/30"
+                  className="border-wellness-taupe/30 hidden md:flex"
                 >
                   <UserCog className="w-4 h-4 mr-2" />
                   Admin
                 </Button>
               )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/summary")}
-                className="border-wellness-taupe/30"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Summary
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/bookings")}
-                className="border-wellness-taupe/30"
-              >
-                <Calendar className="w-4 h-4 mr-2" />
-                Book Services
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/content")}
-                className="border-wellness-taupe/30"
-              >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Library
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/insights")}
-                className="border-wellness-taupe/30"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI Insights
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => navigate("/settings")}
-                className="border-wellness-taupe/30"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="border-wellness-taupe/30"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+              
+              <div className="hidden md:flex gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/summary")}
+                  className="border-wellness-taupe/30"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Summary
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/content")}
+                  className="border-wellness-taupe/30"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Library
+                </Button>
+              </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="border-wellness-taupe/30">
+                    <Menu className="w-4 h-4 mr-2" />
+                    Menu
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Your Journey</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/summary")} className="md:hidden">
+                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <span>View Summary</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/content")} className="md:hidden">
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    <span>Content Library</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/bookings")}>
+                    <Calendar className="mr-2 h-4 w-4" />
+                    <span>Book Services</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/insights")}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    <span>AI Insights</span>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Account</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => navigate("/settings")}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate("/admin")} className="md:hidden">
+                      <UserCog className="mr-2 h-4 w-4" />
+                      <span>Admin Dashboard</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </CardHeader>
         </Card>
+
+        {/* Free In-App Reminder */}
+        <CheckInReminder />
 
         {/* Cycle Phase Check-In - Only show for menstrual cycle life stage */}
         {lifeStage === 'menstrual_cycle' && (
@@ -689,7 +750,11 @@ export default function Tracker() {
                         </p>
                       </div>
                       
-                      <CyclePhaseEducation selectedPhase={cyclePhase} lifeStage={lifeStage} />
+                      <CyclePhaseEducation 
+                        selectedPhase={cyclePhase} 
+                        lifeStage={lifeStage} 
+                        isMenarcheJourney={isMenarcheJourney}
+                      />
                     </div>
                   )}
                 </>
@@ -698,32 +763,24 @@ export default function Tracker() {
           </Card>
         )}
 
-        {/* Trimester - Only show for pregnancy life stage */}
         {lifeStage === 'pregnancy' && (
           <Card className="mb-6 bg-wellness-lilac/10 border-wellness-lilac/20">
             <CardHeader>
               <CardTitle className="text-xl text-wellness-taupe">1. Your Pregnancy Journey</CardTitle>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                This is here to support you through this beautiful journey, not to add pressure.
+                {currentWeek !== null ? `You are ${currentWeek} weeks along.` : 'This is here to support you through this beautiful journey.'}
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <Label>Current Trimester:</Label>
-                <Select value={trimester} onValueChange={setTrimester}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select Trimester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Trimester 1 (Weeks 1-13)</SelectItem>
-                    <SelectItem value="2">Trimester 2 (Weeks 14-27)</SelectItem>
-                    <SelectItem value="3">Trimester 3 (Weeks 28-40)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Removed manual dropdown; Week and Trimester are now automatically calculated from Due Date */}
+              {trimester && (
+                <div className="bg-wellness-lilac/5 p-4 rounded-lg border border-wellness-lilac/20">
+                  <p className="font-medium text-wellness-taupe">Current Trimester: {trimester}</p>
+                </div>
+              )}
               
               {/* Educational section */}
-              {trimester && <PregnancyEducation trimester={trimester} />}
+              {trimester && <PregnancyEducation trimester={trimester} week={currentWeek} />}
             </CardContent>
           </Card>
         )}

@@ -11,14 +11,9 @@ export function AppCompanionDisclaimer({
   showMedicalNote = true,
   className = "" 
 }: AppCompanionDisclaimerProps) {
-  if (variant === "subtle") {
-    return (
       <p className={`text-xs text-muted-foreground italic ${className}`}>
-        This app is a companion for your wellness journey — not a replacement for professional care.
-        {showMedicalNote && " Please consult your healthcare provider for medical guidance."}
+        I am a wellness advisor and practitioner offering supportive advice. This app does NOT provide medical diagnosis or medication. Please consult your physician for all medical guidance.
       </p>
-    );
-  }
 
   if (variant === "card") {
     return (
@@ -32,13 +27,11 @@ export function AppCompanionDisclaimer({
               Your wellness companion
             </p>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              This app offers educational content and supportive guidance to help you understand your body 
-              and wellbeing. It is designed to complement — not replace — the care of qualified practitioners, 
-              medical professionals, or personalised treatment plans.
+              As your founder and guide, I offer 30+ years of wisdom to support your journey. This app provides holistic advice and educational content — it does NOT diagnose, prescribe medication, or replace professional medical care.
             </p>
             {showMedicalNote && (
-              <p className="text-xs text-muted-foreground italic">
-                Always seek advice from your healthcare team for medical concerns.
+              <p className="text-xs text-muted-foreground italic font-medium text-wellness-taupe">
+                Always consult your physician or speak with a practitioner for medical concerns.
               </p>
             )}
           </div>
@@ -50,10 +43,10 @@ export function AppCompanionDisclaimer({
   // Default inline variant
   return (
     <div className={`flex items-center gap-2 p-3 rounded-lg bg-wellness-lilac/5 border border-wellness-lilac/15 ${className}`}>
-      <Heart className="w-4 h-4 text-wellness-lilac flex-shrink-0" />
+      <Shield className="w-4 h-4 text-wellness-lilac flex-shrink-0" />
       <p className="text-xs text-muted-foreground">
-        A gentle guide for your journey — for deeper or complex needs, 
-        personalised practitioner support is always recommended.
+        Offering supportive wisdom and advice — not medical diagnosis or medication. 
+        Consulting your physician or a practitioner is always recommended.
       </p>
     </div>
   );
