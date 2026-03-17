@@ -247,23 +247,9 @@ export default function Auth() {
           if (isAdminSetupMode) {
             // Auto-escalate to admin immediately after sign-in
             try {
-              // Check if already admin
-              const { data: existingRole } = await supabase
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', data.user.id)
-                .eq('role', 'admin')
-                .maybeSingle();
-
-              if (existingRole) {
-                toast.success("You already have admin privileges!");
-              } else {
-                const { error: roleError } = await supabase
-                  .from('user_roles')
-                  .insert({ user_id: data.user.id, role: 'admin' });
-                if (roleError) throw roleError;
-                toast.success("🎉 Admin access granted! Welcome, Mumtaz.");
-              }
+              const { error: rpcError } = await supabase.rpc('grant_admin_to_self');
+              if (rpcError) throw rpcError;
+              toast.success("🎉 Admin access granted! Welcome, Mumtaz.");
               navigate("/admin");
               return;
             } catch (adminErr: any) {
@@ -308,9 +294,9 @@ export default function Auth() {
         toast.error("Please sign in first.");
         return;
       }
-      const { error } = await supabase.from('user_roles').insert({ user_id: user.id, role: 'admin' });
+      const { error } = await supabase.rpc('grant_admin_to_self');
       if (error) throw error;
-      toast.success("You are now an Admin!");
+      toast.success("🎉 You are now an Admin!");
       navigate("/admin");
     } catch (error: any) {
       toast.error(error.message || "Failed to grant admin rights.");
