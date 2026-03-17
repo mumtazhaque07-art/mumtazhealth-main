@@ -126,7 +126,7 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 ## ✅ Completed Work
 
 | Date | What Was Done |
-|------|--------------|
+|------|--------------| 
 | Feb 2026 | Project setup — CLAUDE.md and ROADMAP.md created |
 | Feb 2026 | App running locally at http://localhost:8080 |
 | Feb 2026 | Full codebase accessible in Claude folder |
@@ -143,6 +143,13 @@ Phase 1 stabilisation work **complete as of 7 March 2026.**
 | 7 Mar 2026 | Image lazy loading — confirmed already in place on all ContentLibrary images |
 | 14 Mar 2026 | Google Sign-in enabled and configured in Supabase + Google Cloud |
 | 14 Mar 2026 | Vercel deployment completed with custom domain (mumtazhealth.app) connected |
+| 17 Mar 2026 | Full persona testing & experience refinement — Pregnancy, Postpartum, Menarche, Elderly, Perimenopause, Menopause, Hormonal Conditions (PCOS/IBS/Endo) |
+| 17 Mar 2026 | Brand prominence pass — Logo priority, header enhancements across all personas |
+| 17 Mar 2026 | Auth.tsx reimplemented — streamlined sign-in, sign-up, password reset, admin setup flows |
+| 18 Mar 2026 | Email confirmation handling — "Resend Confirmation Email" button with `supabase.auth.resend()` |
+| 18 Mar 2026 | Admin setup fixed — `grant_admin_to_self()` SECURITY DEFINER function created in Supabase, RPC-based escalation bypasses RLS |
+| 18 Mar 2026 | Admin auto-escalation — sign-in with `?setup_admin=true` now auto-grants admin and redirects to /admin |
+| 18 Mar 2026 | New Supabase migration: `20260318_grant_admin_function.sql` |
 
 ---
 
