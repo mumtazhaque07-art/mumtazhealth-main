@@ -245,7 +245,32 @@ export default function Auth() {
         }
         if (data.user) {
           if (isAdminSetupMode) {
-            toast.success("Ready for Step 2!");
+            // Auto-escalate to admin immediately after sign-in
+            try {
+              // Check if already admin
+              const { data: existingRole } = await supabase
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', data.user.id)
+                .eq('role', 'admin')
+                .maybeSingle();
+
+              if (existingRole) {
+                toast.success("You already have admin privileges!");
+              } else {
+                const { error: roleError } = await supabase
+                  .from('user_roles')
+                  .insert({ user_id: data.user.id, role: 'admin' });
+                if (roleError) throw roleError;
+                toast.success("🎉 Admin access granted! Welcome, Mumtaz.");
+              }
+              navigate("/admin");
+              return;
+            } catch (adminErr: any) {
+              console.error("Admin escalation failed:", adminErr);
+              toast.error("Signed in but admin setup failed: " + (adminErr.message || "Unknown error"));
+              navigate("/");
+            }
           } else {
             navigate(redirectTarget ? `/${redirectTarget}` : "/");
           }
