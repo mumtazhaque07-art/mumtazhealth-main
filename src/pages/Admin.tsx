@@ -657,7 +657,7 @@ export default function Admin() {
                           {stats.byLifeStage.map(({ stage, count }) => (
                             <div key={stage} className="flex items-center justify-between">
                               <span className="text-sm capitalize text-wellness-taupe">
-                                {stage.replace(/_/g, ' ')}
+                                {typeof stage === 'string' ? stage.replace(/_/g, ' ') : String(stage)}
                               </span>
                               <span className="text-sm font-semibold bg-mumtaz-lilac/15 text-mumtaz-plum px-2 py-0.5 rounded-full">
                                 {count}
