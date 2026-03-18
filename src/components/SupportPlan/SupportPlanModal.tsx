@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SupportPlanRecommendations } from "./SupportPlanRecommendations";
 import { WhatWorkedLog } from "./WhatWorkedLog";
-import { Sparkles, ChevronRight, ChevronLeft, X } from "lucide-react";
+import { Sparkles, ChevronRight, ChevronLeft, X, Home, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -155,7 +155,7 @@ export function SupportPlanModal({
           </div>
         </ScrollArea>
 
-        <div className="p-4 border-t bg-muted/30">
+        <div className="p-4 border-t bg-muted/30 space-y-3">
           {step === 'recommendations' ? (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
@@ -173,9 +173,21 @@ export function SupportPlanModal({
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
+              {/* Always-visible dashboard link */}
+              <Button
+                variant="outline"
+                className="w-full border-primary/30 text-primary hover:bg-primary/10 gap-2"
+                onClick={() => {
+                  onOpenChange(false);
+                  navigate('/');
+                }}
+              >
+                <Home className="w-4 h-4" />
+                Go to My Dashboard
+              </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
                 <Button
                   variant="ghost"
@@ -194,40 +206,42 @@ export function SupportPlanModal({
               
               {/* Navigation Options */}
               <div className="pt-3 border-t border-border/50">
-                <p className="text-sm text-muted-foreground text-center mb-3">
+                <p className="text-sm text-muted-foreground text-center mb-2">
                   Where would you like to go next?
                 </p>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col gap-2">
                   <Button
-                    variant="outline"
-                    className="flex-1 text-sm"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gap-2"
                     onClick={() => {
                       onOpenChange(false);
-                      navigate('/my-daily-practice');
+                      navigate('/');
                     }}
                   >
-                    Continue Where I Left Off
+                    <Home className="w-4 h-4" />
+                    Go to My Dashboard
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 text-sm"
-                    onClick={() => {
-                      onOpenChange(false);
-                      navigate('/content-library?tab=favorites');
-                    }}
-                  >
-                    Go to My Favourites
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1 text-sm"
-                    onClick={() => {
-                      onOpenChange(false);
-                      navigate('/content-library');
-                    }}
-                  >
-                    Browse the Library
-                  </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      className="text-sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate('/content-library');
+                      }}
+                    >
+                      Browse Library
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="text-sm"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate('/tracker');
+                      }}
+                    >
+                      Back to Tracker
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
