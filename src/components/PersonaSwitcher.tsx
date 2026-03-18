@@ -31,6 +31,19 @@ export function PersonaSwitcher() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        
+        // Also enable admin mode if user has the admin role
+        const { data: roleData } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .eq("role", "admin")
+          .maybeSingle();
+          
+        if (roleData) {
+          setIsAdminMode(true);
+        }
+
         const { data } = await supabase
           .from("user_wellness_profiles")
           .select("life_stage, spiritual_preference")

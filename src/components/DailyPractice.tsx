@@ -24,11 +24,11 @@ export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPra
     try {
       let query = supabase.from("wellness_content").select("*");
 
-      // Filter by type or category
-      if (type === "emotional") {
-        query = query.eq("category", "emotional");
+      // Filter by type
+      if (type === "spiritual") {
+        query = query.in("content_type", ["meditation", "education", "spiritual"]);
       } else {
-        query = query.eq("type", type);
+        query = query.eq("content_type", type);
       }
 
       const { data, error } = await query;
