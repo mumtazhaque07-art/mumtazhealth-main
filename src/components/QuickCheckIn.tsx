@@ -188,7 +188,7 @@ interface FavoriteFeeling {
 
 export function QuickCheckIn({ username }: QuickCheckInProps) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [selectedFeeling, setSelectedFeeling] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<FavoriteFeeling[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
@@ -310,11 +310,6 @@ export function QuickCheckIn({ username }: QuickCheckInProps) {
     }
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-    setSelectedFeeling(null);
-  };
-
   const currentSuggestions = selectedFeeling ? suggestions[selectedFeeling] : null;
   const isFavorite = (feelingId: string) => favorites.some(f => f.feeling_id === feelingId);
 
@@ -327,50 +322,22 @@ export function QuickCheckIn({ username }: QuickCheckInProps) {
     return 0;
   });
 
-  if (!isOpen) {
-    return (
-      <Card 
-        className="bg-gradient-to-br from-mumtaz-lilac/30 to-mumtaz-sage/20 border-mumtaz-lilac/40 shadow-lg cursor-pointer hover:shadow-xl transition-all"
-        onClick={() => setIsOpen(true)}
-      >
-        <CardContent className="p-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-full bg-mumtaz-lilac/20">
-              <Heart className="h-6 w-6 text-mumtaz-lilac" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg text-foreground">
-                How are you feeling today{username ? `, ${username}` : ""}?
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Tap to get personalized suggestions
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="h-5 w-5 text-muted-foreground" />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="bg-gradient-to-br from-mumtaz-lilac/20 to-mumtaz-sage/10 border-mumtaz-lilac/40 shadow-lg">
-      <CardHeader className="pb-4">
+    <Card className="bg-gradient-to-br from-mumtaz-lilac/20 to-mumtaz-sage/10 border-mumtaz-lilac/40 shadow-lg relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-mumtaz-lilac/10 rounded-full blur-3xl -mr-32 -mt-32 mix-blend-multiply border-none pointer-events-none z-0"></div>
+      <CardHeader className="pb-4 relative z-10">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl flex items-center gap-2">
             <Heart className="h-5 w-5 text-mumtaz-lilac" />
-            How are you feeling today?
+            Check-In
           </CardTitle>
-          <Button variant="ghost" size="icon" onClick={handleClose}>
-            <X className="h-4 w-4" />
-          </Button>
         </div>
         <p className="text-sm text-muted-foreground">
           Select what resonates with you right now
           {favorites.length > 0 && " • Your favorites appear first"}
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 relative z-10">
         {/* Top Feelings Insight */}
         {topFeelings.length > 0 && !selectedFeeling && (
           <div className="p-3 rounded-lg bg-gradient-to-r from-wellness-lilac/10 to-wellness-sage/10 border border-wellness-lilac/20">

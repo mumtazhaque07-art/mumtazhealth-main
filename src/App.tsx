@@ -9,6 +9,7 @@ import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
 import { useEffect, lazy, Suspense } from "react";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
 import { PageTransition } from "@/components/PageTransition";
+import { PersonaSwitcher } from "@/components/PersonaSwitcher";
 
 // Core pages — loaded immediately on first visit
 import Index from "./pages/Index";
@@ -57,6 +58,7 @@ const App = () => (
         <LoadingProvider>
           <RouteLogger />
           <MumtazWisdomGuide />
+          <PersonaSwitcher />
           <Suspense fallback={<PageLoadingSkeleton variant="simple" />}>
             <Routes>
 

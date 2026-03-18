@@ -24,6 +24,8 @@ import { WelcomeEntryDialog } from "@/components/WelcomeEntryDialog";
 import { InBetweenPhaseBanner } from "@/components/InBetweenPhaseBanner";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { DailyPractice } from "@/components/DailyPractice";
 
 interface UserProfile {
   username: string;
@@ -62,6 +64,7 @@ const Index = () => {
   const [showWelcomeDialog, setShowWelcomeDialog] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [showEntryDialog, setShowEntryDialog] = useState(false);
+  const [activePracticeType, setActivePracticeType] = useState<"yoga" | "meditation" | "emotional" | null>(null);
 
   useEffect(() => {
     checkUserProfile();
@@ -275,159 +278,94 @@ const Index = () => {
             </Card>
           )}
 
-          {/* What Would You Like Today? — Category Entry Points */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl mx-auto" data-tour="entry-cards">
-            {/* Check in with yourself */}
-            <Card 
-              className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20 hover:shadow-lg hover:border-accent/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/tracker")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/tracker")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Heart className="w-6 h-6 text-accent" />
+          {/* The Unified "Today" Action Block */}
+          <div className="max-w-3xl mx-auto space-y-6" data-tour="entry-cards">
+            
+            <h2 className="text-xl font-semibold text-foreground/80 pl-2">What does your body need today?</h2>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* Yoga Practice */}
+              <Card 
+                className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/30 hover:shadow-xl hover:-translate-y-1 hover:border-primary/50 transition-all duration-300 cursor-pointer group rounded-2xl overflow-hidden relative"
+                onClick={() => setActivePracticeType("yoga")}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-primary/20"></div>
+                <CardContent className="pt-8 pb-8 relative z-10">
+                  <div className="flex flex-col items-center text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/20 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-transform duration-300">
+                      <Flower2 className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                        Yoga Practice
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Move your body gently
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
-                      Check In
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      How are you feeling?
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Yoga Practice */}
-            <Card 
-              className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-lg hover:border-primary/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?type=yoga")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?type=yoga")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Flower2 className="w-6 h-6 text-primary" />
+              {/* Breathwork & Calm */}
+              <Card 
+                className="bg-gradient-to-br from-teal-500/10 to-teal-500/5 border-teal-500/30 hover:shadow-xl hover:-translate-y-1 hover:border-teal-500/50 transition-all duration-300 cursor-pointer group rounded-2xl overflow-hidden relative"
+                onClick={() => setActivePracticeType("meditation")}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="absolute bottom-0 left-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl -ml-16 -mb-16 transition-all group-hover:bg-teal-500/20"></div>
+                <CardContent className="pt-8 pb-8 relative z-10">
+                  <div className="flex flex-col items-center text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/20 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-300">
+                      <Waves className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-teal-600 transition-colors">
+                        Breathwork
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Find stillness & peace
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                      Yoga Practice
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Move your body gently
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Breathwork & Calm */}
-            <Card 
-              className="bg-gradient-to-br from-teal-50/60 to-teal-100/30 dark:from-teal-900/20 dark:to-teal-800/10 border-teal-200/50 hover:shadow-lg hover:border-teal-300/60 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?type=meditation")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?type=meditation")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Waves className="w-6 h-6 text-teal-600 dark:text-teal-400" />
+              {/* Spiritual Uplift */}
+              <Card 
+                className="bg-gradient-to-br from-mumtaz-lilac/20 to-mumtaz-lilac/5 border-mumtaz-lilac/30 hover:shadow-xl hover:-translate-y-1 hover:border-mumtaz-lilac/50 transition-all duration-300 cursor-pointer group rounded-2xl overflow-hidden relative"
+                onClick={() => setActivePracticeType("emotional")}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-mumtaz-lilac/10 rounded-full blur-3xl transition-all group-hover:bg-mumtaz-lilac/20"></div>
+                <CardContent className="pt-8 pb-8 relative z-10">
+                  <div className="flex flex-col items-center text-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/20 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Sparkles className="w-8 h-8 text-accent" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-foreground group-hover:text-accent transition-colors">
+                        {wellnessProfile?.spiritual_preference === 'islamic' ? 'Islamic Wisdom' : 'Spiritual Uplift'}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {wellnessProfile?.spiritual_preference === 'islamic' ? 'Dhikr & prayer' :
+                         wellnessProfile?.spiritual_preference === 'both' ? 'Universal & Islamic' :
+                         'Meditation'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-teal-600 transition-colors">
-                      Breathwork & Calm
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Find stillness & peace
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-            {/* Spiritual Uplift — respects user's spiritual preference */}
-            <Card 
-              className="bg-gradient-to-br from-mumtaz-lilac/10 to-mumtaz-lilac/5 border-mumtaz-lilac/20 hover:shadow-lg hover:border-mumtaz-lilac/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?category=emotional")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?category=emotional")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-mumtaz-lilac/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-6 h-6 text-accent" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
-                      Spiritual Uplift
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {wellnessProfile?.spiritual_preference === 'islamic' ? 'Dhikr, prayer & reflection' :
-                       wellnessProfile?.spiritual_preference === 'both' ? 'Islamic & universal wisdom' :
-                       'Meditation & reflection'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Nourishment */}
-            <Card 
-              className="bg-gradient-to-br from-mumtaz-sage/10 to-mumtaz-sage/5 border-mumtaz-sage/20 hover:shadow-lg hover:border-mumtaz-sage/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?category=nutrition")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?category=nutrition")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-mumtaz-sage/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <BookOpen className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                      Nourishment
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Ayurvedic nutrition tips
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* My Journey / Saved Practices */}
-            <Card 
-              className="bg-gradient-to-br from-orange-50/60 to-orange-100/30 dark:from-orange-900/20 dark:to-orange-800/10 border-orange-200/50 hover:shadow-lg hover:border-orange-300/60 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?filter=favorites")}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?filter=favorites")}
-            >
-              <CardContent className="pt-5 pb-5">
-                <div className="flex flex-col items-center text-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-foreground group-hover:text-orange-600 transition-colors">
-                      My Journey
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Your saved practices
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Quick Check-In prominent inline block */}
+          <div className="max-w-3xl mx-auto w-full">
+            <QuickCheckIn username={userProfile?.username} />
           </div>
 
           {/* Complete Onboarding Prompt - Gentle, non-pressuring */}
@@ -669,6 +607,48 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+        <Sheet open={activePracticeType !== null} onOpenChange={(open) => !open && setActivePracticeType(null)}>
+          <SheetContent side="bottom" className="h-[85vh] sm:h-[600px] sm:max-w-md sm:mx-auto sm:right-0 sm:left-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-l-2xl border-t-2 sm:border-t-0 p-0 flex flex-col overflow-hidden bg-background">
+            <div className="overflow-y-auto p-6 flex-1">
+              <SheetHeader className="mb-6 relative">
+                <div className="absolute top-0 right-[-10px] w-32 h-32 bg-primary/20 rounded-full blur-3xl -z-10"></div>
+                <SheetTitle className="text-3xl font-bold font-accent text-foreground mt-2">
+                  {activePracticeType === 'yoga' ? 'Your Daily Flow' : 
+                   activePracticeType === 'meditation' ? 'Find Stillness' : 
+                   'Spiritual Wisdom'}
+                </SheetTitle>
+                <SheetDescription className="text-base text-muted-foreground">
+                  Perfectly curated for your body and mind today.
+                </SheetDescription>
+              </SheetHeader>
+              
+              {activePracticeType && (
+                <DailyPractice 
+                  type={activePracticeType} 
+                  lifeStage={wellnessProfile?.life_stage || null} 
+                  spiritualPreference={wellnessProfile?.spiritual_preference || null} 
+                />
+              )}
+              
+              <div className="mt-8 pt-6 border-t border-border flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground text-center">Want more options?</p>
+                <Button 
+                  variant="outline" 
+                  className="w-full rounded-xl"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (activePracticeType === "emotional") params.set("category", "emotional");
+                    else params.set("type", activePracticeType!);
+                    navigate(`/content-library?${params.toString()}`);
+                  }}
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Explore Content Library
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     );
   }
