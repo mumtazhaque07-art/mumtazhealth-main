@@ -344,9 +344,32 @@ export function MumtazWisdomGuide() {
     setLastFailedMessage(null);
 
     try {
+      // Build Anthropic-compliant message history:
+      // 1. Must strictly start with a 'user' role (strip the opening greeting)
+      // 2. Must strictly alternate between 'user' and 'assistant'
+      const rawMessages = isRetry ? messages : [...messages, userMessage];
+      const payloadMessages: any[] = [];
+      
+      for (const msg of rawMessages) {
+        if (msg.role !== 'user' && msg.role !== 'assistant') continue;
+        
+        if (payloadMessages.length === 0) {
+          if (msg.role === 'user') {
+            payloadMessages.push({ role: msg.role, content: msg.content });
+          }
+        } else {
+          const lastMsg = payloadMessages[payloadMessages.length - 1];
+          if (lastMsg.role === msg.role) {
+            lastMsg.content += "\n\n" + msg.content;
+          } else {
+            payloadMessages.push({ role: msg.role, content: msg.content });
+          }
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke("mumtaz-wisdom-guide", {
         body: {
-          messages: isRetry ? messages : [...messages, userMessage],
+          messages: payloadMessages,
           userName: userProfile?.username,
           primaryDosha: userProfile?.primaryDosha,
           secondaryDosha: userProfile?.secondaryDosha,
