@@ -387,7 +387,7 @@ const ContentLibrary = () => {
 
     const { data, error } = await supabase
       .from('user_wellness_profiles')
-      .select('subscription_tier, preferred_yoga_style, primary_dosha')
+      .select('subscription_tier, preferred_yoga_style, primary_dosha, life_stage, pregnancy_status')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -399,6 +399,29 @@ const ContentLibrary = () => {
     setUserTier(data?.subscription_tier || 'free');
     setUserMovementPreference(data?.preferred_yoga_style || null);
     setUserPrimaryDosha(data?.primary_dosha || null);
+
+    // Store life stage for personalization
+    const lifeStage = data?.life_stage || '';
+    const pregnancyStatus = data?.pregnancy_status || '';
+    localStorage.setItem('mumtaz_user_life_stage', lifeStage);
+    localStorage.setItem('mumtaz_user_pregnancy_status', pregnancyStatus);
+
+    // Auto-apply life stage filter for first-time visitors
+    if (lifeStage && selectedLifePhase === 'all' && !searchParams.get('phase') && !searchParams.get('stage')) {
+      // Map life stages to filter values
+      const stageToFilter: Record<string, string> = {
+        'menopause': 'menopause',
+        'perimenopause': 'perimenopause',
+        'post_menopause': 'post-menopause',
+        'menstrual_cycle': 'menstrual',
+        'pregnancy': 'pregnant',
+        'postpartum': 'postpartum',
+      };
+      const autoFilter = stageToFilter[lifeStage];
+      if (autoFilter) {
+        setSelectedLifePhase(autoFilter);
+      }
+    }
   };
 
   useEffect(() => {
@@ -927,6 +950,11 @@ const ContentLibrary = () => {
     }
     if (tags?.some(tag => ['standing', 'strength', 'pyramid'].includes(tag))) {
       return pyramidPoseBlocks;
+    }
+    // Title-specific overrides for known mismatches
+    // "Legs Up the Wall" should show a restorative wall pose, not bridge
+    if (tags?.some(tag => ['legs-up-wall', 'viparita-karani'].includes(tag))) {
+      return forearmReclinedHero; // Closest match for restorative inversions
     }
     if (tags?.some(tag => ['backbend', 'spine', 'camel'].includes(tag))) {
       return camelPose;

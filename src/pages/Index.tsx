@@ -275,9 +275,9 @@ const Index = () => {
             </Card>
           )}
 
-          {/* Gentle Entry Cards - 4 Maximum */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto" data-tour="entry-cards">
-            {/* Card 1: Check in with yourself */}
+          {/* What Would You Like Today? — Category Entry Points */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl mx-auto" data-tour="entry-cards">
+            {/* Check in with yourself */}
             <Card 
               className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20 hover:shadow-lg hover:border-accent/40 transition-all cursor-pointer group active:scale-[0.98]"
               onClick={() => navigate("/tracker")}
@@ -285,98 +285,146 @@ const Index = () => {
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && navigate("/tracker")}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Heart className="w-6 h-6 text-accent" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">
-                      Check in with yourself
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
+                      Check In
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      A moment to notice how you're feeling — body, mind, and heart.
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      How are you feeling?
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 2: Support for your body */}
+            {/* Yoga Practice */}
             <Card 
               className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover:shadow-lg hover:border-primary/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library?category=mobility")}
+              onClick={() => navigate("/content-library?type=yoga")}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?category=mobility")}
+              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?type=yoga")}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Activity className="w-6 h-6 text-primary" />
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Flower2 className="w-6 h-6 text-primary" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      Support for your body
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                      Yoga Practice
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Gentle movement, mobility, and confidence-building practices.
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Move your body gently
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 3: Learn & explore */}
+            {/* Breathwork & Calm */}
             <Card 
-              className="bg-gradient-to-br from-mumtaz-sage/10 to-mumtaz-sage/5 border-mumtaz-sage/20 hover:shadow-lg hover:border-mumtaz-sage/40 transition-all cursor-pointer group active:scale-[0.98]"
-              onClick={() => navigate("/content-library")}
+              className="bg-gradient-to-br from-teal-50/60 to-teal-100/30 dark:from-teal-900/20 dark:to-teal-800/10 border-teal-200/50 hover:shadow-lg hover:border-teal-300/60 transition-all cursor-pointer group active:scale-[0.98]"
+              onClick={() => navigate("/content-library?type=meditation")}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library")}
+              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?type=meditation")}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-mumtaz-sage/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <BookOpen className="w-6 h-6 text-primary" />
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Waves className="w-6 h-6 text-teal-600 dark:text-teal-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      Learn & explore
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-teal-600 transition-colors">
+                      Breathwork & Calm
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Yoga, nutrition, Ayurveda, and spiritual wisdom — at your pace.
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Find stillness & peace
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Card 4: My saved practices */}
+            {/* Spiritual Uplift — respects user's spiritual preference */}
             <Card 
               className="bg-gradient-to-br from-mumtaz-lilac/10 to-mumtaz-lilac/5 border-mumtaz-lilac/20 hover:shadow-lg hover:border-mumtaz-lilac/40 transition-all cursor-pointer group active:scale-[0.98]"
+              onClick={() => navigate("/content-library?category=emotional")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?category=emotional")}
+            >
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-mumtaz-lilac/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-6 h-6 text-accent" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
+                      Spiritual Uplift
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {wellnessProfile?.spiritual_preference === 'islamic' ? 'Dhikr, prayer & reflection' :
+                       wellnessProfile?.spiritual_preference === 'both' ? 'Islamic & universal wisdom' :
+                       'Meditation & reflection'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Nourishment */}
+            <Card 
+              className="bg-gradient-to-br from-mumtaz-sage/10 to-mumtaz-sage/5 border-mumtaz-sage/20 hover:shadow-lg hover:border-mumtaz-sage/40 transition-all cursor-pointer group active:scale-[0.98]"
+              onClick={() => navigate("/content-library?category=nutrition")}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?category=nutrition")}
+            >
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-mumtaz-sage/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                      Nourishment
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Ayurvedic nutrition tips
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* My Journey / Saved Practices */}
+            <Card 
+              className="bg-gradient-to-br from-orange-50/60 to-orange-100/30 dark:from-orange-900/20 dark:to-orange-800/10 border-orange-200/50 hover:shadow-lg hover:border-orange-300/60 transition-all cursor-pointer group active:scale-[0.98]"
               onClick={() => navigate("/content-library?filter=favorites")}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && navigate("/content-library?filter=favorites")}
             >
-              <CardContent className="pt-6 pb-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-full bg-mumtaz-lilac/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-6 h-6 text-accent" />
+              <CardContent className="pt-5 pb-5">
+                <div className="flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-accent transition-colors">
-                      My saved practices
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground group-hover:text-orange-600 transition-colors">
+                      My Journey
                     </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Return to what you've saved and what feels familiar.
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Your saved practices
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all flex-shrink-0 mt-1" />
                 </div>
               </CardContent>
             </Card>

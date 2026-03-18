@@ -165,6 +165,8 @@ export function PersonalizedRecommendations() {
   const [topFeeling, setTopFeeling] = useState<TopFeeling | null>(null);
   const [loading, setLoading] = useState(true);
   const [feelingLabel, setFeelingLabel] = useState("");
+  const [userLifeStage, setUserLifeStage] = useState<string | null>(null);
+  const [userPregnancyStatus, setUserPregnancyStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPersonalizedContent();
@@ -177,6 +179,18 @@ export function PersonalizedRecommendations() {
         setLoading(false);
         return;
       }
+
+      // Fetch user's wellness profile to know their life stage
+      const { data: wellnessProfile } = await supabase
+        .from("user_wellness_profiles")
+        .select("life_stage, pregnancy_status")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      const lifeStage = wellnessProfile?.life_stage || null;
+      const pregnancyStatus = wellnessProfile?.pregnancy_status || null;
+      setUserLifeStage(lifeStage);
+      setUserPregnancyStatus(pregnancyStatus);
 
       // Get top feelings from the last 30 days
       const thirtyDaysAgo = new Date();
@@ -225,22 +239,56 @@ export function PersonalizedRecommendations() {
       // Fetch relevant content
       const { data: content, error: contentError } = await supabase
         .from("wellness_content")
-        .select("id, title, content_type, description, tags")
+        .select("id, title, content_type, description, tags, cycle_phases, pregnancy_statuses")
         .eq("is_active", true)
         .in("content_type", mapping.types)
-        .limit(20);
+        .limit(40);
 
       if (contentError || !content) {
         setLoading(false);
         return;
       }
 
-      // Score and filter content based on tag matches
-      const scoredContent = content.map(item => {
+      // Life-stage exclusion tags — exclude content meant for stages the user is NOT in
+      const pregnancyRelatedTags = ['pregnancy', 'prenatal', 'trimester', 'pregnant'];
+      const postpartumRelatedTags = ['postpartum', 'postnatal', 'post-birth', 'fourth-trimester'];
+      const isUserPregnant = pregnancyStatus === 'pregnant' || lifeStage === 'pregnancy';
+      const isUserPostpartum = pregnancyStatus === 'postpartum' || lifeStage === 'postpartum';
+
+      // Filter out content from life stages the user is NOT in
+      const lifeStageFiltered = content.filter(item => {
+        const itemTags = (item.tags || []).map((t: string) => t.toLowerCase());
+        const itemTitle = item.title.toLowerCase();
+        const itemPhases = ((item as any).cycle_phases || []).map((p: string) => p.toLowerCase());
+        const itemPregnancyStatuses = ((item as any).pregnancy_statuses || []).map((p: string) => p.toLowerCase());
+
+        // If user is NOT pregnant, exclude pregnancy-specific content
+        if (!isUserPregnant) {
+          const isPregnancyContent = 
+            pregnancyRelatedTags.some(tag => itemTags.includes(tag)) ||
+            pregnancyRelatedTags.some(tag => itemTitle.includes(tag)) ||
+            itemPregnancyStatuses.includes('pregnant');
+          if (isPregnancyContent && !itemTags.includes('universal')) return false;
+        }
+
+        // If user is NOT postpartum, exclude postpartum-specific content
+        if (!isUserPostpartum) {
+          const isPostpartumContent = 
+            postpartumRelatedTags.some(tag => itemTags.includes(tag)) ||
+            postpartumRelatedTags.some(tag => itemTitle.includes(tag)) ||
+            itemPregnancyStatuses.includes('postpartum');
+          if (isPostpartumContent && !itemTags.includes('universal')) return false;
+        }
+
+        return true;
+      });
+
+      // Score and filter content based on tag matches + life stage relevance
+      const scoredContent = lifeStageFiltered.map(item => {
         let score = 0;
-        const itemTags = item.tags || [];
+        const itemTags = (item.tags || []).map((t: string) => t.toLowerCase());
         mapping.tags.forEach(tag => {
-          if (itemTags.some(t => t.toLowerCase().includes(tag.toLowerCase()))) {
+          if (itemTags.some(t => t.includes(tag.toLowerCase()))) {
             score += 2;
           }
           if (item.title.toLowerCase().includes(tag.toLowerCase())) {
@@ -250,6 +298,18 @@ export function PersonalizedRecommendations() {
             score += 1;
           }
         });
+
+        // Boost score for content matching user's life stage
+        if (lifeStage) {
+          const stageTag = lifeStage.toLowerCase();
+          if (itemTags.some(t => t.includes(stageTag))) {
+            score += 3;
+          }
+          if (itemTags.includes('menopause') && (stageTag.includes('menopause') || stageTag.includes('peri'))) {
+            score += 4;
+          }
+        }
+
         return { ...item, score };
       });
 
@@ -259,9 +319,9 @@ export function PersonalizedRecommendations() {
         .sort((a, b) => b.score - a.score)
         .slice(0, 3);
 
-      // If not enough matches, add some from the right content types
+      // If not enough matches, add some from the right content types (still filtered)
       if (topContent.length < 3) {
-        const remaining = content
+        const remaining = lifeStageFiltered
           .filter(c => !topContent.find(tc => tc.id === c.id))
           .slice(0, 3 - topContent.length);
         topContent.push(...remaining.map(c => ({ ...c, score: 0 })));
