@@ -100,6 +100,64 @@ export default function Admin() {
     is_active: true,
   });
 
+  const personas = [
+    {
+      name: "Menarche Journey",
+      description: "Young user, Menstrual Cycle focus, Islamic Wisdom, Kapha",
+      data: {
+        life_stage: "menstrual_cycle",
+        is_menarche_journey: true,
+        primary_dosha: "kapha",
+        spiritual_preference: "islamic",
+        onboarding_completed: true,
+      }
+    },
+    {
+      name: "Pregnant (Trimester 2)",
+      description: "Pregnancy phase, Holistic focus, Both Spiritualities, Pitta",
+      data: {
+        life_stage: "pregnancy",
+        pregnancy_status: "pregnant",
+        current_trimester: 2,
+        primary_dosha: "pitta",
+        spiritual_preference: "both",
+        onboarding_completed: true,
+      }
+    },
+    {
+      name: "Postpartum (Natural)",
+      description: "Post-delivery recovery, Vata-balancing, Both Spiritualities",
+      data: {
+        life_stage: "postpartum",
+        pregnancy_status: "postpartum",
+        postpartum_delivery_type: "natural",
+        primary_dosha: "vata",
+        spiritual_preference: "both",
+        onboarding_completed: true,
+      }
+    },
+    {
+      name: "Perimenopause",
+      description: "Hormonal shifts, Heat management, Both Spiritualities, Pitta",
+      data: {
+        life_stage: "perimenopause",
+        primary_dosha: "pitta",
+        spiritual_preference: "both",
+        onboarding_completed: true,
+      }
+    },
+    {
+      name: "Menopause",
+      description: "Transition completed, Structural support, Meditation, Vata",
+      data: {
+        life_stage: "menopause",
+        primary_dosha: "vata",
+        spiritual_preference: "meditation",
+        onboarding_completed: true,
+      }
+    }
+  ];
+
   // ── Stats state ──────────────────────────────────────────────────────────
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -520,6 +578,30 @@ export default function Admin() {
     }
   };
 
+  const handleSetPersona = async (userId: string, personaName: string, personaData: any) => {
+    if (!userId) return;
+
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('user_wellness_profiles')
+        .update(personaData)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+
+      toast.success(`Persona set to "${personaName}" for the selected user`);
+      
+      // Optionally refresh the view if needed, or redirect
+      // navigate("/");
+    } catch (error) {
+      console.error('Error setting persona:', error);
+      toast.error('Failed to update persona');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-wellness-beige">
@@ -770,20 +852,55 @@ export default function Admin() {
             </div>
 
             {selectedUserId && (
-              <div className="flex items-center gap-3 p-4 bg-wellness-sage/10 rounded-lg border border-wellness-sage/20">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-wellness-taupe">Reset Test User</p>
-                  <p className="text-xs text-wellness-taupe/70 mt-1">
-                    Clear all data and return user to onboarding state
-                  </p>
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 p-4 bg-wellness-sage/10 rounded-lg border border-wellness-sage/20">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-wellness-taupe">Reset Test User</p>
+                    <p className="text-xs text-wellness-taupe/70 mt-1">
+                      Clear all data and return user to onboarding state
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => handleResetUser(selectedUserId)}
+                    variant="outline"
+                    className="border-wellness-sage text-wellness-sage hover:bg-wellness-sage/10"
+                  >
+                    Reset User
+                  </Button>
                 </div>
-                <Button
-                  onClick={() => handleResetUser(selectedUserId)}
-                  variant="outline"
-                  className="border-wellness-sage text-wellness-sage hover:bg-wellness-sage/10"
-                >
-                  Reset User
-                </Button>
+
+                <div className="space-y-4">
+                  <div className="flex flex-col">
+                    <h3 className="text-lg font-semibold text-wellness-taupe flex items-center gap-2">
+                       <Plus className="w-5 h-5" />
+                       Persona Switcher (Dev Mode)
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Instantly update your profile to test different app states
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {personas.map((persona) => (
+                      <Card key={persona.name} className="border-wellness-taupe/10 hover:border-mumtaz-lilac/30 transition-all cursor-pointer overflow-hidden group">
+                        <CardContent className="p-4 flex flex-col justify-between h-full">
+                          <div>
+                            <h4 className="font-bold text-mumtaz-plum group-hover:text-accent transition-colors">{persona.name}</h4>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                              {persona.description}
+                            </p>
+                          </div>
+                          <Button 
+                            className="w-full mt-4 bg-mumtaz-lilac/20 hover:bg-mumtaz-lilac/40 text-mumtaz-plum border-none text-xs h-8"
+                            onClick={() => handleSetPersona(selectedUserId, persona.name, persona.data)}
+                          >
+                            Switch to this Persona
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>

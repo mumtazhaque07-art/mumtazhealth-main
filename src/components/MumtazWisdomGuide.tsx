@@ -29,6 +29,8 @@ interface UserProfile {
   primaryFocus?: string[];
   pregnancyTrimester?: number;
   spiritualPreference?: string;
+  isMenarcheJourney?: boolean;
+  postpartumDeliveryType?: string;
 }
 
 interface Conversation {
@@ -174,7 +176,7 @@ export function MumtazWisdomGuide() {
 
       const { data: wellnessProfile } = await supabase
         .from("user_wellness_profiles")
-        .select("primary_dosha, secondary_dosha, life_stage, life_phases, primary_focus, current_trimester, spiritual_preference")
+        .select("primary_dosha, secondary_dosha, life_stage, life_phases, primary_focus, current_trimester, spiritual_preference, is_menarche_journey, postpartum_delivery_type")
         .eq("user_id", user.id)
         .single();
 
@@ -187,6 +189,8 @@ export function MumtazWisdomGuide() {
         primaryFocus: wellnessProfile?.primary_focus || undefined,
         pregnancyTrimester: wellnessProfile?.current_trimester || undefined,
         spiritualPreference: wellnessProfile?.spiritual_preference || undefined,
+        isMenarcheJourney: wellnessProfile?.is_menarche_journey || undefined,
+        postpartumDeliveryType: wellnessProfile?.postpartum_delivery_type || undefined,
       });
     } catch (error) {
       console.error("[CHATBOT_UI_ERROR] Error fetching profile:", error);
@@ -378,6 +382,8 @@ export function MumtazWisdomGuide() {
           primaryFocus: userProfile?.primaryFocus,
           pregnancyTrimester: userProfile?.pregnancyTrimester,
           spiritualPreference: userProfile?.spiritualPreference,
+          isMenarcheJourney: userProfile?.isMenarcheJourney,
+          postpartumDeliveryType: userProfile?.postpartumDeliveryType,
         },
       });
 
