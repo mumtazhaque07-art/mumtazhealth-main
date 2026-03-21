@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface DailyRhythmProps {
   lifeStage?: string;
+  fiqhStatus?: string;
 }
 
 interface TimeOfDayGuidance {
@@ -90,7 +91,7 @@ const DAILY_RHYTHMS: TimeOfDayGuidance[] = [
   },
 ];
 
-export function DailyRhythm({ lifeStage }: DailyRhythmProps) {
+export function DailyRhythm({ lifeStage, fiqhStatus }: DailyRhythmProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [userDosha, setUserDosha] = useState<string | null>(null);
 
@@ -135,6 +136,35 @@ export function DailyRhythm({ lifeStage }: DailyRhythmProps) {
 
   const currentBlock = getCurrentTimeBlock();
 
+  const getAyurvedicMeal = () => {
+    if (!userDosha) return "A warm, nourishing bowl of kitchari with seasonal vegetables.";
+    
+    switch (currentBlock) {
+      case 0: // Morning
+        return userDosha === 'vata' ? "Warm stewed apples with cinnamon and ghee." : 
+               userDosha === 'pitta' ? "Cooling coconut porridge with fresh berries." : 
+               "Stimulating ginger tea and a light rye toast.";
+      case 1: // Midday
+        return userDosha === 'vata' ? "Root vegetable stew with basmati rice." : 
+               userDosha === 'pitta' ? "Mung bean soup with cooling cilantro." : 
+               "Spiced lentil dal with plenty of bitter greens.";
+      case 3: // Night
+        return "A light, warm soup or golden milk to prepare for rest.";
+      default:
+        return "A handful of soaked almonds or a warm herbal infusion.";
+    }
+  };
+
+  const getFaithRitual = () => {
+    if (fiqhStatus === 'Hayd') {
+      return "Focus on Dhikr (remembrance) and Tasbih. This is a time for internal reflection over external ritual.";
+    }
+    return currentBlock === 0 ? "Fajr connection & morning Adhkar." :
+           currentBlock === 1 ? "Dhuhr pause & gratitude practice." :
+           currentBlock === 2 ? "Asr grounding & spiritual check-in." :
+           "Maghrib entry & peaceful evening Dua.";
+  };
+
   return (
     <div className="space-y-4">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -155,11 +185,27 @@ export function DailyRhythm({ lifeStage }: DailyRhythmProps) {
         </CollapsibleTrigger>
 
         <CollapsibleContent className="pt-4 space-y-4">
+          {/* Immediate Value: Holistic Anchor */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-wellness-sage/10 border border-wellness-sage/20 shadow-sm">
+              <p className="text-[10px] font-bold text-wellness-sage uppercase tracking-widest mb-1">Meal for Me</p>
+              <p className="text-sm text-wellness-taupe font-medium leading-snug">
+                {getAyurvedicMeal()}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-wellness-lilac/10 border border-wellness-lilac/20 shadow-sm">
+              <p className="text-[10px] font-bold text-wellness-lilac uppercase tracking-widest mb-1">Spiritual Ritual</p>
+              <p className="text-sm text-wellness-taupe font-medium leading-snug">
+                {getFaithRitual()}
+              </p>
+            </div>
+          </div>
+
           {/* Intro */}
-          <div className="p-4 rounded-lg bg-wellness-sage/10 border border-wellness-sage/20">
-            <p className="text-sm text-wellness-taupe/90 italic">
-              Ayurveda teaches that our energy naturally shifts throughout the day. 
-              These are gentle suggestions to help you flow with your body's rhythms.
+          <div className="p-4 rounded-lg bg-wellness-taupe/5 border border-wellness-taupe/10">
+            <p className="text-xs text-wellness-taupe/90 italic leading-relaxed">
+              Ayurveda teaches that our energy naturally shifts with the sun. 
+              These are gentle invitations to find ease in your own rhythm.
             </p>
           </div>
 

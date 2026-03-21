@@ -22,6 +22,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import {
   DropdownMenu,
@@ -44,6 +45,8 @@ import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
 import { SupportPlanModal } from "@/components/SupportPlan";
 import { GentleSignInPrompt } from "@/components/GentleSignInPrompt";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { useFiqhStatus } from "@/hooks/useFiqhStatus";
+import { FiqhCycleStatus } from "@/components/FiqhCycleStatus";
 import { CheckInReminder } from "@/components/CheckInReminder";
 
 interface DailyPractice {
@@ -151,11 +154,24 @@ export default function Tracker() {
   const [menopauseJointPain, setMenopauseJointPain] = useState('');
   const [menopauseDigestion, setMenopauseDigestion] = useState('');
   
+  // Syam tracking state
+  const [missedFasts, setMissedFasts] = useState('');
+  const [fidyaPaid, setFidyaPaid] = useState('');
+  const [syamType, setSyamType] = useState('None');
+  const [syamNotes, setSyamNotes] = useState('');
+  
   // Support Plan modal state
   const [showSupportPlan, setShowSupportPlan] = useState(false);
   const [userDosha, setUserDosha] = useState<string | undefined>();
   
   const navigate = useNavigate();
+
+  // Fiqh Status
+  const { 
+    status: fiqhStatus, 
+    dayOfStatus, 
+    recommendations: fiqhRecommendations 
+  } = useFiqhStatus(user?.id, new Date(selectedDate));
 
   // Sign-in prompt state
   const [showSignInPrompt, setShowSignInPrompt] = useState(false);
@@ -349,7 +365,14 @@ export default function Tracker() {
       setMaghrib(spiritualData.maghrib || false);
       setIsha(spiritualData.isha || false);
       setMantras(spiritualData.mantras || '');
+      setMantras(spiritualData.mantras || '');
       setMeditationMinutes(spiritualData.meditationMinutes || '');
+      
+      // Load Syam data from spiritual_practices JSON
+      setMissedFasts(spiritualData.missedFasts || '');
+      setFidyaPaid(spiritualData.fidyaPaid || '');
+      setSyamType(spiritualData.syamType || 'None');
+      setSyamNotes(spiritualData.syamNotes || '');
     } else {
       setCyclePhase('');
       setTrimester('');
@@ -486,6 +509,11 @@ export default function Tracker() {
           isha: isha,
           mantras: truncateText(mantras, 500),
           meditationMinutes: truncateText(meditationMinutes, 10),
+          // Save Syam data into spiritual_practices JSON
+          missedFasts: missedFasts,
+          fidyaPaid: fidyaPaid,
+          syamType: syamType,
+          syamNotes: truncateText(syamNotes, 500),
         },
       };
       
@@ -611,6 +639,7 @@ export default function Tracker() {
             <TabsList className="flex w-full overflow-x-auto bg-wellness-taupe/10 border border-wellness-taupe/20 h-auto p-1 scrollbar-hide">
               <TabsTrigger value="rhythm" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Daily Rhythm</TabsTrigger>
               <TabsTrigger value="journey" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">My Journey</TabsTrigger>
+              <TabsTrigger value="syam" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Syam</TabsTrigger>
               <TabsTrigger value="wellness" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Wellness Log</TabsTrigger>
               <TabsTrigger value="practices" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Practices</TabsTrigger>
             </TabsList>
@@ -716,6 +745,14 @@ export default function Tracker() {
                     />
                   ) : (
                     <>
+                      <div className="mb-6">
+                        <FiqhCycleStatus 
+                          status={fiqhStatus} 
+                          dayOfStatus={dayOfStatus} 
+                          recommendations={fiqhRecommendations} 
+                        />
+                      </div>
+                      
                       <div>
                         <Label className="text-wellness-taupe font-medium">Current Phase</Label>
                         <Select value={cyclePhase} onValueChange={(value) => {
@@ -772,6 +809,74 @@ export default function Tracker() {
             )}
             
             {lifeStage === 'postpartum' && <PostpartumEducation />}
+          </TabsContent>
+
+          <TabsContent value="syam" className="space-y-6">
+            <Card className="border-wellness-taupe/20 shadow-sm overflow-hidden bg-gradient-to-br from-white to-wellness-sage/5">
+              <CardHeader className="bg-wellness-sage/10 border-b border-wellness-sage/10">
+                <CardTitle className="text-xl text-wellness-taupe flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-wellness-sage" />
+                  Syam (Fasting) Manager
+                </CardTitle>
+                <CardDescription>Track missed fasts and recovery</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-white border border-wellness-sage/20 space-y-2">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Missed Ramadan Fasts</Label>
+                    <div className="flex items-center gap-3">
+                      <Input 
+                        type="number" 
+                        value={missedFasts}
+                        onChange={(e) => setMissedFasts(e.target.value)}
+                        placeholder="0" 
+                        className="w-20 text-center text-lg font-bold" 
+                      />
+                      <span className="text-sm text-wellness-taupe">days to recover</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white border border-wellness-sage/20 space-y-2">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Fidya (Recovery Payment)</Label>
+                    <div className="flex items-center gap-3">
+                      <Input 
+                        type="number" 
+                        value={fidyaPaid}
+                        onChange={(e) => setFidyaPaid(e.target.value)}
+                        placeholder="0" 
+                        className="w-20 text-center text-lg font-bold" 
+                      />
+                      <span className="text-sm text-wellness-taupe">days fulfilled</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-wellness-warm/30 border border-wellness-taupe/10">
+                  <p className="text-sm text-wellness-taupe mb-3 font-medium">Spiritual Intent today:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Nafl (Voluntary)', 'Qada (Recovery)', 'None'].map((type) => (
+                      <Badge 
+                        key={type} 
+                        variant={syamType === type ? 'default' : 'secondary'}
+                        onClick={() => setSyamType(type)}
+                        className={`cursor-pointer py-2 px-4 transition-all ${syamType === type ? 'bg-wellness-sage text-white' : 'hover:bg-wellness-sage/20'}`}
+                      >
+                        {type}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Syam Notes</Label>
+                  <Textarea 
+                    value={syamNotes}
+                    onChange={(e) => setSyamNotes(e.target.value)}
+                    placeholder="Intentions or reflections on your fast..." 
+                    className="bg-white/50 text-sm" 
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="wellness" className="space-y-6">
