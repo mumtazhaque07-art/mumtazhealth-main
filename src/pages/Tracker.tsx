@@ -7,12 +7,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { wellnessEntrySchema, validateInput, truncateText } from "@/lib/validation";
-import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings, Menu } from "lucide-react";
+import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings, Menu, Info, Baby, HelpCircle, Flower2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -236,7 +246,6 @@ export default function Tracker() {
       const due = new Date(dueDate);
       const today = new Date(selectedDate);
       
-      // Standard pregnancy is 280 days (40 weeks) from LMP. Due date is day 280.
       const diffTime = due.getTime() - today.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
@@ -297,7 +306,6 @@ export default function Tracker() {
       setMonthlyReflection(data.monthly_reflection || '');
       setPractices(typeof data.daily_practices === 'object' && data.daily_practices !== null ? data.daily_practices as Record<string, any> : {});
       
-      // Load pregnancy tracking data
       const pregnancyData = typeof data.pregnancy_tracking === 'object' && data.pregnancy_tracking !== null ? data.pregnancy_tracking as Record<string, any> : {};
       setPregnancyNausea(pregnancyData.nausea || '');
       setPregnancyFatigue(pregnancyData.fatigue || '');
@@ -308,7 +316,6 @@ export default function Tracker() {
       setPregnancyBabyMovement(pregnancyData.babyMovement || '');
       setPregnancyNotes(pregnancyData.notes || '');
       
-      // Load postpartum tracking data
       const postpartumData = typeof data.postpartum_tracking === 'object' && data.postpartum_tracking !== null ? data.postpartum_tracking as Record<string, any> : {};
       setPostpartumSleep(postpartumData.sleep || '');
       setPostpartumMood(postpartumData.mood || '');
@@ -317,7 +324,6 @@ export default function Tracker() {
       setPostpartumFeeding(postpartumData.feeding || '');
       setPostpartumNotes(postpartumData.notes || '');
       
-      // Load menopause tracking data
       const menopauseData = typeof data.menopause_tracking === 'object' && data.menopause_tracking !== null ? data.menopause_tracking as Record<string, any> : {};
       setMenopauseHotFlashes(menopauseData.hotFlashes || '');
       setMenopauseNightSweats(menopauseData.nightSweats || '');
@@ -328,17 +334,14 @@ export default function Tracker() {
       setMenopauseJointPain(menopauseData.jointPain || '');
       setMenopauseDigestion(menopauseData.digestion || '');
       
-      // Load yoga practice data
       const yogaData = typeof data.yoga_practice === 'object' && data.yoga_practice !== null ? data.yoga_practice as Record<string, any> : {};
       setYogaStyle(yogaData.style || '');
       setYogaDuration(yogaData.duration || '');
       setYogaPoses(yogaData.poses || '');
       
-      // Load nutrition data
       const nutritionData = typeof data.nutrition_log === 'object' && data.nutrition_log !== null ? data.nutrition_log as Record<string, any> : {};
       setMeals(Array.isArray(nutritionData.meals) ? nutritionData.meals : []);
       
-      // Load spiritual practices data
       const spiritualData = typeof data.spiritual_practices === 'object' && data.spiritual_practices !== null ? data.spiritual_practices as Record<string, any> : {};
       setFajr(spiritualData.fajr || false);
       setDhuhr(spiritualData.dhuhr || false);
@@ -348,7 +351,6 @@ export default function Tracker() {
       setMantras(spiritualData.mantras || '');
       setMeditationMinutes(spiritualData.meditationMinutes || '');
     } else {
-      // Reset form for new date
       setCyclePhase('');
       setTrimester('');
       setPainLevel('');
@@ -398,13 +400,11 @@ export default function Tracker() {
 
   const saveData = async () => {
     if (!user) {
-      // Show gentle sign-in prompt instead of hard redirect
       setShowSignInPrompt(true);
       return;
     }
     
     try {
-      // Validate text inputs before saving
       const validation = validateInput(wellnessEntrySchema, {
         emotional_state: emotionalState || null,
         physical_symptoms: physicalSymptoms || null,
@@ -497,20 +497,17 @@ export default function Tracker() {
       
       if (error) throw error;
       
-      toast.success(`Progress saved for ${selectedDate}!`);
-      // Show the Support Plan modal after saving
+      toast.success(`Progress saved!`);
       setShowSupportPlan(true);
     } catch (error) {
       console.error('Error saving data:', error);
-      toast.error('Error saving data. Please try again.');
+      toast.error('Error saving data.');
     }
   };
 
   const clearData = async () => {
     if (!user) return;
-    if (!window.confirm(`Are you sure you want to clear the data for ${selectedDate}? This cannot be undone.`)) {
-      return;
-    }
+    if (!window.confirm(`Clear data for ${selectedDate}?`)) return;
     
     try {
       const { error } = await supabase
@@ -520,73 +517,41 @@ export default function Tracker() {
         .eq('entry_date', selectedDate);
       
       if (error) throw error;
-      
-      toast.success(`Entry for ${selectedDate} cleared!`);
+      toast.success(`Cleared!`);
       loadData();
     } catch (error) {
       console.error('Error deleting data:', error);
-      toast.error('Error clearing data. Please try again.');
+      toast.error('Error clearing data.');
     }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
   };
 
   const getAdjustedPractices = (): DailyPractice[] => {
     if (!isMenstrual) return DAILY_PRACTICES_BASE;
-    
     return DAILY_PRACTICES_BASE.map(practice => {
       const adjusted = MENSTRUAL_ADJUSTMENTS[practice.id as keyof typeof MENSTRUAL_ADJUSTMENTS];
       return adjusted ? { ...practice, label: adjusted } : practice;
     });
   };
 
-  // Integrate with global loading indicator
   useGlobalLoading(loading);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-wellness-lavender/20 to-background animate-fade-in">
+      <div className="min-h-screen bg-wellness-beige pt-24">
         <Navigation />
-        <div className="max-w-2xl mx-auto p-4 pt-24 space-y-6">
-          {/* Header skeleton */}
-          <Card className="mb-6 bg-wellness-warm border-wellness-taupe/20">
-            <CardHeader className="text-center space-y-4">
-              <div className="h-8 w-64 bg-muted animate-pulse rounded mx-auto" />
-              <div className="flex items-center justify-center gap-4">
-                <div className="h-10 w-40 bg-muted animate-pulse rounded" />
-                <div className="h-9 w-24 bg-muted animate-pulse rounded" />
-              </div>
-            </CardHeader>
-          </Card>
-          
-          {/* Form sections skeleton */}
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-wellness-sage/20">
-              <CardHeader>
-                <div className="h-6 w-48 bg-muted animate-pulse rounded" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="h-10 w-full bg-muted animate-pulse rounded" />
-                <div className="h-10 w-full bg-muted animate-pulse rounded" />
-              </CardContent>
-            </Card>
-          ))}
-          
-          {/* Save button skeleton */}
-          <div className="h-12 w-full bg-muted animate-pulse rounded-lg" />
+        <div className="max-w-2xl mx-auto p-4 space-y-6">
+          <Card className="animate-pulse h-40 bg-wellness-warm" />
+          <Card className="animate-pulse h-20 bg-wellness-warm" />
+          <Card className="animate-pulse h-60 bg-wellness-warm" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-wellness-beige animate-fade-in">
+    <div className="min-h-screen bg-wellness-beige animate-fade-in pb-24 md:pb-0">
       <Navigation />
       
-      {/* Gentle sign-in prompt */}
       <GentleSignInPrompt
         open={showSignInPrompt}
         onClose={() => setShowSignInPrompt(false)}
@@ -594,745 +559,91 @@ export default function Tracker() {
         returnPath="/tracker"
       />
       
-      <div className="max-w-2xl mx-auto p-4 pb-32 pt-24">
-        {/* Header */}
-        <Card className="mb-6 bg-wellness-warm border-wellness-taupe/20 shadow-lg">
-          <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-3xl font-bold text-wellness-taupe">
+      <div className="max-w-2xl mx-auto p-4 pt-24 space-y-6">
+        <Card className="mb-6 bg-wellness-warm border-wellness-taupe/20 shadow-sm">
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-3xl font-bold text-wellness-taupe mb-4">
               {getTrackerTitle()}
             </CardTitle>
-            <div className="flex items-center justify-center gap-4 pt-2">
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-auto border-wellness-taupe/30"
-              />
+            
+            <div className="flex flex-col items-center gap-4">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={`w-[240px] justify-start text-left font-normal border-wellness-taupe/30 bg-white/50 hover:bg-white transition-all`}
+                  >
+                    <Calendar className="mr-2 h-4 w-4 text-wellness-sage" />
+                    {selectedDate ? format(new Date(selectedDate), "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <CalendarComponent
+                    mode="single"
+                    selected={selectedDate ? new Date(selectedDate) : undefined}
+                    onSelect={(date) => date && setSelectedDate(date.toISOString().split('T')[0])}
+                    initialFocus
+                    className="rounded-md border border-wellness-taupe/20 bg-white shadow-xl"
+                  />
+                </PopoverContent>
+              </Popover>
+
               {isAdmin && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/admin")}
-                  className="border-wellness-taupe/30 hidden md:flex"
-                >
-                  <UserCog className="w-4 h-4 mr-2" />
-                  Admin
+                <Button variant="outline" size="sm" asChild className="border-wellness-taupe/30 text-wellness-taupe">
+                  <Link to="/admin"><Settings className="w-4 h-4 mr-2" />Admin</Link>
                 </Button>
               )}
-              
-              <div className="hidden md:flex gap-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/summary")}
-                  className="border-wellness-taupe/30"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Summary
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate("/content")}
-                  className="border-wellness-taupe/30"
-                >
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Library
-                </Button>
-              </div>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-wellness-taupe/30">
-                    <Menu className="w-4 h-4 mr-2" />
-                    Menu
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Your Journey</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/summary")} className="md:hidden">
-                    <BarChart3 className="mr-2 h-4 w-4" />
-                    <span>View Summary</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/content")} className="md:hidden">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    <span>Content Library</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/bookings")}>
-                    <Calendar className="mr-2 h-4 w-4" />
-                    <span>Book Services</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/insights")}>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    <span>AI Insights</span>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  <DropdownMenuLabel>Account</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  {isAdmin && (
-                    <DropdownMenuItem onClick={() => navigate("/admin")} className="md:hidden">
-                      <UserCog className="mr-2 h-4 w-4" />
-                      <span>Admin Dashboard</span>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Free In-App Reminder */}
-        <CheckInReminder />
-
-        {/* Cycle Phase Check-In - Only show for menstrual cycle life stage */}
-        {lifeStage === 'menstrual_cycle' && (
-          <Card className="mb-6 border-wellness-sage/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-wellness-taupe">1. Cycle Phase Check-In</CardTitle>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                This is here to help you understand your body, not to track perfection. 
-                Choose whatever feels right for you today.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {showCycleHelper ? (
-                <CyclePhaseHelper
-                  onPhaseSelected={(phase) => {
-                    setCyclePhase(phase);
-                    setShowCycleHelper(false);
-                  }}
-                  onCancel={() => setShowCycleHelper(false)}
-                />
-              ) : (
-                <>
-                  <div>
-                    <Label className="text-wellness-taupe">How does your body feel today?</Label>
-                    <Select value={cyclePhase} onValueChange={(value) => {
-                      if (value === "not_sure") {
-                        setShowCycleHelper(true);
-                      } else {
-                        setCyclePhase(value);
-                      }
-                    }}>
-                      <SelectTrigger className="mt-2 border-wellness-sage/30">
-                        <SelectValue placeholder="Select your current phase" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Menstrual">Menstrual — resting & releasing</SelectItem>
-                        <SelectItem value="Follicular">Follicular — energy building</SelectItem>
-                        <SelectItem value="Ovulatory">Ovulatory — vibrant & expressive</SelectItem>
-                        <SelectItem value="Luteal">Luteal — winding down</SelectItem>
-                        <SelectItem value="not_sure" className="text-wellness-sage font-medium">
-                          I'm not sure — help me find out
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {cyclePhase && (
-                    <div className="space-y-4">
-                      <div className="p-4 bg-wellness-sage/10 rounded-lg border border-wellness-sage/20">
-                        <p className="text-sm text-wellness-taupe/90 leading-relaxed">
-                          {cyclePhase === "Menstrual" && "A sacred time for rest and gentle self-care. Your body is doing important work — honour what it needs."}
-                          {cyclePhase === "Follicular" && "Energy is often building during this phase. A lovely time for fresh ideas and gentle momentum."}
-                          {cyclePhase === "Ovulatory" && "You may notice feeling more vibrant and connected. A beautiful time for expression and creativity."}
-                          {cyclePhase === "Luteal" && "Energy naturally winds down now. Focus on nourishing yourself and preparing for renewal."}
-                        </p>
-                      </div>
-                      
-                      <CyclePhaseEducation 
-                        selectedPhase={cyclePhase} 
-                        lifeStage={lifeStage} 
-                        isMenarcheJourney={isMenarcheJourney}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {lifeStage === 'pregnancy' && (
-          <Card className="mb-6 bg-wellness-lilac/10 border-wellness-lilac/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-wellness-taupe">1. Your Pregnancy Journey</CardTitle>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {currentWeek !== null ? `You are ${currentWeek} weeks along.` : 'This is here to support you through this beautiful journey.'}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Removed manual dropdown; Week and Trimester are now automatically calculated from Due Date */}
-              {trimester && (
-                <div className="bg-wellness-lilac/5 p-4 rounded-lg border border-wellness-lilac/20">
-                  <p className="font-medium text-wellness-taupe">Current Trimester: {trimester}</p>
-                </div>
-              )}
-              
-              {/* Educational section */}
-              {trimester && <PregnancyEducation trimester={trimester} week={currentWeek} />}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Pregnancy Tracking - Only show for pregnancy life stage */}
-        {lifeStage === 'pregnancy' && (
-          <Card className="mb-6 bg-wellness-pink/20 border-wellness-taupe/30">
-            <CardHeader>
-              <CardTitle className="text-xl">2. Pregnancy Tracking</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Track your daily symptoms and how you're feeling
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Nausea Level:</Label>
-                <Select value={pregnancyNausea} onValueChange={setPregnancyNausea}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="severe">Severe</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Fatigue Level:</Label>
-                <Select value={pregnancyFatigue} onValueChange={setPregnancyFatigue}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low - Feeling energetic</SelectItem>
-                    <SelectItem value="moderate">Moderate - Managing well</SelectItem>
-                    <SelectItem value="high">High - Very tired</SelectItem>
-                    <SelectItem value="extreme">Extreme - Need extra rest</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Sleep Quality:</Label>
-                <Select value={pregnancySleep} onValueChange={setPregnancySleep}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select quality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="excellent">Excellent</SelectItem>
-                    <SelectItem value="good">Good</SelectItem>
-                    <SelectItem value="fair">Fair</SelectItem>
-                    <SelectItem value="poor">Poor</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Mood:</Label>
-                <Select value={pregnancyMood} onValueChange={setPregnancyMood}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How are you feeling?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="happy">Happy & Positive</SelectItem>
-                    <SelectItem value="content">Content & Calm</SelectItem>
-                    <SelectItem value="anxious">Anxious or Worried</SelectItem>
-                    <SelectItem value="emotional">Emotional or Tearful</SelectItem>
-                    <SelectItem value="irritable">Irritable</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Back Pain:</Label>
-                <Select value={pregnancyBackPain} onValueChange={setPregnancyBackPain}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="severe">Severe</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Digestion/Bloating:</Label>
-                <Select value={pregnancyDigestion} onValueChange={setPregnancyDigestion}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How's your digestion?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="good">Good - No issues</SelectItem>
-                    <SelectItem value="slight_bloating">Slight bloating</SelectItem>
-                    <SelectItem value="constipation">Constipation</SelectItem>
-                    <SelectItem value="heartburn">Heartburn</SelectItem>
-                    <SelectItem value="multiple">Multiple issues</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Baby Movement:</Label>
-                <Select value={pregnancyBabyMovement} onValueChange={setPregnancyBabyMovement}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Any movement today?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="not_yet">Not felt yet (early pregnancy)</SelectItem>
-                    <SelectItem value="light">Light flutters</SelectItem>
-                    <SelectItem value="moderate">Moderate movement</SelectItem>
-                    <SelectItem value="active">Very active</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Notes:</Label>
-                <Textarea
-                  value={pregnancyNotes}
-                  onChange={(e) => setPregnancyNotes(e.target.value)}
-                  placeholder="Any other symptoms, concerns, or notes about how you're feeling today..."
-                  className="mt-2 min-h-[100px]"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={saveData}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  onClick={() => {
-                    saveData();
-                    navigate('/');
-                  }}
-                  className="flex-1"
-                  variant="secondary"
-                >
-                  Next
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Postpartum Tracking - Show for all postpartum-related life stages */}
-        {(lifeStage === 'postpartum' || lifeStage === 'postpartum_natural' || lifeStage === 'postpartum_csection' || lifeStage === 'pregnancy_loss' || lifeStage === 'emotional_support') && (
-          <Card className="mb-6 bg-wellness-sage/10 border-wellness-sage/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-wellness-taupe">1. Your Postpartum Recovery</CardTitle>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                This is here to support your healing, not to track perfection. 
-                You are doing an amazing job.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Educational section */}
-              <PostpartumEducation />
-              <PostBirthSupportEducation />
-              <div>
-                <Label>Sleep Quality:</Label>
-                <Select value={postpartumSleep} onValueChange={setPostpartumSleep}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How did you sleep?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="poor">Poor - Very interrupted</SelectItem>
-                    <SelectItem value="fair">Fair - Some sleep</SelectItem>
-                    <SelectItem value="good">Good - Decent rest</SelectItem>
-                    <SelectItem value="excellent">Excellent - Well rested</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Mood:</Label>
-                <Select value={postpartumMood} onValueChange={setPostpartumMood}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How are you feeling emotionally?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="positive">Positive & Happy</SelectItem>
-                    <SelectItem value="content">Content & Calm</SelectItem>
-                    <SelectItem value="overwhelmed">Overwhelmed</SelectItem>
-                    <SelectItem value="anxious">Anxious or Worried</SelectItem>
-                    <SelectItem value="tearful">Tearful or Sad</SelectItem>
-                    <SelectItem value="struggling">Really struggling</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Energy Level:</Label>
-                <Select value={postpartumEnergy} onValueChange={setPostpartumEnergy}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How's your energy?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="very_low">Very Low - Exhausted</SelectItem>
-                    <SelectItem value="low">Low - Need more rest</SelectItem>
-                    <SelectItem value="moderate">Moderate - Managing</SelectItem>
-                    <SelectItem value="good">Good - Feeling better</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Pain/Discomfort:</Label>
-                <Select value={postpartumPain} onValueChange={setPostpartumPain}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Any pain or discomfort?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild - Manageable</SelectItem>
-                    <SelectItem value="moderate">Moderate - Some concern</SelectItem>
-                    <SelectItem value="severe">Severe - Need support</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Feeding Method:</Label>
-                <Select value={postpartumFeeding} onValueChange={setPostpartumFeeding}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How are you feeding baby?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="breastfeeding">Breastfeeding</SelectItem>
-                    <SelectItem value="pumping">Pumping</SelectItem>
-                    <SelectItem value="formula">Formula feeding</SelectItem>
-                    <SelectItem value="combination">Combination</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Notes:</Label>
-                <Textarea
-                  value={postpartumNotes}
-                  onChange={(e) => setPostpartumNotes(e.target.value)}
-                  placeholder="Any other notes about your recovery, concerns, or how you're feeling today..."
-                  className="mt-2 min-h-[100px]"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={saveData}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  onClick={() => {
-                    saveData();
-                    navigate('/');
-                  }}
-                  className="flex-1"
-                  variant="secondary"
-                >
-                  Next
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Menopause Tracking - Only show for perimenopause, menopause, and post-menopause */}
-        {(lifeStage === 'perimenopause' || lifeStage === 'menopause' || lifeStage === 'post_menopause') && (
-          <Card className="mb-6 bg-wellness-lilac/20 border-wellness-lilac/30">
-            <CardHeader>
-              <CardTitle className="text-xl text-wellness-taupe">1. Your Wellness Check-In</CardTitle>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                This is here to help you understand your body, not to track perfection. 
-                Notice what feels true for you today.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Educational expandable section */}
-              <MenopauseEducation lifeStage={lifeStage as 'perimenopause' | 'menopause' | 'post_menopause'} />
-              
-              {/* Body Changing Education - Deep dive into transition phases */}
-              <BodyChangingEducation />
-              
-              <div>
-                <Label>Hot Flashes:</Label>
-                <Select value={menopauseHotFlashes} onValueChange={setMenopauseHotFlashes}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Frequency today?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild - 1-2 times</SelectItem>
-                    <SelectItem value="moderate">Moderate - 3-5 times</SelectItem>
-                    <SelectItem value="severe">Severe - 6+ times</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Night Sweats:</Label>
-                <Select value={menopauseNightSweats} onValueChange={setMenopauseNightSweats}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Did you experience night sweats?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild - Slightly uncomfortable</SelectItem>
-                    <SelectItem value="moderate">Moderate - Woke up once</SelectItem>
-                    <SelectItem value="severe">Severe - Multiple times/changed sheets</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Mood:</Label>
-                <Select value={menopauseMood} onValueChange={setMenopauseMood}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How's your mood today?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="stable">Stable & Positive</SelectItem>
-                    <SelectItem value="content">Content & Calm</SelectItem>
-                    <SelectItem value="irritable">Irritable or Short-tempered</SelectItem>
-                    <SelectItem value="anxious">Anxious or Worried</SelectItem>
-                    <SelectItem value="low">Low or Down</SelectItem>
-                    <SelectItem value="fluctuating">Fluctuating throughout day</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Brain Fog:</Label>
-                <Select value={menopauseBrainFog} onValueChange={setMenopauseBrainFog}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Mental clarity level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clear">Clear - Sharp focus</SelectItem>
-                    <SelectItem value="mild">Mild - Slight forgetfulness</SelectItem>
-                    <SelectItem value="moderate">Moderate - Difficulty concentrating</SelectItem>
-                    <SelectItem value="severe">Severe - Hard to focus/remember</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Energy Level:</Label>
-                <Select value={menopauseEnergy} onValueChange={setMenopauseEnergy}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How's your energy?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">High - Feeling energetic</SelectItem>
-                    <SelectItem value="moderate">Moderate - Steady energy</SelectItem>
-                    <SelectItem value="low">Low - Feeling tired</SelectItem>
-                    <SelectItem value="depleted">Depleted - Very fatigued</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Sleep Quality:</Label>
-                <Select value={menopauseSleep} onValueChange={setMenopauseSleep}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How did you sleep?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="excellent">Excellent - Restful sleep</SelectItem>
-                    <SelectItem value="good">Good - Slept well</SelectItem>
-                    <SelectItem value="fair">Fair - Some interruptions</SelectItem>
-                    <SelectItem value="poor">Poor - Restless/difficult</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Joint Pain:</Label>
-                <Select value={menopauseJointPain} onValueChange={setMenopauseJointPain}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Any joint pain?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="mild">Mild - Slight stiffness</SelectItem>
-                    <SelectItem value="moderate">Moderate - Noticeable discomfort</SelectItem>
-                    <SelectItem value="severe">Severe - Limiting movement</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label>Digestion/Bloating:</Label>
-                <Select value={menopauseDigestion} onValueChange={setMenopauseDigestion}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="How's your digestion?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="good">Good - No issues</SelectItem>
-                    <SelectItem value="bloating">Bloating</SelectItem>
-                    <SelectItem value="constipation">Constipation</SelectItem>
-                    <SelectItem value="sensitive">Sensitive stomach</SelectItem>
-                    <SelectItem value="multiple">Multiple issues</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={saveData}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  onClick={() => {
-                    saveData();
-                    navigate('/');
-                  }}
-                  className="flex-1"
-                  variant="secondary"
-                >
-                  Next
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Red Day Protocol */}
-        {isMenstrual && lifeStage === 'menstrual_cycle' && (
-          <Card className="mb-6 bg-wellness-pink/30 border-wellness-taupe/30">
-            <CardHeader>
-              <CardTitle className="text-xl">Sacred Day 1 Protocol (Maximum Rest)</CardTitle>
-              <p className="text-sm text-red-700 font-medium">
-                Vata is highest now. Your only job is **warmth and rest**.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Pain/Cramp Level (1-10):</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={painLevel}
-                  onChange={(e) => setPainLevel(e.target.value)}
-                  placeholder="Record physical intensity"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label>Emotional Grief/Sadness Score (1-10):</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={emotionalScore}
-                  onChange={(e) => setEmotionalScore(e.target.value)}
-                  placeholder="Record emotional intensity"
-                  className="mt-2"
-                />
-              </div>
-              <div>
-                <Label>Spiritual Anchor Today:</Label>
-                <Select value={spiritualAnchor} onValueChange={setSpiritualAnchor}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Istighfar">Istighfar (Seeking Forgiveness)</SelectItem>
-                    <SelectItem value="Tawakkul-Dhikr">Tawakkul Dhikr (Ya Rahman, Ya Raheem)</SelectItem>
-                    <SelectItem value="None-Quiet">None, quiet reflection only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  onClick={saveData}
-                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  onClick={() => {
-                    saveData();
-                    navigate('/');
-                  }}
-                  className="flex-1"
-                  variant="secondary"
-                >
-                  Next
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Daily Rhythm Section - Show for all life stages */}
-        <Card className="mb-6 bg-gradient-to-br from-wellness-lilac/5 to-wellness-sage/5 border-wellness-lilac/15">
-          <CardHeader>
-            <CardTitle className="text-xl text-wellness-taupe flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-wellness-lilac" />
-              Daily Rhythm
-            </CardTitle>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Ayurvedic wisdom for flowing with your body's natural rhythms throughout the day.
+        <Card className="mb-6 border-wellness-sage/30 bg-wellness-sage/5">
+          <CardContent className="py-3 flex items-start gap-3">
+            <Info className="h-5 w-5 text-wellness-sage shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <strong>Practitioner's Guidance:</strong> This tracker provides wellness suggestions to help you flow with your natural rhythms. It is not medical advice.
             </p>
-          </CardHeader>
-          <CardContent>
-            <DailyRhythm lifeStage={lifeStage} />
           </CardContent>
         </Card>
 
-        {/* Daily Practices - Show for menstrual cycle tracking */}
-        {lifeStage === 'menstrual_cycle' && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl">2. Daily Dinacharya & Practices</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {getAdjustedPractices().map((practice) => (
-                <div key={practice.id} className="flex items-start gap-4 p-3 bg-wellness-warm/50 rounded-lg">
-                  <div className="flex-1">
-                    <Label className="text-sm font-medium">{practice.label}</Label>
-                    <div className="flex gap-2 mt-2">
+        <Tabs defaultValue="rhythm" className="space-y-6">
+          <div className="sticky top-20 z-10 bg-wellness-beige/80 backdrop-blur-md py-4 -mx-4 px-4">
+            <TabsList className="flex w-full overflow-x-auto bg-wellness-taupe/10 border border-wellness-taupe/20 h-auto p-1 scrollbar-hide">
+              <TabsTrigger value="rhythm" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Daily Rhythm</TabsTrigger>
+              <TabsTrigger value="journey" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">My Journey</TabsTrigger>
+              <TabsTrigger value="wellness" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Wellness Log</TabsTrigger>
+              <TabsTrigger value="practices" className="flex-1 px-4 py-2.5 data-[state=active]:bg-wellness-warm text-xs sm:text-sm">Practices</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="rhythm" className="space-y-6">
+            <DailyRhythm lifeStage={lifeStage} />
+            
+            <Card className="border-wellness-taupe/20 shadow-sm overflow-hidden">
+              <CardHeader className="bg-wellness-warm/30 border-b border-wellness-taupe/10">
+                <CardTitle className="text-xl text-wellness-taupe flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-wellness-sage" />
+                  Daily Dinacharya
+                </CardTitle>
+                <CardDescription>Flow with your body's natural clock</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-4">
+                {getAdjustedPractices().map((practice) => (
+                  <div key={practice.id} className="flex flex-col gap-2 p-3 bg-wellness-warm/20 rounded-lg border border-wellness-taupe/5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-wellness-taupe">{practice.label}</Label>
                       {practice.type === 'checkbox' && (
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={practices[practice.id]?.status || false}
-                          onChange={(e) => setPractices({
+                          onCheckedChange={(checked) => setPractices({
                             ...practices,
-                            [practice.id]: { ...practices[practice.id], status: e.target.checked }
+                            [practice.id]: { ...practices[practice.id], status: checked }
                           })}
-                          className="w-5 h-5"
                         />
                       )}
+                    </div>
+                    
+                    <div className="flex gap-2">
                       {(practice.type === 'time' || practice.type === 'checkbox') && (
                         <Input
                           type="time"
@@ -1341,7 +652,7 @@ export default function Tracker() {
                             ...practices,
                             [practice.id]: { ...practices[practice.id], detail: e.target.value }
                           })}
-                          className="w-32 text-xs"
+                          className="w-full sm:w-32 bg-white/50 text-xs"
                         />
                       )}
                       {practice.type === 'number' && (
@@ -1352,8 +663,8 @@ export default function Tracker() {
                             ...practices,
                             [practice.id]: { ...practices[practice.id], detail: e.target.value }
                           })}
-                          placeholder="Hours"
-                          className="w-24 text-xs"
+                          placeholder="Amount"
+                          className="w-full sm:w-32 bg-white/50 text-xs"
                         />
                       )}
                       {practice.type === 'text' && (
@@ -1364,137 +675,203 @@ export default function Tracker() {
                             ...practices,
                             [practice.id]: { ...practices[practice.id], detail: e.target.value }
                           })}
-                          placeholder="Details"
-                          className="flex-1 text-xs"
+                          placeholder="Details..."
+                          className="flex-1 bg-white/50 text-xs"
                         />
                       )}
-                      <Input
-                        type="text"
-                        value={practices[practice.id]?.notes || ''}
-                        onChange={(e) => setPractices({
-                          ...practices,
-                          [practice.id]: { ...practices[practice.id], notes: e.target.value }
-                        })}
-                        placeholder="Feeling Check"
-                        className="flex-1 text-xs"
-                      />
                     </div>
+                    <Input
+                      type="text"
+                      value={practices[practice.id]?.notes || ''}
+                      onChange={(e) => setPractices({
+                        ...practices,
+                        [practice.id]: { ...practices[practice.id], notes: e.target.value }
+                      })}
+                      placeholder="Note how this felt..."
+                      className="w-full bg-white/50 text-[10px] h-8 italic border-none"
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="journey" className="space-y-6">
+            {lifeStage === 'menstrual_cycle' && (
+              <Card className="border-wellness-sage/20 shadow-sm overflow-hidden">
+                <CardHeader className="bg-wellness-sage/5 border-b border-wellness-sage/10">
+                  <CardTitle className="text-xl text-wellness-taupe flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-wellness-sage" />
+                    Cycle Phase Check-In
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  {showCycleHelper ? (
+                    <CyclePhaseHelper
+                      onPhaseSelected={(phase) => {
+                        setCyclePhase(phase);
+                        setShowCycleHelper(false);
+                      }}
+                      onCancel={() => setShowCycleHelper(false)}
+                    />
+                  ) : (
+                    <>
+                      <div>
+                        <Label className="text-wellness-taupe font-medium">Current Phase</Label>
+                        <Select value={cyclePhase} onValueChange={(value) => {
+                          if (value === "not_sure") setShowCycleHelper(true);
+                          else setCyclePhase(value);
+                        }}>
+                          <SelectTrigger className="mt-2 border-wellness-sage/30 bg-white/50">
+                            <SelectValue placeholder="Select phase" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Menstrual">Menstrual</SelectItem>
+                            <SelectItem value="Follicular">Follicular</SelectItem>
+                            <SelectItem value="Ovulatory">Ovulatory</SelectItem>
+                            <SelectItem value="Luteal">Luteal</SelectItem>
+                            <SelectItem value="not_sure">Not sure</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {cyclePhase && (
+                        <CyclePhaseEducation 
+                          selectedPhase={cyclePhase} 
+                          lifeStage={lifeStage} 
+                          isMenarcheJourney={isMenarcheJourney}
+                        />
+                      )}
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {lifeStage === 'pregnancy' && (
+              <Card className="bg-wellness-lilac/5 border-wellness-lilac/20 shadow-sm overflow-hidden">
+                <CardHeader className="bg-wellness-lilac/10 border-b border-wellness-lilac/10">
+                  <CardTitle className="text-xl text-wellness-taupe flex items-center gap-2">
+                    <Baby className="h-5 w-5 text-wellness-lilac" />
+                    Pregnancy Progress
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                   {currentWeek !== null && (
+                    <div className="bg-wellness-lilac/10 p-4 rounded-lg border border-wellness-lilac/20">
+                      <p className="font-semibold text-wellness-taupe text-sm">Week {currentWeek}</p>
+                    </div>
+                  )}
+                  {trimester && <PregnancyEducation trimester={trimester} week={currentWeek} />}
+                </CardContent>
+              </Card>
+            )}
+
+            {(lifeStage === 'perimenopause' || lifeStage === 'menopause' || lifeStage === 'post_menopause') && (
+              <MenopauseEducation lifeStage={lifeStage as any} />
+            )}
+            
+            {lifeStage === 'postpartum' && <PostpartumEducation />}
+          </TabsContent>
+
+          <TabsContent value="wellness" className="space-y-6">
+            <Card className="border-wellness-taupe/20 shadow-sm">
+              <CardHeader><CardTitle className="text-xl text-wellness-taupe">Holistic Wellbeing</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs">Emotional Score (1-10)</Label>
+                    <Input type="number" min="1" max="10" value={emotionalScore} onChange={(e) => setEmotionalScore(e.target.value)} className="bg-white/50" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs">Physical Comfort (1-10)</Label>
+                    <Input type="number" min="1" max="10" value={painLevel} onChange={(e) => setPainLevel(e.target.value)} className="bg-white/50" />
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Label className="text-xs">Vata Energy Crash?</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-wellness-sage" /></TooltipTrigger>
+                        <TooltipContent><p className="max-w-xs text-xs">Vata crash: sudden depletion or anxiety.</p></TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Select value={vataCrash} onValueChange={setVataCrash}>
+                    <SelectTrigger className="bg-white/50"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="No">No</SelectItem>
+                      <SelectItem value="Mild">Mild</SelectItem>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-xs">Daily Reflections</Label>
+                  <Textarea value={emotionalState} onChange={(e) => setEmotionalState(e.target.value)} placeholder="Feelings..." className="min-h-[100px] bg-white/50 text-sm" />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="practices" className="space-y-6">
+             <Card className="border-wellness-taupe/20 shadow-sm overflow-hidden text-sm">
+                <CardHeader className="bg-wellness-taupe/5 border-b border-wellness-taupe/10">
+                  <CardTitle className="text-lg text-wellness-taupe">Spiritual Anchor</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-6">
+                  <div className="grid grid-cols-5 gap-2">
+                    {['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((p) => {
+                      const key = p.toLowerCase() as any;
+                      const val = { fajr, dhuhr, asr, maghrib, isha }[key];
+                      const setters = { fajr: setFajr, dhuhr: setDhuhr, asr: setAsr, maghrib: setMaghrib, isha: setIsha } as any;
+                      return (
+                        <button key={p} onClick={() => setters[key](!val)} className={`flex flex-col items-center gap-1 p-2 rounded border ${val ? 'bg-wellness-sage/20 border-wellness-sage' : 'bg-white/50'}`}>
+                          <div className={`h-2 w-2 rounded-full ${val ? 'bg-wellness-sage' : 'bg-gray-200'}`} />
+                          <span className="text-[10px]">{p}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <Textarea value={mantras} onChange={(e) => setMantras(e.target.value)} placeholder="Dhikr..." className="bg-white/50" />
+                </CardContent>
+             </Card>
+
+             <Card className="border-wellness-taupe/20 shadow-sm">
+                <CardHeader><CardTitle className="text-xl text-wellness-taupe">Physical Practice</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <Input value={yogaStyle} onChange={(e) => setYogaStyle(e.target.value)} placeholder="Style" className="bg-white/50" />
+                  <Input value={yogaDuration} onChange={(e) => setYogaDuration(e.target.value)} placeholder="Duration" className="bg-white/50" />
+                  <Textarea value={yogaPoses} onChange={(e) => setYogaPoses(e.target.value)} placeholder="Notes..." className="bg-white/50" />
+                </CardContent>
+             </Card>
+          </TabsContent>
+        </Tabs>
+
+        {user && (
+          <SupportPlanModal
+            open={showSupportPlan}
+            onOpenChange={setShowSupportPlan}
+            userId={user.id}
+            entryDate={selectedDate}
+            lifeStage={lifeStage}
+            symptoms={[emotionalState, physicalSymptoms, vataCrash === 'Yes' ? 'Vata Crash' : ''].filter(Boolean)}
+            dosha={userDosha}
+          />
         )}
 
-        {/* Symptom & Tweak Log - Show for menstrual cycle tracking */}
-        {lifeStage === 'menstrual_cycle' && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl">3. Symptom & Tweak Log</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Emotional State (Anxiety, Calm, Irritable):</Label>
-              <Textarea
-                value={emotionalState}
-                onChange={(e) => setEmotionalState(e.target.value)}
-                placeholder="Describe your dominant feelings"
-                className="mt-2"
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label>Physical Symptoms (Dry skin, bloat, heat, pain):</Label>
-              <Textarea
-                value={physicalSymptoms}
-                onChange={(e) => setPhysicalSymptoms(e.target.value)}
-                placeholder="Record physical signs of Vata/Pitta imbalance"
-                className="mt-2"
-                rows={2}
-              />
-            </div>
-            <div>
-              <Label>Did the 'Vata Crash' Occur?</Label>
-              <Select value={vataCrash} onValueChange={setVataCrash}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="No">No</SelectItem>
-                  <SelectItem value="Mild">Mild</SelectItem>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Tweak Plan (What to change next week):</Label>
-              <Textarea
-                value={tweakPlan}
-                onChange={(e) => setTweakPlan(e.target.value)}
-                placeholder="What worked? What needs adjustment?"
-                className="mt-2"
-                rows={2}
-              />
-            </div>
-          </CardContent>
-        </Card>
-        )}
+        <AppCompanionDisclaimer variant="subtle" className="pt-8 pb-32 text-center" />
+      </div>
 
-        {/* Monthly Reflection - Show for menstrual cycle tracking */}
-        {lifeStage === 'menstrual_cycle' && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="text-xl">4. Monthly Reflection</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea
-              value={monthlyReflection}
-              onChange={(e) => setMonthlyReflection(e.target.value)}
-              placeholder="* What was the most successful Vata-pacifying action this month? * Which phase was the most challenging? * What is ONE new Dinacharya item to add next month?"
-              rows={4}
-            />
-          </CardContent>
-        </Card>
-        )}
-
-        {/* Companion Disclaimer */}
-        <AppCompanionDisclaimer variant="subtle" className="mt-8 mb-24 text-center" />
-
-        {/* Fixed Footer */}
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t shadow-2xl p-4">
-          <div className="max-w-2xl mx-auto flex gap-3">
-            <Button
-              onClick={saveData}
-              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md font-semibold"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save Today's Data
-            </Button>
-            <Button
-              onClick={clearData}
-              variant="destructive"
-              className="w-1/4"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Clear
-            </Button>
-          </div>
+      <div className="fixed bottom-0 inset-x-0 p-4 bg-background/80 backdrop-blur-lg border-t z-30 flex justify-center">
+        <div className="max-w-2xl w-full flex gap-3">
+          <Button variant="ghost" className="flex-1 h-12" onClick={clearData}><Trash2 className="w-4 h-4 mr-2" />Clear</Button>
+          <Button className="flex-[2] h-12 bg-wellness-sage hover:bg-wellness-sage/90 text-white font-bold" onClick={saveData}><Save className="w-5 h-5 mr-2" />Save</Button>
         </div>
       </div>
-      
-      {/* Support Plan Modal */}
-      {user && (
-        <SupportPlanModal
-          open={showSupportPlan}
-          onOpenChange={setShowSupportPlan}
-          userId={user.id}
-          entryDate={selectedDate}
-          lifeStage={lifeStage}
-          symptoms={[emotionalState, physicalSymptoms, vataCrash].filter(Boolean)}
-          dosha={userDosha}
-        />
-      )}
     </div>
   );
 }

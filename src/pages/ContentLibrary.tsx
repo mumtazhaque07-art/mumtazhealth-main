@@ -87,6 +87,7 @@ import { trackRecentActivity } from "@/components/RecentlyViewed";
 import { usePregnancySafeMode } from "@/hooks/usePregnancySafeMode";
 import { PregnancySafetyIndicator, PregnancySafetyBadge, getContentPregnancySafety } from "@/components/PregnancySafetyIndicator";
 import { TrimesterPoseRecommendations } from "@/components/TrimesterPoseRecommendations";
+import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 interface WellnessContent {
