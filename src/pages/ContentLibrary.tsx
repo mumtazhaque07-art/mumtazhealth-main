@@ -76,6 +76,7 @@ import fishPoseLegsUp from "@/assets/poses/fish-pose-legs-up.jpeg";
 import forearmReclinedHero from "@/assets/poses/forearm-reclined-hero.jpeg";
 import compassPose from "@/assets/poses/compass-pose.jpeg";
 import revolvedHeadToKnee from "@/assets/poses/revolved-head-to-knee.jpeg";
+import legsUpTheWall from "@/assets/poses/legs-up-the-wall.png";
 import { Navigation } from "@/components/Navigation";
 import { ContentGridSkeleton } from "@/components/ContentSkeleton";
 import { DailyReminderButton } from "@/components/DailyReminderButton";
@@ -920,6 +921,7 @@ const ContentLibrary = () => {
     '/src/assets/poses/forearm-reclined-hero.jpeg': forearmReclinedHero,
     '/src/assets/poses/compass-pose.jpeg': compassPose,
     '/src/assets/poses/revolved-head-to-knee.jpeg': revolvedHeadToKnee,
+    '/src/assets/poses/legs-up-the-wall.png': legsUpTheWall,
   };
 
   const resolveImageUrl = (imageUrl: string | null | undefined): string | null => {
@@ -956,7 +958,7 @@ const ContentLibrary = () => {
     // Title-specific overrides for known mismatches
     // "Legs Up the Wall" should show a restorative wall pose, not bridge
     if (tags?.some(tag => ['legs-up-wall', 'viparita-karani'].includes(tag))) {
-      return forearmReclinedHero; // Closest match for restorative inversions
+      return legsUpTheWall;
     }
     if (tags?.some(tag => ['backbend', 'spine', 'camel'].includes(tag))) {
       return camelPose;
