@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown } from "lucide-react";
+import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -859,6 +859,7 @@ const ContentLibrary = () => {
     setSelectedMobility("all");
     setSelectedConcern("all");
     setSelectedCompletion("all");
+    setActiveQuickFilters(new Set());
   };
 
   const getContentIcon = (type: string) => {
@@ -1062,6 +1063,11 @@ const ContentLibrary = () => {
   };
 
   const isContentUnlocked = (item: WellnessContent) => {
+    // For now, allow all content to be visible for the preview/discovery phase
+    // This allows you to review the full flow and content architecture
+    return true;
+    
+    /* 
     if (!user) return false;
     
     // Check tier requirement
@@ -1079,6 +1085,7 @@ const ContentLibrary = () => {
     }
 
     return true;
+    */
   };
 
   // Check if animated instructional video is available (all tiers can view animations)
@@ -1149,10 +1156,35 @@ const ContentLibrary = () => {
             </Button>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Wellness Library</h1>
-              <p className="text-muted-foreground">Discover personalized wellness content</p>
+              <p className="text-muted-foreground italic">Personalised advice & holistic recommendations</p>
             </div>
           </div>
+          <Button 
+            variant="outline" 
+            className="hidden md:flex items-center gap-2 border-primary/40 hover:bg-primary/5"
+            onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Book a Consultation
+          </Button>
         </div>
+
+        {/* Global Medical Disclaimer */}
+        <Card className="mb-8 border-wellness-sage/30 bg-wellness-sage/5">
+          <CardContent className="py-4 flex items-center gap-3">
+            <Info className="h-5 w-5 text-wellness-sage shrink-0" />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              This library provides <strong>general wellbeing and lifestyle advice only</strong>. It is not medical advice and does not replace the guidance of a healthcare professional. Always consult your doctor for medical concerns. You can also book a 1-to-1 session for personalised support.
+            </p>
+            <Button 
+              variant="link" 
+              className="text-wellness-sage p-0 h-auto font-semibold ml-auto hidden sm:block"
+              onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+            >
+              Book Now
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Dosha Legend Guide */}
         <TooltipProvider>
@@ -1375,12 +1407,16 @@ const ContentLibrary = () => {
         )}
 
         {/* Category Tabs */}
-        <Tabs defaultValue="all" className="w-full">
+        <Tabs defaultValue="for-you" className="w-full">
           <div className="mb-6 relative">
             {/* Scroll hint gradient on right */}
             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 md:hidden" />
             <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
               <TabsList className="inline-flex w-max h-auto gap-1 p-1.5 bg-muted/50 rounded-lg">
+                <TabsTrigger value="for-you" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Sparkles className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  For You
+                </TabsTrigger>
                 <TabsTrigger value="all" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
                   <BookOpen className="h-4 w-4 mr-1.5 flex-shrink-0" />
                   All
@@ -1420,6 +1456,68 @@ const ContentLibrary = () => {
               </TabsList>
             </div>
           </div>
+
+          <TabsContent value="for-you" className="space-y-6">
+            <Card className="bg-gradient-to-br from-wellness-lilac-light/40 via-background to-wellness-sage-light/40 border-wellness-lilac/20">
+              <CardHeader className="pb-3 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">Specially for you</CardTitle>
+                    <CardDescription className="text-sm">
+                      Based on your {userPrimaryDosha ? userPrimaryDosha.toUpperCase() : ''} nature and preferences
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(getRecommendedContent().length > 0 ? getRecommendedContent() : content.slice(0, 3)).map((item) => {
+                      const isLocked = !isContentUnlocked(item);
+                      return (
+                        <Card 
+                          key={item.id} 
+                          className="flex flex-row overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border-none shadow-sm md:flex-col"
+                          onClick={() => openContentDetail(item)}
+                        >
+                          <div className="w-1/3 aspect-[4/5] sm:aspect-video flex-shrink-0 md:w-full md:aspect-video relative overflow-hidden bg-muted">
+                            <img 
+                              src={getContentImage(item.content_type, item.tags, item.image_url)}
+                              alt={item.title}
+                              className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : 'group-hover:scale-110 duration-500'}`}
+                            />
+                          </div>
+                          <div className="flex-1 p-3 md:p-4 flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-[10px] sm:text-xs py-0 h-5 border-primary/30 text-primary uppercase font-bold tracking-tighter">
+                                        {item.recommendationReason}
+                                    </Badge>
+                                </div>
+                              <h3 className="font-bold text-sm sm:text-base line-clamp-1 text-foreground leading-tight">
+                                {item.title}
+                              </h3>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-1 sm:hidden">
+                                {item.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between mt-2">
+                                <div className="flex items-center gap-1.5">
+                                    {getContentIcon(item.content_type)}
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase">{item.duration_minutes} min</span>
+                                </div>
+                                <Button size="sm" variant="ghost" className="h-7 px-2 text-primary text-xs">View</Button>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="all" className="space-y-6">
             {/* Recommended for You Section */}
@@ -1557,35 +1655,40 @@ const ContentLibrary = () => {
 
             {/* Filters */}
             <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <button 
-                    className="flex items-center gap-2 md:cursor-default"
-                    onClick={() => setFiltersExpanded(!filtersExpanded)}
-                  >
-                    <Filter className="h-5 w-5" />
-                    <CardTitle className="text-lg">Filter Content</CardTitle>
-                    {/* Active filter count badge */}
-                    {(() => {
-                      const activeCount = [
-                        selectedCategory !== "all",
-                        selectedMobility !== "all",
-                        selectedLifePhase !== "all",
-                        selectedDosha !== "all",
-                        selectedConcern !== "all",
-                        selectedCompletion !== "all"
-                      ].filter(Boolean).length;
-                      return activeCount > 0 ? (
-                        <Badge variant="default" className="h-5 w-5 p-0 flex items-center justify-center text-xs rounded-full">
-                          {activeCount}
+              <CardHeader className="pb-3 px-4">
+                <div className="flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide">
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={() => setFiltersExpanded(!filtersExpanded)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 border-primary/20 hover:bg-primary/10 whitespace-nowrap"
+                    >
+                      <Filter className="h-4 w-4" />
+                      Filter
+                      {activeQuickFilters.size > 0 && (
+                        <Badge variant="secondary" className="ml-1 px-1 h-5 min-w-[20px] bg-primary/20">
+                          {activeQuickFilters.size}
                         </Badge>
-                      ) : null;
-                    })()}
-                    <ChevronDown className={`h-4 w-4 md:hidden transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`} />
-                  </button>
-                  <Button variant="ghost" size="sm" onClick={clearFilters}>
-                    Clear All
-                  </Button>
+                      )}
+                    </Button>
+                    
+                    {(searchQuery || selectedCategory !== "all" || selectedDosha !== "all" || selectedLifePhase !== "all" || selectedMobility !== "all" || selectedConcern !== "all" || selectedCompletion !== "all" || activeQuickFilters.size > 0) && (
+                      <Button 
+                        onClick={clearFilters}
+                        variant="ghost" 
+                        size="sm"
+                        className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Clear All
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 md:hidden">
+                    <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`} />
+                  </div>
                 </div>
               </CardHeader>
               
@@ -1749,9 +1852,9 @@ const ContentLibrary = () => {
             const isLocked = !isContentUnlocked(item);
             
             return (
-              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
+              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative flex flex-row h-32 sm:h-auto sm:flex-col">
                 {/* Content Image with Lock Overlay */}
-                <div className="h-48 overflow-hidden bg-muted relative">
+                <div className="w-32 sm:w-full sm:h-48 shrink-0 overflow-hidden bg-muted relative">
                   <img 
                     src={getContentImage(item.content_type, item.tags, item.image_url)}
                     alt={item.title}
@@ -1788,37 +1891,30 @@ const ContentLibrary = () => {
                   )}
                 </div>
                 
-                <CardHeader className="pb-2 sm:pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2 flex-1 min-w-0">
-                      <div className="shrink-0 mt-0.5">{getContentIcon(item.content_type)}</div>
-                      <CardTitle className="text-base sm:text-lg leading-snug break-words hyphens-auto">
-                        {item.title}
-                      </CardTitle>
+                <CardHeader className="p-3 sm:pb-3 flex-1 min-w-0 flex flex-col justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2 flex-1 min-w-0">
+                        <div className="shrink-0 mt-0.5">{getContentIcon(item.content_type)}</div>
+                        <CardTitle className="text-sm sm:text-lg font-bold leading-tight line-clamp-2">
+                          {item.title}
+                        </CardTitle>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                      {user && completedContentIds.has(item.id) && (
-                        <Badge variant="default" className="bg-green-600 hover:bg-green-700 h-6 px-1.5">
-                          <CheckCircle2 className="h-3 w-3" />
-                        </Badge>
-                      )}
-                      <Button
-                        variant={savedContentIds.has(item.id) ? "default" : "outline"}
-                        size="sm"
-                        className={`text-xs h-7 sm:h-8 px-2 sm:px-3 shrink-0 ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
-                        onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
-                      >
-                        <Heart className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
-                        <span className="hidden xs:inline ml-1">{savedContentIds.has(item.id) ? 'Saved' : 'Save'}</span>
-                      </Button>
-                    </div>
+                    <CardDescription className="text-[10px] sm:text-sm line-clamp-1 sm:line-clamp-2">
+                      {isLocked && item.preview_content ? item.preview_content : item.description}
+                    </CardDescription>
                   </div>
-                  <CardDescription className="text-xs sm:text-sm leading-relaxed mt-1.5 sm:mt-2">
-                    {isLocked && item.preview_content ? item.preview_content : item.description}
-                  </CardDescription>
+                  
+                  <div className="flex items-center gap-2 mt-auto">
+                    <Badge variant="secondary" className="text-[9px] sm:text-xs px-1.5 py-0 capitalize">
+                      {item.content_type}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{item.duration_minutes} min</span>
+                  </div>
                 </CardHeader>
                 
-                <CardContent>
+                <CardContent className="hidden sm:block">
                   <div className="space-y-3 mb-4">
                     {/* Dosha Icons */}
                     {item.doshas && item.doshas.length > 0 && (
@@ -2940,6 +3036,44 @@ const ContentLibrary = () => {
                           : (selectedContent.preview_content || selectedContent.description || 'Unlock to see full content...')
                         }
                       </p>
+                    </div>
+
+                    <div className="pt-6 border-t border-border">
+                      <h3 className="font-semibold mb-3 flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        Practitioner's Guidance
+                      </h3>
+                      <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {selectedContent.description}
+                        </p>
+                        <div className="mt-4 pt-4 border-t border-primary/10 flex flex-wrap gap-4">
+                          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                            Alignment: {selectedContent.primary_dosha ? selectedContent.primary_dosha.charAt(0).toUpperCase() + selectedContent.primary_dosha.slice(1) : 'Tridoshic'}
+                          </div>
+                          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+                            Phase: {selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'General Wellbeing'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-wellness-sage/10 p-4 rounded-lg border border-wellness-sage/20 space-y-3">
+                      <h4 className="text-sm font-semibold text-wellness-sage flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        Want Personalised Advice?
+                      </h4>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        Every woman's journey is unique. For a tailored plan that maps specifically to your current phase, dosha, and health goals, consider a 1-to-1 consultation.
+                      </p>
+                      <Button 
+                        className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white"
+                        onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+                      >
+                        Book a Consultation with Mumtaz
+                      </Button>
                     </div>
 
                     {/* Locked Content Overlay for Text */}

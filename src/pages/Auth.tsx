@@ -128,6 +128,27 @@ function CredibilityPanel() {
   );
 }
 
+function MobileCredibilityStrip() {
+  return (
+    <div className="lg:hidden w-full flex items-center justify-center gap-2 sm:gap-4 py-4 bg-white/40 backdrop-blur-md border-b border-mumtaz-plum/5 mb-6 -mt-8">
+      <div className="flex items-center gap-1.5">
+        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+        <span className="text-[10px] font-bold text-mumtaz-plum/80 uppercase tracking-tight">5-Star Rated</span>
+      </div>
+      <div className="w-px h-3 bg-mumtaz-plum/10" />
+      <div className="flex items-center gap-1.5">
+        <Shield className="w-3.5 h-3.5 text-wellness-sage" />
+        <span className="text-[10px] font-bold text-mumtaz-plum/80 uppercase tracking-tight">Accredited</span>
+      </div>
+      <div className="w-px h-3 bg-mumtaz-plum/10" />
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] text-mumtaz-plum/60 italic font-accent">Featured in</span>
+        <span className="text-[10px] font-bold text-mumtaz-plum">OM Yoga</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Auth() {
   usePageMeta({
     title: "Sign in | Mumtaz Health",
@@ -247,7 +268,7 @@ export default function Auth() {
           if (isAdminSetupMode) {
             // Auto-escalate to admin immediately after sign-in
             try {
-              const { error: rpcError } = await supabase.rpc('grant_admin_to_self');
+              const { error: rpcError } = await (supabase as any).rpc('has_role', { role: 'admin' });
               if (rpcError) throw rpcError;
               toast.success("🎉 Admin access granted! Welcome, Mumtaz.");
               navigate("/admin");
@@ -294,7 +315,7 @@ export default function Auth() {
         toast.error("Please sign in first.");
         return;
       }
-      const { error } = await supabase.rpc('grant_admin_to_self');
+      const { error } = await (supabase as any).rpc('grant_admin_to_self');
       if (error) throw error;
       toast.success("🎉 You are now an Admin!");
       navigate("/admin");
@@ -322,7 +343,8 @@ export default function Auth() {
   return (
     <div className="min-h-screen lg:flex">
       <CredibilityPanel />
-      <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 px-4 py-8 sm:py-12">
+        <MobileCredibilityStrip />
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <Logo size="lg" className="mx-auto mb-4" />
@@ -425,7 +447,7 @@ export default function Auth() {
                 </Button>
 
                 {isLogin && !isAdminSetupMode && (
-                  <Button type="button" variant="link" className="text-xs text-gray-500" onClick={() => setIsResetPassword(true)}>
+                  <Button type="button" variant="link" className="text-sm font-medium text-mumtaz-plum hover:text-mumtaz-plum/80 transition-colors" onClick={() => setIsResetPassword(true)}>
                     Forgot Password?
                   </Button>
                 )}

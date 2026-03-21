@@ -481,14 +481,14 @@ export function MumtazWisdomGuide() {
         {isMobile ? (
           <Button
             size="icon"
-            className="fixed bottom-6 right-4 h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-wellness-lilac to-accent hover:scale-110 transition-all duration-300 z-50 animate-fade-in"
+            className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-wellness-lilac to-accent hover:scale-110 transition-all duration-300 z-50 animate-fade-in"
             aria-label="Ask Mumtaz a question"
           >
             <MessageCircle className="h-6 w-6 text-white" />
           </Button>
         ) : (
           <Button
-            className="fixed bottom-6 right-6 rounded-full shadow-lg bg-gradient-to-br from-wellness-lilac to-accent hover:scale-105 transition-all duration-300 pl-6 pr-5 py-6 gap-2 z-50 animate-fade-in"
+            className="fixed bottom-24 right-6 rounded-full shadow-lg bg-gradient-to-br from-wellness-lilac to-accent hover:scale-105 transition-all duration-300 pl-6 pr-5 py-6 gap-2 z-50 animate-fade-in"
             aria-label="Ask Mumtaz a question"
           >
             <Sparkles className="h-5 w-5 text-white" />
@@ -497,7 +497,7 @@ export function MumtazWisdomGuide() {
         )}
       </DialogTrigger>
       <DialogContent 
-        className="sm:max-w-2xl p-0 gap-0 animate-scale-in max-h-[90vh] h-[600px] flex flex-col overflow-hidden"
+        className="sm:max-w-2xl p-0 gap-0 animate-scale-in max-h-[90dvh] h-[85dvh] sm:h-[600px] flex flex-col overflow-hidden"
         aria-describedby="chatbot-description"
       >
         <VisuallyHidden>

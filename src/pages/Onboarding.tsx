@@ -424,7 +424,7 @@ export default function Onboarding() {
     return (
       <div className="min-h-screen flex items-center justify-center px-3 py-6 sm:p-4 bg-background">
         <div key="intro1" className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <IntroProgressIndicator current={1} total={11} />
+          <IntroProgressIndicator current={1} total={3} />
           <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
               <Button 
@@ -472,7 +472,7 @@ export default function Onboarding() {
         onBack={() => setStep("intro1")}
         onSkip={skipToProfile}
         currentIntro={2}
-        totalIntros={11}
+        totalIntros={3}
       >
         <p className="text-lg">This app brings together</p>
         <p className="text-xl font-medium text-foreground">
@@ -481,167 +481,44 @@ export default function Onboarding() {
         <p>
           to help you understand your body, support your health, and move through life with more ease and confidence.
         </p>
-        <p className="pt-4 italic">
-          Everything here is designed to feel supportive, not overwhelming.
-        </p>
+        {/* Condensed Ayurveda intro here */}
+        <div className="pt-4 border-t border-border/30 mt-4">
+          <p className="font-semibold text-foreground">The Yoga of Life (Ayurveda)</p>
+          <p className="text-sm">We use the ancient wisdom of Ayurveda to understand your unique nature (your "Dosha") and how it changes with the seasons of your life.</p>
+        </div>
       </IntroScreen>
     );
   }
 
-  // Intro Screen 3: Why Ayurveda
+  // Intro Screen 3: Your Dosha & Empowerment (Consolidated)
   if (step === "intro3") {
     return (
       <IntroScreen
         animationKey="intro3"
-        icon={<Leaf className="h-10 w-10 text-wellness-sage" />}
-        title="Understanding Your Unique Nature"
-        onNext={() => setStep("intro4")}
+        icon={<Compass className="h-10 w-10 text-wellness-lilac" />}
+        title="You are supported here"
+        onNext={() => setStep("welcome")}
         onBack={() => setStep("intro2")}
         onSkip={skipToProfile}
         currentIntro={3}
-        totalIntros={11}
+        totalIntros={3}
+        nextLabel="Let's begin"
       >
-        <div className="space-y-6 max-w-lg mx-auto">
-          {/* Simple Ayurveda Explanation */}
-          <div className="space-y-3">
-            <p className="text-lg">
-              <strong className="text-foreground">Ayurveda</strong> is an ancient approach to wellbeing that recognises something simple but powerful:
-            </p>
-            <p className="text-foreground font-medium">
-              Every woman is unique, and our needs change throughout life.
-            </p>
-            <p>
-              It helps guide how we eat, move, rest, and care for ourselves — without rigid rules or pressure. Just gentle awareness.
-            </p>
-          </div>
-
-          {/* What are Doshas */}
-          <div className="bg-muted/30 rounded-xl p-4 space-y-3">
-            <h3 className="font-semibold text-foreground text-lg">What are doshas?</h3>
-            <p>
-              Doshas are natural energy patterns that describe how your body and mind tend to work. Think of them as your personal tendencies.
-            </p>
-            <p className="text-sm">
-              <strong className="text-foreground">Everyone has all three doshas</strong> — they are not labels or boxes. One or two may be more dominant in you, and this can change over time due to age, stress, pregnancy, menopause, health, or lifestyle.
-            </p>
-          </div>
-
-          {/* Visual Dosha Diagram */}
+        <div className="space-y-6">
+          <p className="text-lg">
+            Every woman is unique, and our needs change throughout life.
+          </p>
+          
           <DoshaVisualDiagram />
-
-          {/* Three Doshas */}
-          <div className="space-y-3">
-            <h3 className="font-semibold text-foreground">The three doshas:</h3>
-            
-            {/* Vata */}
-            <Collapsible className="bg-background/50 border border-border/30 rounded-lg overflow-hidden">
-              <div className="p-4 text-left">
-                <div className="flex items-center gap-2 mb-2">
-                  <Wind className="h-5 w-5 text-wellness-lilac" />
-                  <span className="font-semibold text-foreground">Vata</span>
-                  <span className="text-muted-foreground text-sm">— movement & change</span>
-                </div>
-                <p className="text-sm">
-                  Connected to movement, creativity, and the nervous system. Vata energy is light, quick, and changeable — like the wind.
-                </p>
-                <CollapsibleTrigger className="flex items-center gap-1 text-xs text-wellness-lilac hover:text-wellness-lilac/80 mt-2 transition-colors">
-                  <span>Learn more</span>
-                  <ChevronDown className="h-3 w-3 transition-transform duration-200 [[data-state=open]_&]:rotate-180" />
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent className="animate-accordion-down">
-                <div className="px-4 pb-4 pt-0 text-sm text-muted-foreground space-y-2 border-t border-border/20 mt-0 pt-3">
-                  <p><strong className="text-foreground">When balanced:</strong> Creative, enthusiastic, flexible, quick-thinking, joyful</p>
-                  <p><strong className="text-foreground">When out of balance:</strong> Anxious, scattered, difficulty sleeping, dry skin, cold hands/feet</p>
-                  <p><strong className="text-foreground">Supportive practices:</strong> Warm, grounding foods • Regular routines • Gentle yoga • Warm baths • Rest and stillness</p>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Pitta */}
-            <Collapsible className="bg-background/50 border border-border/30 rounded-lg overflow-hidden">
-              <div className="p-4 text-left">
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame className="h-5 w-5 text-wellness-lilac" />
-                  <span className="font-semibold text-foreground">Pitta</span>
-                  <span className="text-muted-foreground text-sm">— digestion & transformation</span>
-                </div>
-                <p className="text-sm">
-                  Connected to digestion, focus, and how we process things — physically and mentally. Pitta energy is warm, sharp, and driven.
-                </p>
-                <CollapsibleTrigger className="flex items-center gap-1 text-xs text-wellness-lilac hover:text-wellness-lilac/80 mt-2 transition-colors">
-                  <span>Learn more</span>
-                  <ChevronDown className="h-3 w-3 transition-transform duration-200 [[data-state=open]_&]:rotate-180" />
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent className="animate-accordion-down">
-                <div className="px-4 pb-4 pt-0 text-sm text-muted-foreground space-y-2 border-t border-border/20 mt-0 pt-3">
-                  <p><strong className="text-foreground">When balanced:</strong> Focused, confident, good digestion, warm, natural leaders</p>
-                  <p><strong className="text-foreground">When out of balance:</strong> Irritable, inflammation, heartburn, overheating, impatient</p>
-                  <p><strong className="text-foreground">Supportive practices:</strong> Cooling foods • Time in nature • Swimming • Avoiding excess heat • Calming breathwork</p>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Kapha */}
-            <Collapsible className="bg-background/50 border border-border/30 rounded-lg overflow-hidden">
-              <div className="p-4 text-left">
-                <div className="flex items-center gap-2 mb-2">
-                  <Mountain className="h-5 w-5 text-wellness-lilac" />
-                  <span className="font-semibold text-foreground">Kapha</span>
-                  <span className="text-muted-foreground text-sm">— stability & strength</span>
-                </div>
-                <p className="text-sm">
-                  Connected to stability, nourishment, and calm. Kapha energy is grounding, steady, and nurturing — like the earth.
-                </p>
-                <CollapsibleTrigger className="flex items-center gap-1 text-xs text-wellness-lilac hover:text-wellness-lilac/80 mt-2 transition-colors">
-                  <span>Learn more</span>
-                  <ChevronDown className="h-3 w-3 transition-transform duration-200 [[data-state=open]_&]:rotate-180" />
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent className="animate-accordion-down">
-                <div className="px-4 pb-4 pt-0 text-sm text-muted-foreground space-y-2 border-t border-border/20 mt-0 pt-3">
-                  <p><strong className="text-foreground">When balanced:</strong> Calm, loving, strong, steady, excellent memory, patient</p>
-                  <p><strong className="text-foreground">When out of balance:</strong> Sluggish, heavy, congestion, resistant to change, low motivation</p>
-                  <p><strong className="text-foreground">Supportive practices:</strong> Light, warming foods • Regular movement • Stimulating activities • Variety in routine • Energising breathwork</p>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-
-          {/* Quiz Prompt */}
-          <div className="bg-wellness-sage/10 rounded-xl p-4 text-center space-y-3">
-            <div className="flex items-center justify-center gap-2">
-              <HelpCircle className="h-5 w-5 text-wellness-sage" />
-              <p className="font-medium text-foreground">Not sure which sounds like you?</p>
-            </div>
+          
+          <div className="bg-muted/30 rounded-xl p-4 space-y-3 text-left">
             <p className="text-sm">
-              Don't worry — later in setup, you'll take a simple quiz to help discover your unique balance.
+              Whether you are navigating your cycle, pregnancy, or menopause, we are honoured to walk alongside you with gentle, ancient wisdom.
             </p>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setStep("dosha")}
-              className="border-wellness-sage/30 hover:bg-wellness-sage/10 text-foreground"
-            >
-              Skip ahead to the quiz
-            </Button>
           </div>
 
-          {/* Reassurance */}
-          <div className="bg-wellness-lilac/10 rounded-xl p-4 space-y-2 text-left">
-            <p className="font-medium text-foreground">A gentle reminder:</p>
-            <ul className="space-y-1 text-sm">
-              <li>• There is nothing "wrong" with any dosha</li>
-              <li>• Balance changes naturally throughout life</li>
-              <li>• It's normal to need different support at different times</li>
-              <li>• This app adapts with you</li>
-            </ul>
-          </div>
-
-          {/* Closing */}
           <p className="italic text-center pt-2">
-            You don't need to memorise this — the app will guide you gently as you go.
+            Move gently. Learn at your own pace.
           </p>
         </div>
       </IntroScreen>
@@ -987,7 +864,7 @@ export default function Onboarding() {
                 Where are you today?
               </p>
               <div className="flex justify-between">
-                <Button variant="ghost" onClick={() => setStep("intro11")} className="gap-2">
+                <Button variant="ghost" onClick={() => setStep("intro3")} className="gap-2">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
                 <Button

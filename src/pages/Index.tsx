@@ -247,6 +247,11 @@ const Index = () => {
             </p>
           </div>
 
+          {/* Personalized Recommendations - MOVED TO TOP for discoverability */}
+          <div className="max-w-5xl mx-auto">
+            <PersonalizedRecommendations />
+          </div>
+
           {/* Hormonal Transition Quick Access - for in-between phase users */}
           {(wellnessProfile?.life_stage === 'cycle_changes' || 
             wellnessProfile?.life_stage === 'peri_menopause_transition' ||
@@ -406,10 +411,6 @@ const Index = () => {
             </div>
           )}
 
-          {/* Quick Check-In */}
-          <div className="max-w-5xl mx-auto">
-            <QuickCheckIn username={userProfile?.username} />
-          </div>
 
           {/* Confidence Journey - for users building confidence */}
           <div className="max-w-5xl mx-auto">
@@ -426,10 +427,6 @@ const Index = () => {
             <PoseOfTheDay />
           </div>
 
-          {/* Personalized Recommendations */}
-          <div className="max-w-5xl mx-auto">
-            <PersonalizedRecommendations />
-          </div>
 
           {/* Recently Viewed */}
           <div className="max-w-5xl mx-auto">

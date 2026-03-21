@@ -34,9 +34,9 @@ export function Navigation({ className }: NavigationProps) {
 
   const navItems = [
     { label: "Home", icon: Home, href: "/", description: "Your dashboard" },
-    { label: "Check-in", icon: Heart, href: "/tracker", description: "How are you feeling?" },
-    { label: "Library", icon: BookOpen, href: "/content-library", description: "Explore practices" },
-    { label: "My Practice", icon: Clock, href: "/my-daily-practice", description: "Saved & reminders" },
+    { label: "Journal", icon: Heart, href: "/tracker", description: "How are you feeling?" },
+    { label: "Explore", icon: BookOpen, href: "/content-library", description: "Find practices" },
+    { label: "Sessions", icon: Clock, href: "/my-daily-practice", description: "Saved & reminders" },
     { label: "Insights", icon: BarChart3, href: "/insights", description: "Your patterns" },
   ];
 
