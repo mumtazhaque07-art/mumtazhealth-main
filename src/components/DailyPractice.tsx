@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, PlayCircle, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface DailyPracticeProps {
   type: "yoga" | "meditation" | "emotional";
@@ -12,6 +13,7 @@ interface DailyPracticeProps {
 }
 
 export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPracticeProps) {
+  const navigate = useNavigate();
   const [content, setContent] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,8 +27,8 @@ export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPra
       let query = supabase.from("wellness_content").select("*");
 
       // Filter by type
-      if (type === "spiritual") {
-        query = query.in("content_type", ["meditation", "education", "spiritual"]);
+      if (type === "emotional") {
+        query = query.in("content_type", ["meditation", "education", "spiritual", "article"]);
       } else {
         query = query.eq("content_type", type);
       }
@@ -96,7 +98,12 @@ export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPra
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity group-hover:bg-black/40">
-          <Button variant="outline" size="lg" className="rounded-full bg-white/20 border-white/50 text-white hover:bg-white hover:text-black backdrop-blur-sm transition-all border-2">
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="rounded-full bg-white/20 border-white/50 text-white hover:bg-white hover:text-black backdrop-blur-sm transition-all border-2"
+            onClick={() => navigate(`/content-library?highlight=${content.id}`)}
+          >
             <PlayCircle className="w-6 h-6 mr-2" />
             Start Practice
           </Button>

@@ -373,7 +373,7 @@ export function PersonalizedRecommendations() {
           {recommendations.map((content) => (
             <button
               key={content.id}
-              onClick={() => navigate(`/content-library`)}
+              onClick={() => navigate(`/content-library?highlight=${content.id}`)}
               className="p-4 rounded-xl bg-card border border-border/50 hover:border-wellness-lilac/50 
                 hover:shadow-md hover:scale-[1.01] transition-all duration-200 text-left group"
             >

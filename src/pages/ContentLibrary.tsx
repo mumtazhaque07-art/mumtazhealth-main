@@ -113,6 +113,8 @@ interface WellnessContent {
   is_premium: boolean;
   preview_content: string;
   unlock_after_completions: number;
+  recommendationReason?: string;
+  primary_dosha?: string; // For internal UI matching
 }
 
 // Map movement preferences to content tags
@@ -425,6 +427,17 @@ const ContentLibrary = () => {
       }
     }
   };
+
+  // Handle 'highlight' parameter to automatically open content
+  useEffect(() => {
+    const highlightId = searchParams.get('highlight');
+    if (highlightId && content.length > 0) {
+      const item = content.find(c => c.id === highlightId);
+      if (item) {
+        openContentDetail(item);
+      }
+    }
+  }, [searchParams, content]);
 
   useEffect(() => {
     // Update total count when content changes
@@ -3053,7 +3066,7 @@ const ContentLibrary = () => {
                         <div className="mt-4 pt-4 border-t border-primary/10 flex flex-wrap gap-4">
                           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                            Alignment: {selectedContent.primary_dosha ? selectedContent.primary_dosha.charAt(0).toUpperCase() + selectedContent.primary_dosha.slice(1) : 'Tridoshic'}
+                            Alignment: {selectedContent.doshas?.[0] ? selectedContent.doshas[0].charAt(0).toUpperCase() + selectedContent.doshas[0].slice(1) : 'Tridoshic'}
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1.5">
                             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
