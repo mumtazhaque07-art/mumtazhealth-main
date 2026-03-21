@@ -18,34 +18,34 @@ const SERVICE_CONTENT: Record<ServiceType, {
   ctaText: string;
 }> = {
   consultation: {
-    title: "Work with Mumtaz directly",
-    description: "For personalised Ayurvedic consultations, tailored herbal remedies, and one-to-one support for your unique needs.",
+    title: "Request a Consultation",
+    description: "Work with Mumtaz directly for personalised Ayurvedic guidance and holistic support tailored to your journey.",
     icon: Heart,
-    ctaText: "Book a consultation",
+    ctaText: "Book with Mumtaz",
   },
   workshop: {
-    title: "Join a live workshop",
-    description: "Deepen your understanding through interactive group sessions led by Mumtaz, covering Ayurveda, yoga, and holistic wellbeing.",
+    title: "Join Mumtaz's Circle",
+    description: "Deepen your understanding through expert-led sessions covering Ayurveda, yoga, and holistic wellbeing.",
     icon: Users,
-    ctaText: "View upcoming workshops",
+    ctaText: "Inquire about workshops",
   },
   retreat: {
-    title: "Experience a wellness retreat",
-    description: "Immerse yourself in transformative healing through guided retreats that nourish body, mind, and spirit.",
+    title: "Wellness & Healing",
+    description: "Immerse yourself in transformative experiences that nourish body, mind, and spirit under Mumtaz's guidance.",
     icon: Flower2,
-    ctaText: "Explore retreats",
+    ctaText: "Request details",
   },
   training: {
-    title: "Become a yoga teacher",
-    description: "Train with an International Yoga Teacher Trainer. Deepen your practice and learn to guide others on their journey.",
+    title: "Teacher Mentorship",
+    description: "Deepen your practice and learn to guide others with International Teacher Trainer mentorship.",
     icon: GraduationCap,
-    ctaText: "Learn about YTT",
+    ctaText: "Inquire about training",
   },
   general: {
-    title: "Ready for deeper support?",
-    description: "When you're ready for personalised guidance, Mumtaz offers consultations, workshops, retreats, and teacher training.",
+    title: "Personalised Support",
+    description: "When you're ready for deeper guidance, Mumtaz offers private consultations and expert-led programs.",
     icon: Sparkles,
-    ctaText: "Explore practitioner support",
+    ctaText: "Book with Mumtaz",
   },
 };
 

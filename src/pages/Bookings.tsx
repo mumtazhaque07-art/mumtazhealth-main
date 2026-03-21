@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ArrowLeft, Calendar, Clock, Users, Check, Filter, X } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Users, Check, Filter, X, Heart } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
 import { bookingSchema, validateInput } from "@/lib/validation";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -388,198 +388,73 @@ export default function Bookings() {
 
         <Tabs defaultValue="services" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="services">Browse Services</TabsTrigger>
-            <TabsTrigger value="mybookings">My Bookings ({myBookings.length})</TabsTrigger>
+            <TabsTrigger value="services">Book with Mumtaz</TabsTrigger>
+            <TabsTrigger value="mybookings">My Requests ({myBookings.length})</TabsTrigger>
           </TabsList>
 
           {/* Browse Services */}
           <TabsContent value="services" className="space-y-6">
-            {/* Filters Section */}
-            <Card className="bg-white border-wellness-taupe/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-5 h-5 text-wellness-taupe" />
-                    <CardTitle className="text-lg">Filters</CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {hasActiveFilters && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="text-wellness-taupe"
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Clear All
-                      </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowFilters(!showFilters)}
-                      className="text-wellness-taupe"
-                    >
-                      {showFilters ? 'Hide' : 'Show'}
-                    </Button>
+            {/* Simplified Single Consultation Card */}
+            <div className="max-w-2xl mx-auto py-8">
+              <Card className="overflow-hidden border-wellness-taupe/20 shadow-xl bg-gradient-to-br from-wellness-warm to-white">
+                <div className="h-64 overflow-hidden relative">
+                  <img 
+                    src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=1000" 
+                    alt="Consultation with Mumtaz" 
+                    className="w-full h-full object-cover opacity-90"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-wellness-taupe/60 to-transparent flex items-end p-6">
+                    <CardTitle className="text-3xl font-bold text-white">
+                      Consult with Mumtaz
+                    </CardTitle>
                   </div>
                 </div>
-              </CardHeader>
-              
-              {showFilters && (
-                <CardContent className="space-y-4">
-                  {/* Category Filter */}
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Category</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { value: 'consultation', label: 'Consultations' },
-                        { value: 'workshop', label: 'Workshops' },
-                        { value: 'retreat', label: 'Retreats' },
-                        { value: 'training', label: 'Teacher Training' }
-                      ].map(category => (
-                        <Badge
-                          key={category.value}
-                          variant={selectedCategories.includes(category.value) ? 'default' : 'outline'}
-                          className={`cursor-pointer ${
-                            selectedCategories.includes(category.value)
-                              ? 'bg-wellness-taupe hover:bg-wellness-taupe/90'
-                              : 'hover:bg-wellness-taupe/10'
-                          }`}
-                          onClick={() => toggleCategory(category.value)}
-                        >
-                          {category.label}
-                        </Badge>
-                      ))}
+                <CardHeader>
+                  <CardDescription className="text-lg leading-relaxed text-wellness-taupe/90">
+                    Experience private, holistic guidance tailored to your unique journey. Mumtaz offers deep consultations for Ayurvedic wellness, hormonal transition support, and personalized lifestyle practices.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-wellness-taupe">
+                      <div className="p-2 rounded-full bg-wellness-sage/20">
+                        <Heart className="w-5 h-5" />
+                      </div>
+                      <span>One-to-one personalised Ayurvedic care</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-wellness-taupe">
+                      <div className="p-2 rounded-full bg-wellness-sage/20">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <span>Tailored for your specific life phase & needs</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-wellness-taupe">
+                      <div className="p-2 rounded-full bg-wellness-sage/20">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <span>Flexible session lengths and delivery</span>
                     </div>
                   </div>
-
-                  {/* Price Range Filter */}
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">
-                      Price Range: £{priceRange[0]} - £{priceRange[1]}
-                    </Label>
-                    <div className="flex gap-4">
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Min</Label>
-                        <Input
-                          type="number"
-                          value={priceRange[0]}
-                          onChange={(e) => setPriceRange([Number(e.target.value), priceRange[1]])}
-                          min={0}
-                          max={priceRange[1]}
-                          className="mt-1"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <Label className="text-xs text-muted-foreground">Max</Label>
-                        <Input
-                          type="number"
-                          value={priceRange[1]}
-                          onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
-                          min={priceRange[0]}
-                          max={10000}
-                          className="mt-1"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Duration Filter */}
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block">Duration</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { value: 'all', label: 'All Durations' },
-                        { value: 'short', label: 'Short (≤4 hours)' },
-                        { value: 'medium', label: 'Medium (1-7 days)' },
-                        { value: 'long', label: 'Long (7+ days)' }
-                      ].map(duration => (
-                        <Badge
-                          key={duration.value}
-                          variant={durationFilter === duration.value ? 'default' : 'outline'}
-                          className={`cursor-pointer ${
-                            durationFilter === duration.value
-                              ? 'bg-wellness-taupe hover:bg-wellness-taupe/90'
-                              : 'hover:bg-wellness-taupe/10'
-                          }`}
-                          onClick={() => setDurationFilter(duration.value)}
-                        >
-                          {duration.label}
-                        </Badge>
-                      ))}
-                    </div>
+                  
+                  <div className="pt-4">
+                    <Button 
+                      onClick={() => {
+                        const generalService = services.find(s => s.category === 'consultation') || services[0];
+                        if (generalService) handleBookService(generalService);
+                        else toast.error("Booking service currently unavailable. Please check back soon.");
+                      }}
+                      className="w-full py-6 text-lg bg-wellness-lilac hover:bg-wellness-lilac/90 text-white shadow-lg transition-transform hover:scale-[1.02]"
+                    >
+                      <Calendar className="w-5 h-5 mr-3" />
+                      Request a Consultation
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground mt-4 italic">
+                      Pricing and package details will be shared during your initial inquiry.
+                    </p>
                   </div>
                 </CardContent>
-              )}
-            </Card>
-
-            {/* Services List */}
-            {['consultation', 'workshop', 'retreat', 'training'].map(category => {
-              const filteredServices = getFilteredServices();
-              const categoryServices = filteredServices.filter(s => s.category === category);
-              if (categoryServices.length === 0) return null;
-
-              return (
-                <div key={category}>
-                  <h2 className="text-2xl font-bold text-wellness-taupe mb-4">
-                    {getCategoryLabel(category)}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {categoryServices.map(service => (
-                      <Card key={service.id} className="hover:shadow-lg transition-shadow">
-                        <CardHeader>
-                          <CardTitle className="text-lg">{service.title}</CardTitle>
-                          <CardDescription className="text-sm">
-                            {service.description}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              {service.duration_hours && (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-4 h-4" />
-                                  {service.duration_hours} hours
-                                </div>
-                              )}
-                              {service.duration_days && (
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="w-4 h-4" />
-                                  {service.duration_days} days
-                                </div>
-                              )}
-                              {service.max_capacity && (
-                                <div className="flex items-center gap-1">
-                                  <Users className="w-4 h-4" />
-                                  Max {service.max_capacity}
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div className="flex flex-col">
-                                <div className="text-2xl font-bold text-wellness-taupe">
-                                  {formatDualCurrency(service.price).gbp}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {formatDualCurrency(service.price).sar}
-                                </div>
-                              </div>
-                              <Button 
-                                onClick={() => handleBookService(service)}
-                                className="bg-wellness-taupe hover:bg-wellness-taupe/90"
-                              >
-                                Book Now
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+              </Card>
+            </div>
             
             {/* No results message */}
             {getFilteredServices().length === 0 && (
@@ -667,9 +542,9 @@ export default function Bookings() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
-              <DialogTitle>Book {selectedService?.title}</DialogTitle>
+              <DialogTitle>Request Consultation</DialogTitle>
               <DialogDescription>
-                Choose your preferred date and add any notes
+                Mumtaz will review your request and contact you to confirm the details.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -695,21 +570,11 @@ export default function Bookings() {
                   rows={4}
                 />
               </div>
-              {selectedService && (
-                <div className="bg-muted p-4 rounded-md">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Total:</span>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-wellness-taupe">
-                        {formatDualCurrency(selectedService.price).gbp}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatDualCurrency(selectedService.price).sar}
-                      </div>
-                    </div>
-                  </div>
+                <div className="bg-wellness-lilac/5 p-3 rounded-lg border border-wellness-lilac/10">
+                  <p className="text-xs text-wellness-taupe italic">
+                    Note: This is a booking request. You will be contacted regarding session availability and fees.
+                  </p>
                 </div>
-              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
