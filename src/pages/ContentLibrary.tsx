@@ -1178,7 +1178,7 @@ const ContentLibrary = () => {
           <Button 
             variant="outline" 
             className="hidden md:flex items-center gap-2 border-primary/40 hover:bg-primary/5"
-            onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+            onClick={() => navigate('/bookings')}
           >
             <ExternalLink className="h-4 w-4" />
             Book a Consultation
@@ -1195,7 +1195,7 @@ const ContentLibrary = () => {
             <Button 
               variant="link" 
               className="text-wellness-sage p-0 h-auto font-semibold ml-auto hidden sm:block"
-              onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+              onClick={() => navigate('/bookings')}
             >
               Book Now
             </Button>
@@ -3086,7 +3086,7 @@ const ContentLibrary = () => {
                       </p>
                       <Button 
                         className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white"
-                        onClick={() => window.open('https://mumtazhealth.app/book', '_blank')}
+                        onClick={() => navigate('/bookings')}
                       >
                         Book a Consultation with Mumtaz
                       </Button>

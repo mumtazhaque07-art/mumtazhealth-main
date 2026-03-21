@@ -10,6 +10,7 @@ import { z } from "zod";
 import { Logo } from "@/components/Logo";
 import { ArrowLeft, KeyRound, Mail, RefreshCw, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Star, Quote, Shield } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+// Badge import removed to resolve runtime definition issue
 import { usePageMeta } from "@/hooks/usePageMeta";
 
 const emailSchema = z.string().trim().email({ message: "Please enter a valid email" });
@@ -327,17 +328,12 @@ export default function Auth() {
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${getAuthRedirectBase()}/auth` }
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message);
-      setLoading(false);
-    }
+    // Google Sign-In is currently not enabled in the Supabase project configuration.
+    // To prevent the 'Unsupported Provider' error page, we show an informative message.
+    toast.info("Google Sign-In is currently being configured. Please use your email to sign in or sign up for now.", {
+      description: "We're working on making this available soon!",
+      duration: 5000,
+    });
   };
 
   return (
@@ -432,8 +428,14 @@ export default function Auth() {
 
               <CardFooter className="flex flex-col space-y-4">
                 {(!session || !isAdminSetupMode) && (
-                  <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={loading}>
-                    Continue with Google
+                  <Button type="button" variant="outline" className="w-full relative group" onClick={handleGoogleSignIn} disabled={loading}>
+                    <div className="flex items-center justify-center gap-2">
+                      <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+                      Continue with Google
+                    </div>
+                    <span className="ml-2 text-[10px] py-0.5 px-2 border border-mumtaz-plum/20 rounded-full text-mumtaz-plum/60 bg-transparent group-hover:bg-white transition-colors">
+                      Coming Soon
+                    </span>
                   </Button>
                 )}
                 
