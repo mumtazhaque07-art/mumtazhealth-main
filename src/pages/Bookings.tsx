@@ -186,6 +186,7 @@ export default function Bookings() {
         .eq('user_id', user.id)
         .single();
 
+      // 1. Send admin notification email
       await supabase.functions.invoke('send-booking-email', {
         body: {
           type: 'admin_notification',
@@ -202,8 +203,26 @@ export default function Bookings() {
           adminEmail: 'admin@holistic-wellness.com',
         },
       }).catch(err => {
-        console.warn('Booking email function unreachable (this may be expected in some environments):', err);
-        // We don't throw here so the user still sees their booking was successful in the DB
+        console.warn('Admin booking email function unreachable:', err);
+      });
+
+      // 2. Send user confirmation email (The consumer copy)
+      await supabase.functions.invoke('send-booking-email', {
+        body: {
+          type: 'confirmed',
+          bookingId: bookingData?.id,
+          userEmail: user.email,
+          userName: profileData?.username || user.email?.split('@')[0] || 'User',
+          serviceTitle: selectedService.title,
+          bookingDate: new Date(bookingDate).toLocaleString(),
+          duration: selectedService.duration_days 
+            ? `${selectedService.duration_days} days` 
+            : `${selectedService.duration_hours} hours`,
+          price: `${selectedService.currency} ${selectedService.price}`,
+          notes: bookingNotes || undefined,
+        },
+      }).catch(err => {
+        console.warn('User confirmation email function unreachable:', err);
       });
     } catch (emailError) {
       console.error('Error in email preparation flow:', emailError);

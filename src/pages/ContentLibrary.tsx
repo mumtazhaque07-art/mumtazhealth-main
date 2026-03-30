@@ -3150,8 +3150,12 @@ const ContentLibrary = () => {
                        {/* Description & How to Build */}
                        <div>
                          <h3 className="font-semibold text-lg mb-2 text-foreground flex items-center gap-2">
-                            <BookOpen className="h-5 w-5 text-wellness-sage" />
-                            How to Build This Practice
+                            {selectedContent.content_type === 'nutrition' ? (
+                              <Salad className="h-5 w-5 text-wellness-sage" />
+                            ) : (
+                              <BookOpen className="h-5 w-5 text-wellness-sage" />
+                            )}
+                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'How to Build This Practice'}
                          </h3>
                          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
                             {isContentUnlocked(selectedContent) 
