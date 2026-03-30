@@ -152,7 +152,7 @@ const PHASE_SPECIFIC_PRACTICES: Record<LifeStage, DailyPractice[]> = {
     { id: 'phyto_shifa', label: 'Phytoestrogen Shifa (Flax/Soy)', type: 'checkbox' },
   ],
   menopause: [
-    { id: 'stillness', label: 'Second Spring Stillness Mins', type: 'number' },
+    { id: 'stillness', label: 'Found a Moment of Stillness', type: 'checkbox' },
     { id: 'heart_health', label: 'Heart-Focused Moon Breathing', type: 'checkbox' },
     { id: 'ghee_moisture', label: 'Internal Moisture (Ghee)', type: 'checkbox' },
   ],
