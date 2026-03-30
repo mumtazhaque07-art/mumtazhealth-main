@@ -3147,75 +3147,64 @@ const ContentLibrary = () => {
 
                     {/* Structural Sections: How to, Options, Benefits */}
                     <div className="space-y-6 pt-6 border-t border-border">
-                       {/* Description & How to Build */}
-                       <div>
-                         <h3 className="font-semibold text-lg mb-2 text-foreground flex items-center gap-2">
-                            {selectedContent.content_type === 'nutrition' ? (
-                              <Salad className="h-5 w-5 text-wellness-sage" />
-                            ) : (
-                              <BookOpen className="h-5 w-5 text-wellness-sage" />
-                            )}
-                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'How to Build This Practice'}
-                         </h3>
-                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                            {isContentUnlocked(selectedContent) 
-                              ? selectedContent.detailed_guidance 
-                              : (selectedContent.preview_content || selectedContent.description || 'Unlock to see full guidance...')}
+                       {/* High-Level Description (Why this helps) */}
+                       <div className="mb-6">
+                         <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                           {selectedContent.description}
                          </p>
                        </div>
 
+                       {/* Instructions (How to get into it) */}
+                       <div className="mb-6">
+                         <h3 className="font-semibold text-lg mb-3 text-wellness-plum border-b border-wellness-plum/10 pb-2 flex items-center gap-2">
+                            {selectedContent.content_type === 'nutrition' ? (
+                              <Salad className="h-5 w-5" />
+                            ) : (
+                              <BookOpen className="h-5 w-5" />
+                            )}
+                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'Instructions & Guidance'}
+                         </h3>
+                         <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2">
+                            {isContentUnlocked(selectedContent) 
+                              ? selectedContent.detailed_guidance 
+                              : (selectedContent.preview_content || 'Unlock to see full guidance...')}
+                         </div>
+                       </div>
+
+                       {/* Benefits */}
+                       {(selectedContent.benefits?.length > 0) && (
+                         <div className="mb-6 bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10">
+                           <h3 className="font-semibold text-lg mb-3 text-wellness-sage flex items-center gap-2">
+                             <Sparkles className="h-5 w-5" />
+                             Key Benefits
+                           </h3>
+                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                             {selectedContent.benefits.map((benefit: string, i: number) => (
+                               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                 <CheckCircle2 className="h-4 w-4 text-wellness-sage shrink-0 mt-0.5" />
+                                 <span>{benefit}</span>
+                               </li>
+                             ))}
+                           </ul>
+                         </div>
+                       )}
+
                        {/* Modifications & Options */}
-                       <div className="bg-wellness-lilac/10 p-5 rounded-2xl border border-wellness-lilac/20">
-                         <h3 className="font-semibold mb-3 text-wellness-plum flex items-center gap-2">
-                            <Activity className="h-4 w-4" />
-                            Modifications & Phase Options
+                       <div className="bg-wellness-lilac/10 p-5 rounded-2xl border border-wellness-lilac/20 mb-2">
+                         <h3 className="font-semibold text-lg mb-3 text-wellness-plum flex items-center gap-2">
+                            <Activity className="h-5 w-5" />
+                            Modifications & Safety Notes
                          </h3>
                          <ul className="space-y-3">
                            <li className="text-sm text-muted-foreground flex items-start gap-2">
-                             <span className="text-wellness-sage font-bold mt-0.5">•</span>
-                             <span><strong>If you feel exhausted:</strong> Use props (pillows/blocks) to fully support your weight. Less effort is more healing in this phase.</span>
+                             <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                             <span><strong>Listen to your body:</strong> Use props (pillows/blocks) to fully support your weight if needed. Never push through pain. Less effort is often more healing.</span>
                            </li>
                            <li className="text-sm text-muted-foreground flex items-start gap-2">
-                             <span className="text-wellness-sage font-bold mt-0.5">•</span>
-                             <span><strong>Based on your phase ({selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'current'}):</strong> {selectedContent.cycle_phases?.[0] === 'menstruation' ? 'Avoid deep twists or inversions. Keep the belly soft and breathing gentle.' : 'Listen to your body\'s feedback—if you feel strain, back off.'}</span>
+                             <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                             <span><strong>Based on your phase ({selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'current'}):</strong> {selectedContent.cycle_phases?.[0] === 'menstruation' ? 'Avoid deep twists or inversions. Keep the belly soft.' : 'Adapt movements to honor your daily energy level.'}</span>
                            </li>
                          </ul>
-                       </div>
-
-                       {/* Practitioner's Guidance & Benefits */}
-                       <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10">
-                         <h3 className="font-semibold mb-3 flex items-center gap-2">
-                           <Sparkles className="h-4 w-4 text-primary" />
-                           Practitioner's Guidance & Benefits
-                         </h3>
-                         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                           {selectedContent.description}
-                         </p>
-                         
-                         {(selectedContent.benefits?.length > 0) && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-semibold mb-2 text-foreground/90">Key Benefits:</h4>
-                             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                               {selectedContent.benefits.map((benefit: string, i: number) => (
-                                 <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
-                                   <CheckCircle2 className="h-3.5 w-3.5 text-wellness-sage shrink-0 mt-0.5" />
-                                   <span>{benefit}</span>
-                                 </li>
-                               ))}
-                             </ul>
-                           </div>
-                         )}
-
-                         <div className="pt-4 border-t border-primary/10 flex flex-wrap gap-4">
-                           <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                             Alignment: {selectedContent.doshas?.[0] ? selectedContent.doshas[0].charAt(0).toUpperCase() + selectedContent.doshas[0].slice(1) : 'Tridoshic'}
-                           </div>
-                           <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
-                             <CheckCircle2 className="h-4 w-4 text-green-500" />
-                             Phase: {selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'General Wellbeing'}
-                           </div>
-                         </div>
                        </div>
                     </div>
 

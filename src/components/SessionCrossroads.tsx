@@ -56,12 +56,12 @@ export function SessionCrossroads({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md border-wellness-sage/20 bg-wellness-warm/50 backdrop-blur-xl">
+      <DialogContent className="sm:max-w-md border-none bg-white shadow-2xl backdrop-blur-none">
         <DialogHeader>
           <DialogTitle className="text-2xl text-center text-wellness-taupe font-serif">
             How are you feeling now?
           </DialogTitle>
-          <DialogDescription className="text-center text-wellness-taupe/60 italic">
+          <DialogDescription className="text-center text-wellness-taupe/80 italic">
             Honor your energy. There is no rush in this sanctuary.
           </DialogDescription>
         </DialogHeader>
@@ -70,7 +70,7 @@ export function SessionCrossroads({
           <Button 
             variant="outline" 
             onClick={handleContinue}
-            className="h-16 justify-between px-6 border-wellness-sage/30 bg-white/40 hover:bg-wellness-sage hover:text-white transition-all group"
+            className="h-16 justify-between px-6 border-wellness-sage/30 bg-wellness-sage/5 hover:bg-wellness-sage text-wellness-taupe hover:text-white transition-all group"
           >
             <div className="flex items-center gap-3">
               <IconSparkles className="h-5 w-5 text-wellness-sage group-hover:text-white" />
@@ -85,7 +85,7 @@ export function SessionCrossroads({
           <Button 
             variant="outline" 
             onClick={handleRest}
-            className="h-16 justify-between px-6 border-wellness-lilac/30 bg-white/40 hover:bg-wellness-lilac hover:text-white transition-all group"
+            className="h-16 justify-between px-6 border-wellness-lilac/30 bg-wellness-lilac/5 hover:bg-wellness-lilac text-wellness-taupe hover:text-white transition-all group"
           >
             <div className="flex items-center gap-3">
               <IconMoon className="h-5 w-5 text-wellness-lilac group-hover:text-white" />
@@ -100,7 +100,7 @@ export function SessionCrossroads({
           <Button 
             variant="outline" 
             onClick={handleRemind}
-            className="h-16 justify-between px-6 border-wellness-taupe/20 bg-white/40 hover:bg-wellness-taupe hover:text-white transition-all group"
+            className="h-16 justify-between px-6 border-slate-200 bg-slate-50 hover:bg-slate-500 text-wellness-taupe hover:text-white transition-all group"
           >
             <div className="flex items-center gap-3">
               <IconBell className="h-5 w-5 text-wellness-taupe group-hover:text-white" />
