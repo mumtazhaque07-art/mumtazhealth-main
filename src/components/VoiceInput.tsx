@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -20,33 +20,37 @@ export function VoiceInput({ onTranscript, className, size = "icon" }: VoiceInpu
   const [isListening, setIsListening] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
+  const toastIdRef = useRef<string | number | null>(null);
 
   useEffect(() => {
     const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognitionAPI) {
       setIsSupported(true);
       const recognitionInstance = new SpeechRecognitionAPI();
-      recognitionInstance.continuous = false;
+      recognitionInstance.continuous = true;
       recognitionInstance.interimResults = false;
       recognitionInstance.lang = 'en-US';
       
       recognitionInstance.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        onTranscript(transcript);
-        setIsListening(false);
+        const transcriptChunk = event.results[event.results.length - 1][0].transcript;
+        onTranscript(transcriptChunk);
+        
         if ('vibrate' in navigator) navigator.vibrate(50);
+        toast.success("Captured!", { duration: 2000 });
       };
 
       recognitionInstance.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
         if (event.error !== 'aborted') {
-          toast.error("Could not understand. Please try again.");
+          toast.error("I didn't quite catch that. Try speaking closer to the mic.");
         }
         setIsListening(false);
+        if (toastIdRef.current) toast.dismiss(toastIdRef.current.toString());
       };
 
       recognitionInstance.onend = () => {
         setIsListening(false);
+        if (toastIdRef.current) toast.dismiss(toastIdRef.current.toString());
       };
 
       setRecognition(recognitionInstance);
@@ -57,13 +61,18 @@ export function VoiceInput({ onTranscript, className, size = "icon" }: VoiceInpu
     if (!recognition) return;
 
     if (isListening) {
-      recognition.abort();
+      recognition.stop();
       setIsListening(false);
+      if (toastIdRef.current) toast.dismiss(toastIdRef.current.toString());
+      toast.info("Microphone paused.");
     } else {
       try {
         recognition.start();
         setIsListening(true);
-        if ('vibrate' in navigator) navigator.vibrate(25);
+        if ('vibrate' in navigator) navigator.vibrate([25, 50, 25]);
+        toastIdRef.current = toast.loading("I'm listening. Take your time speaking... (Tap mic again to stop)", {
+          duration: 60000,
+        });
       } catch (error) {
         console.error("Error starting recognition:", error);
       }
