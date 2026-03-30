@@ -430,13 +430,21 @@ export default function Bookings() {
               </p>
               <div className="mt-8 flex items-center gap-4">
                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(-1)}
-                    className="rounded-full border-wellness-taupe/20 text-wellness-taupe hover:bg-wellness-warm"
+                    onClick={() => handleBookService(services.find(s => s.category === 'consultation') || services[0] || { 
+                      id: 'temp-1', 
+                      title: '1-to-1 Consultation', 
+                      description: 'Private assessment', 
+                      category: 'consultation', 
+                      duration_days: null, 
+                      duration_hours: 1, 
+                      price: 0, 
+                      currency: 'GBP', 
+                      max_capacity: 1 
+                    })}
+                    className="rounded-full bg-wellness-sage hover:bg-wellness-sage/90 text-white shadow-lg shadow-wellness-sage/20 transition-all active:scale-[0.98] font-semibold px-6 py-5 text-md"
                   >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Book Consultation
                   </Button>
               </div>
             </div>
