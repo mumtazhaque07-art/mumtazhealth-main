@@ -426,7 +426,7 @@ export default function Bookings() {
                 Consult with Mumtaz
               </h1>
               <p className="text-wellness-taupe/80 text-lg max-w-xl leading-relaxed">
-                "My mission is to hold space for your healing. Through Ayurvedic wisdom and conscious practice, we reclaim your vitality together."
+                "My mission is to hold space for your healing. Through a holistic and Ayurvedic approach—integrating therapeutic yoga and transformational inner child healing—we reclaim your vitality together."
               </p>
               <div className="mt-8 flex items-center gap-4">
                  <Button
