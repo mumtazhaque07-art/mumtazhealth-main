@@ -24,20 +24,41 @@ type OnboardingStep =
   | "welcome" | "lifeStage" | "cycle_changes_focus" | "cycle" | "dosha" | "doshaResults" 
   | "conditions" | "spiritual" | "pregnancy" | "preferences" | "complete";
 
-const ProgressIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
-  <div className="mb-6">
-    <div className="flex items-center justify-between mb-2">
-      <span className="text-sm text-muted-foreground">Step {currentStep} of {totalSteps}</span>
-      <span className="text-sm font-medium text-primary">{Math.round((currentStep / totalSteps) * 100)}%</span>
-    </div>
-    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+const ProgressIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
+  const progress = currentStep / totalSteps;
+  const size = 60; // Size of the orb container
+  const orbSize = 20 + (progress * 40); // Grows from 20px to 60px
+  
+  return (
+    <div className="flex flex-col items-center justify-center mb-8 space-y-3">
       <div 
-        className="h-full bg-gradient-to-r from-wellness-lilac to-wellness-sage transition-all duration-500 ease-out"
-        style={{ width: `${(currentStep / totalSteps) * 100}%` }}
-      />
+        className="relative flex items-center justify-center" 
+        style={{ width: size, height: size }}
+      >
+        {/* The Aura */}
+        <div 
+          className="absolute rounded-full bg-wellness-lilac/30 blur-xl transition-all duration-1000 ease-in-out animate-breathe-outer"
+          style={{ 
+            width: orbSize * 1.5, 
+            height: orbSize * 1.5 
+          }}
+        />
+        {/* The Core Orb */}
+        <div 
+          className="relative rounded-full bg-gradient-to-br from-wellness-lilac to-wellness-sage shadow-inner transition-all duration-1000 ease-in-out animate-breathe"
+          style={{ 
+            width: orbSize, 
+            height: orbSize,
+            opacity: 0.4 + (progress * 0.6)
+          }}
+        />
+      </div>
+      <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] uppercase opacity-70">
+        {currentStep === totalSteps ? 'Complete' : 'Unfolding'}
+      </span>
     </div>
-  </div>
-);
+  );
+};
 
 const IntroProgressIndicator = ({ current, total }: { current: number; total: number }) => (
   <div className="flex items-center justify-center gap-1.5 mb-4">
@@ -137,7 +158,7 @@ const IntroScreen = ({
       className="w-full max-w-2xl animate-in fade-in slide-in-from-right-4 duration-500"
     >
       {currentIntro && totalIntros && (
-        <IntroProgressIndicator current={currentIntro} total={totalIntros} />
+        <ProgressIndicator currentStep={currentIntro} totalSteps={totalIntros} />
       )}
       <div className="flex justify-center mb-4">
         <Logo size="md" showText={false} />
@@ -275,21 +296,21 @@ export default function Onboarding() {
     const stepMap: Record<OnboardingStep, number> = {
       initial_choice: 0,
       quick_checkin: 0,
-      intro1: 0, intro2: 0, intro3: 0, intro4: 0, intro5: 0,
+      intro1: 1, intro2: 2, intro3: 0, intro4: 0, intro5: 0,
       intro6: 0, intro7: 0, intro8: 0, intro9: 0, intro10: 0, intro11: 0,
-      welcome: 1,
-      lifeStage: 2,
-      cycle_changes_focus: 3,
-      cycle: 3,
-      dosha: 4,
+      welcome: 3,
+      lifeStage: 4,
+      cycle_changes_focus: 0,
+      cycle: 0,
+      dosha: 5,
       doshaResults: 5,
-      conditions: 6,
-      spiritual: 7,
-      pregnancy: 8,
-      preferences: 9,
-      complete: 10,
+      conditions: 0,
+      spiritual: 6,
+      pregnancy: 0,
+      preferences: 0,
+      complete: 6,
     };
-    return { current: stepMap[step], total: 10 };
+    return { current: stepMap[step], total: 6 };
   };
 
   const handleDoshaComplete = (primary: string, secondary: string) => {
@@ -424,7 +445,9 @@ export default function Onboarding() {
     return (
       <div className="min-h-screen flex items-center justify-center px-3 py-6 sm:p-4 bg-background">
         <div key="intro1" className="w-full max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <IntroProgressIndicator current={1} total={3} />
+          <div className="px-6 pt-6 pb-2">
+            <ProgressIndicator currentStep={getStepInfo().current} totalSteps={getStepInfo().total} />
+          </div>
           <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-2 right-2 sm:top-4 sm:right-4">
               <Button 
@@ -468,11 +491,11 @@ export default function Onboarding() {
         animationKey="intro2"
         icon={<Heart className="h-10 w-10 text-wellness-lilac" />}
         title="A holistic approach to women's wellbeing"
-        onNext={() => setStep("intro3")}
+        onNext={() => setStep("welcome")}
         onBack={() => setStep("intro1")}
         onSkip={skipToProfile}
-        currentIntro={2}
-        totalIntros={3}
+        currentIntro={getStepInfo().current}
+        totalIntros={getStepInfo().total}
       >
         <p className="text-lg">This app brings together</p>
         <p className="text-xl font-medium text-foreground">
@@ -864,7 +887,7 @@ export default function Onboarding() {
                 Where are you today?
               </p>
               <div className="flex justify-between">
-                <Button variant="ghost" onClick={() => setStep("intro3")} className="gap-2">
+                <Button variant="ghost" onClick={() => setStep("intro2")} className="gap-2">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </Button>
                 <Button
@@ -1125,16 +1148,7 @@ export default function Onboarding() {
                 }
                 
                 // Determine next step based on selections
-                const hasRegularCycle = selectedLifePhases.includes("regular_cycle");
-                const hasCycleChanges = selectedLifePhases.includes("cycle_changes");
-                
-                if (hasRegularCycle) {
-                  setStep("cycle");
-                } else if (hasCycleChanges) {
-                  setStep("cycle_changes_focus");
-                } else {
-                  setStep("dosha");
-                }
+                setStep("dosha");
               }}
               onBack={() => setStep("welcome")}
               initialPrimaryFocus={primaryFocus}
@@ -1373,12 +1387,7 @@ export default function Onboarding() {
         <DoshaAssessment 
           onComplete={handleDoshaComplete} 
           onBack={() => {
-            // Go back to cycle step only if life stage is menstrual_cycle
-            if (lifeStage === 'menstrual_cycle') {
-              setStep("cycle");
-            } else {
-              setStep("lifeStage");
-            }
+            setStep("lifeStage");
           }}
           currentStep={getStepInfo().current}
           totalSteps={getStepInfo().total}
@@ -1524,7 +1533,7 @@ export default function Onboarding() {
               {/* Simplified next step - single clear CTA */}
               <div className="space-y-4 pt-4">
                 <Button 
-                  onClick={() => setStep("conditions")} 
+                  onClick={() => setStep("spiritual")} 
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2"
                   size="lg"
                 >
@@ -1568,13 +1577,8 @@ export default function Onboarding() {
                 setStep("spiritual");
               }}
               onBack={() => {
-                // If menstrual_cycle, go back to cycle step
-                if (lifeStage === 'menstrual_cycle') {
-                  setStep("cycle");
-                } else {
-                  setStep("doshaResults");
-                }
-              }}
+              setStep("lifeStage");
+            }}
               onSkip={() => setStep("spiritual")}
               initialConditions={selectedConditions}
             />
@@ -1635,7 +1639,7 @@ export default function Onboarding() {
               <Button variant="outline" onClick={() => setStep("doshaResults")}>
                 Back
               </Button>
-              <Button onClick={() => setStep("pregnancy")}>
+              <Button onClick={() => setStep("complete")}>
                 Next
               </Button>
             </div>

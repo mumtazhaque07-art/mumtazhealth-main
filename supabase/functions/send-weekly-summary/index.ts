@@ -202,7 +202,8 @@ const sendSummaryForUser = async (
     );
 
     const emailResponse = await resend.emails.send({
-      from: "Mumtaz Health <onboarding@resend.dev>",
+      from: "Mumtaz Health <hello@mumtazhealth.app>",
+      reply_to: "mumtazhaque07@gmail.com",
       to: [userEmail],
       subject: "🌸 Your Weekly Wellness Summary",
       html,

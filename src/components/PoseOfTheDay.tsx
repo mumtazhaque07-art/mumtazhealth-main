@@ -238,7 +238,7 @@ const poseLibrary: PoseData[] = [
       primary: "Vata",
       effect: "Grounding and calming, perfect for settling anxiety and restlessness"
     },
-    lifePhases: ["Menstrual (All phases)", "Pregnancy (All trimesters)", "Postpartum", "Perimenopause", "Menopause"],
+    lifePhases: ["Menstrual (All phases)", "Postpartum", "Perimenopause", "Menopause"],
     modifications: [
       "Place a blanket under the head",
       "Keep the knees closer together",

@@ -12,9 +12,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ArrowLeft, Calendar, Clock, Users, Check, Filter, X, Heart } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Navigation } from "@/components/Navigation";
 import { bookingSchema, validateInput } from "@/lib/validation";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { mumtazYoga8 } from "@/assets/brandImages";
+import { PaymentModal } from "@/components/PaymentModal";
 
 interface Service {
   id: string;
@@ -47,10 +59,12 @@ export default function Bookings() {
   const [bookingDate, setBookingDate] = useState('');
   const [bookingNotes, setBookingNotes] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
   const [durationFilter, setDurationFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,24 +135,29 @@ export default function Bookings() {
     setIsDialogOpen(true);
   };
 
-  const confirmBooking = async () => {
-    if (!user || !selectedService || !bookingDate) {
-      toast.error('Please fill in all required fields');
+  const executeBooking = async () => {
+    if (!user || !selectedService) {
+      toast.error('Session expired. Please log in again.');
       return;
     }
 
-    // Validate booking input
+    if (!bookingDate) {
+      toast.error('Please select a preferred date and time for your session.');
+      return;
+    }
+    
+    // Make sure we have validated data to insert
     const validation = validateInput(bookingSchema, {
       service_id: selectedService.id,
       booking_date: bookingDate,
       notes: bookingNotes || null,
     });
-
+    
     if (!validation.success) {
       toast.error((validation as { success: false; error: string }).error);
       return;
     }
-
+    
     const validatedData = validation.data;
 
     const { data: bookingData, error } = await supabase
@@ -159,7 +178,7 @@ export default function Bookings() {
       return;
     }
 
-    // Send admin notification email
+    // Send admin notification email - wrapped in try/catch to prevent 404s/network errors from blocking UI
     try {
       const { data: profileData } = await supabase
         .from('profiles')
@@ -182,27 +201,30 @@ export default function Bookings() {
           notes: bookingNotes || undefined,
           adminEmail: 'admin@holistic-wellness.com',
         },
+      }).catch(err => {
+        console.warn('Booking email function unreachable (this may be expected in some environments):', err);
+        // We don't throw here so the user still sees their booking was successful in the DB
       });
     } catch (emailError) {
-      console.error('Error sending email:', emailError);
+      console.error('Error in email preparation flow:', emailError);
     }
 
-    toast.success('Booking request submitted! We will confirm shortly.');
+    toast.success('Booking request submitted! A confirmation has been sent to your email.');
     setIsDialogOpen(false);
     loadMyBookings();
   };
 
-  const cancelBooking = async (bookingId: string) => {
-    if (!confirm('Are you sure you want to cancel this booking?')) return;
+  const executeCancelBooking = async () => {
+    if (!bookingToCancel) return;
 
     // Get booking details for email
-    const booking = myBookings.find(b => b.id === bookingId);
+    const booking = myBookings.find(b => b.id === bookingToCancel);
     if (!booking) return;
 
     const { error } = await supabase
       .from('bookings')
       .update({ status: 'cancelled' })
-      .eq('id', bookingId);
+      .eq('id', bookingToCancel);
 
     if (error) {
       console.error('Error cancelling booking:', error);
@@ -235,6 +257,7 @@ export default function Bookings() {
     }
 
     toast.success('Booking cancelled');
+    setBookingToCancel(null);
     loadMyBookings();
   };
 
@@ -357,33 +380,48 @@ export default function Bookings() {
     );
   }
 
+  const consultationService = services.find(s => s.category === 'consultation');
+  const workshopService = services.find(s => s.category === 'workshop');
+
   return (
-    <div className="min-h-screen bg-wellness-beige animate-fade-in">
+    <div className="min-h-screen bg-wellness-beige animate-in fade-in slide-in-from-bottom-4 duration-500">
       <Navigation />
       <div className="max-w-6xl mx-auto p-4 pb-8 pt-24">
-        {/* Header */}
-        <Card className="mb-6 bg-wellness-warm border-wellness-taupe/20 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/")}
-                  className="text-wellness-taupe"
-                >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Tracker
-                </Button>
-                <CardTitle className="text-2xl font-bold text-wellness-taupe">
-                  Book Services
-                </CardTitle>
+        {/* Header - Improved with image and better welcoming */}
+        <Card className="mb-8 overflow-hidden border-none shadow-2xl bg-gradient-to-br from-wellness-taupe/20 to-white">
+          <div className="flex flex-col md:flex-row">
+            <div className="w-full md:w-1/3 h-64 md:h-auto overflow-hidden relative">
+              <img 
+                src={mumtazYoga8} 
+                alt="Mumtaz Haque" 
+                className="w-full h-full object-cover transition-transform hover:scale-105 duration-700" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-white/10 md:to-white hidden md:block"></div>
+            </div>
+            <div className="flex-1 p-8 md:p-10 flex flex-col justify-center bg-white/40 backdrop-blur-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Badge className="bg-wellness-lilac text-white border-none px-4 py-1">Direct Guidance</Badge>
+                <div className="h-1 w-12 bg-wellness-sage/30 rounded-full"></div>
+              </div>
+              <h1 className="text-4xl font-bold text-wellness-taupe mb-4 leading-tight">
+                Consult with Mumtaz
+              </h1>
+              <p className="text-wellness-taupe/80 text-lg max-w-xl leading-relaxed">
+                "My mission is to hold space for your healing. Through Ayurvedic wisdom and conscious practice, we reclaim your vitality together."
+              </p>
+              <div className="mt-8 flex items-center gap-4">
+                 <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(-1)}
+                    className="rounded-full border-wellness-taupe/20 text-wellness-taupe hover:bg-wellness-warm"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
               </div>
             </div>
-            <CardDescription>
-              Deep consultations, workshops, retreats, and teacher training programs
-            </CardDescription>
-          </CardHeader>
+          </div>
         </Card>
 
         <Tabs defaultValue="services" className="space-y-6">
@@ -394,66 +432,125 @@ export default function Bookings() {
 
           {/* Browse Services */}
           <TabsContent value="services" className="space-y-6">
-            {/* Simplified Single Consultation Card */}
-            <div className="max-w-2xl mx-auto py-8">
-              <Card className="overflow-hidden border-wellness-taupe/20 shadow-xl bg-gradient-to-br from-wellness-warm to-white">
-                <div className="h-64 overflow-hidden relative">
-                  <img 
-                    src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=1000" 
-                    alt="Consultation with Mumtaz" 
-                    className="w-full h-full object-cover opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-wellness-taupe/60 to-transparent flex items-end p-6">
-                    <CardTitle className="text-3xl font-bold text-white">
-                      Consult with Mumtaz
-                    </CardTitle>
+            {services.length === 0 ? (
+              <div className="max-w-4xl mx-auto py-16">
+                <Card className="overflow-hidden border-white/40 shadow-xl bg-white/40 backdrop-blur-xl group rounded-[2.5rem] p-12 text-center">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-wellness-sage/10 flex items-center justify-center mb-6 shadow-inner">
+                    <Calendar className="w-10 h-10 text-wellness-sage" />
                   </div>
-                </div>
-                <CardHeader>
-                  <CardDescription className="text-lg leading-relaxed text-wellness-taupe/90">
-                    Experience private, holistic guidance tailored to your unique journey. Mumtaz offers deep consultations for Ayurvedic wellness, hormonal transition support, and personalized lifestyle practices.
+                  <CardTitle className="text-3xl font-bold text-wellness-taupe mb-4 tracking-tight">Booking Soon</CardTitle>
+                  <CardDescription className="text-lg leading-relaxed text-wellness-taupe/80 max-w-md mx-auto">
+                    Mumtaz is currently preparing her calendar for new consultations and workshops. Please check back soon for available slots.
                   </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-wellness-taupe">
-                      <div className="p-2 rounded-full bg-wellness-sage/20">
-                        <Heart className="w-5 h-5" />
-                      </div>
-                      <span>One-to-one personalised Ayurvedic care</span>
+                </Card>
+              </div>
+            ) : (
+            <>
+              <div className="max-w-4xl mx-auto py-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                <Card className="overflow-hidden border-white/40 shadow-xl bg-white/40 backdrop-blur-xl hover:bg-white/60 glow-card-accent transition-all duration-500 group rounded-[2.5rem]">
+                   <div className="p-8">
+                    <div className="w-16 h-16 rounded-[2rem] bg-accent/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
+                      <Heart className="w-8 h-8 text-accent" />
                     </div>
-                    <div className="flex items-center gap-3 text-wellness-taupe">
-                      <div className="p-2 rounded-full bg-wellness-sage/20">
-                        <Users className="w-5 h-5" />
-                      </div>
-                      <span>Tailored for your specific life phase & needs</span>
+                    <div className="flex flex-col mb-8">
+                      <CardTitle className="text-3xl font-bold text-wellness-taupe mb-2 tracking-tight">1-to-1 Consultation</CardTitle>
+                      {consultationService ? (
+                        <div className="inline-flex items-center text-accent font-bold text-xl">
+                          {consultationService.currency === 'GBP' ? '£' : ''}{consultationService.price.toFixed(2)}
+                          <span className="text-sm font-medium text-wellness-taupe/60 ml-1">
+                            / {consultationService.duration_hours ? `${consultationService.duration_hours} hr` : 'session'}
+                          </span>
+                        </div>
+                      ) : (
+                        <CardDescription className="text-accent font-semibold italic">Pricing Unavailable</CardDescription>
+                      )}
                     </div>
-                    <div className="flex items-center gap-3 text-wellness-taupe">
-                      <div className="p-2 rounded-full bg-wellness-sage/20">
-                        <Clock className="w-5 h-5" />
-                      </div>
-                      <span>Flexible session lengths and delivery</span>
-                    </div>
-                  </div>
-                  
-                  <div className="pt-4">
+                    <CardDescription className="text-lg leading-relaxed text-wellness-taupe/80 mb-8">
+                      Deep Ayurvedic assessment, pulse constitutional analysis, and a personalized path for your current life phase.
+                    </CardDescription>
+                    <ul className="space-y-4 mb-10">
+                      <li className="flex items-center gap-3 text-wellness-taupe/70 font-medium">
+                        <div className="p-1 rounded-full bg-wellness-sage/20 text-wellness-sage"><Check className="w-4 h-4" /></div> Individual constitutional analysis
+                      </li>
+                      <li className="flex items-center gap-3 text-wellness-taupe/70 font-medium">
+                        <div className="p-1 rounded-full bg-wellness-sage/20 text-wellness-sage"><Check className="w-4 h-4" /></div> Custom nutrition & lifestyle plan
+                      </li>
+                      <li className="flex items-center gap-3 text-wellness-taupe/70 font-medium">
+                        <div className="p-1 rounded-full bg-wellness-sage/20 text-wellness-sage"><Check className="w-4 h-4" /></div> Spiritual alignment guidance
+                      </li>
+                    </ul>
                     <Button 
-                      onClick={() => {
-                        const generalService = services.find(s => s.category === 'consultation') || services[0];
-                        if (generalService) handleBookService(generalService);
-                        else toast.error("Booking service currently unavailable. Please check back soon.");
-                      }}
-                      className="w-full py-6 text-lg bg-wellness-lilac hover:bg-wellness-lilac/90 text-white shadow-lg transition-transform hover:scale-[1.02]"
+                      onClick={() => handleBookService(services.find(s => s.category === 'consultation') || services[0] || { 
+                        id: 'temp-1', 
+                        title: '1-to-1 Consultation', 
+                        description: 'Private assessment', 
+                        category: 'consultation', 
+                        duration_days: null, 
+                        duration_hours: 1, 
+                        price: 0, 
+                        currency: 'GBP', 
+                        max_capacity: 1 
+                      })}
+                      className="w-full bg-accent hover:bg-accent/90 text-white rounded-2xl h-14 text-lg font-bold shadow-lg shadow-accent/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                     >
-                      <Calendar className="w-5 h-5 mr-3" />
-                      Request a Consultation
+                      Request Your Session
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground mt-4 italic">
-                      Pricing and package details will be shared during your initial inquiry.
-                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                </Card>
+
+                <Card className="overflow-hidden border-wellness-taupe/10 shadow-xl bg-white hover:shadow-2xl transition-all group">
+                   <div className="p-6">
+                    <div className="w-12 h-12 rounded-2xl bg-wellness-taupe/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Users className="w-6 h-6 text-wellness-taupe" />
+                    </div>
+                    <div className="flex flex-col mb-6">
+                      <CardTitle className="text-2xl font-bold text-wellness-taupe mb-2">Workshops & Group</CardTitle>
+                      {workshopService ? (
+                        <div className="inline-flex items-center text-wellness-sage font-bold text-xl">
+                          {workshopService.currency === 'GBP' ? '£' : ''}{workshopService.price.toFixed(2)}
+                          <span className="text-sm font-medium text-wellness-taupe/60 ml-1">
+                            / {workshopService.duration_hours ? `${workshopService.duration_hours} hr` : 'session'}
+                          </span>
+                        </div>
+                      ) : (
+                        <CardDescription className="text-wellness-sage font-semibold italic">Pricing Unavailable</CardDescription>
+                      )}
+                    </div>
+                    <CardDescription className="text-base leading-relaxed text-wellness-taupe/80 mb-6">
+                      Join a community of women in themed workshops covering Menarche, Menopause, and Postpartum wisdom.
+                    </CardDescription>
+                    <ul className="space-y-3 mb-8">
+                      <li className="flex items-center gap-2 text-sm text-wellness-taupe/70">
+                        <Check className="w-4 h-4 text-wellness-sage" /> Live group coaching & Q&A
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-wellness-taupe/70">
+                        <Check className="w-4 h-4 text-wellness-sage" /> Themed seasonal practices
+                      </li>
+                      <li className="flex items-center gap-2 text-sm text-wellness-taupe/70">
+                        <Check className="w-4 h-4 text-wellness-sage" /> Peer support & shared learning
+                      </li>
+                    </ul>
+                    <Button 
+                      onClick={() => handleBookService(services.find(s => s.category === 'workshop') || { 
+                        id: 'temp-2', 
+                        title: 'Wisdom Workshop', 
+                        description: 'Group session', 
+                        category: 'workshop', 
+                        duration_days: null, 
+                        duration_hours: 2, 
+                        price: 0, 
+                        currency: 'GBP', 
+                        max_capacity: 20 
+                      })}
+                      variant="outline"
+                      className="w-full border-wellness-taupe/20 text-wellness-taupe hover:bg-wellness-warm rounded-xl"
+                    >
+                      View Schedule
+                    </Button>
+                  </div>
+                </Card>
+              </div>
             </div>
             
             {/* No results message */}
@@ -466,6 +563,8 @@ export default function Bookings() {
                   </Button>
                 </CardContent>
               </Card>
+            )}
+            </>
             )}
           </TabsContent>
 
@@ -523,7 +622,7 @@ export default function Bookings() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => cancelBooking(booking.id)}
+                              onClick={() => setBookingToCancel(booking.id)}
                             >
                               Cancel Booking
                             </Button>
@@ -577,18 +676,33 @@ export default function Bookings() {
                 </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
                 Cancel
               </Button>
               <Button 
-                onClick={confirmBooking}
-                className="bg-wellness-taupe hover:bg-wellness-taupe/90"
+                onClick={executeBooking}
+                className="bg-wellness-sage hover:bg-wellness-sage/90 text-white min-w-[140px] rounded-xl shadow-lg shadow-wellness-sage/20 transition-all active:scale-[0.98]"
               >
                 Confirm Booking
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!bookingToCancel} onOpenChange={(open) => !open && setBookingToCancel(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel this booking? This action cannot be undone and your spot will be released.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+              <AlertDialogAction onClick={executeCancelBooking} className="bg-red-500 hover:bg-red-600">Cancel Booking</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

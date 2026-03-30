@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send welcome email to user
     const userEmailResponse = await resend.emails.send({
-      from: "Mumtaz Health <onboarding@resend.dev>",
+      from: "Mumtaz Health <hello@mumtazhealth.app>",
       reply_to: ADMIN_EMAIL,
       to: [userEmail],
       subject: "Welcome to Mumtaz Health 💜",
@@ -71,7 +71,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Send admin notification about new signup
     try {
       const adminNotificationResponse = await resend.emails.send({
-        from: "Mumtaz Health <onboarding@resend.dev>",
+        from: "Mumtaz Health <hello@mumtazhealth.app>",
+        reply_to: userEmail,
         to: [ADMIN_EMAIL],
         subject: `🎉 New User Signup: ${userName || userEmail}`,
         html: `

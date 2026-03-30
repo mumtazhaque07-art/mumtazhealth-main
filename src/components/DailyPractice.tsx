@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, PlayCircle, Lock } from "lucide-react";
+import { Loader2, PlayCircle, Lock, Moon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
@@ -123,6 +123,42 @@ export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPra
           </Badge>
         ))}
       </div>
+
+      {lifeStage && (
+        <Card className="bg-mumtaz-plum/5 border-mumtaz-lilac/30 shadow-sm overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-mumtaz-plum/10 flex items-center justify-center flex-shrink-0">
+                <Moon className="w-5 h-5 text-mumtaz-plum" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-mumtaz-plum uppercase tracking-tight">
+                  {lifeStage.includes('pregnancy') ? 'Sacred Carry Protocol' : 
+                   lifeStage.includes('postpartum') ? 'The Sacred 40 Protocol' : 
+                   'Sunnah Shifa Protocol'}
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed italic">
+                  {lifeStage === 'fertility' && '"7 Ajwa dates in the morning. A spoonful of raw honey mixed with warm water."'}
+                  {lifeStage === 'menarche' && '"Iron-rich Shifa: Beetroot, spinach, and 3-5 dates daily to support hormonal awakening."'}
+                  {lifeStage === 'pregnancy' && '"Trimester 3: 7 Ajwa dates daily. Talbina (barley porridge) for heart-ease and anxiety."'}
+                  {lifeStage === 'postpartum' && '"Warming Vata-soups with ginger and turmeric. Snehana (oil massage) to ground the spirit."'}
+                  {lifeStage === 'perimenopause' && '"Cooling Pitta fire: Fennel water and Aloe Vera. Bone-density support with sesame seeds."'}
+                  {lifeStage === 'menopause' && '"The Second Spring: Internal moisture with Ghee. Cooling moon-breathing (Sitali)."'}
+                  {lifeStage === 'golden_years' && '"Tejas Glow: Antioxidant tonics, raw honey, and continuous light Dhikr."'}
+                  {lifeStage === 'post_surgical' && '"Healing Sabr: Turmeric-Ginger Shifa tonics and easy-to-digest Sunnah Kitchari."'}
+                </p>
+                <div className="pt-2">
+                  <Badge variant="secondary" className="bg-mumtaz-plum/10 text-mumtaz-plum text-[10px]">
+                    {lifeStage.includes('pregnancy') ? 'Prenatal Wisdom' : 
+                     lifeStage.includes('postpartum') ? 'Maternal Healing' : 
+                     'Prophetic Medicine'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

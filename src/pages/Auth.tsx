@@ -328,12 +328,47 @@ export default function Auth() {
   };
 
   const handleGoogleSignIn = async () => {
-    // Google Sign-In is currently not enabled in the Supabase project configuration.
-    // To prevent the 'Unsupported Provider' error page, we show an informative message.
-    toast.info("Google Sign-In is currently being configured. Please use your email to sign in or sign up for now.", {
-      description: "We're working on making this available soon!",
-      duration: 5000,
-    });
+    setLoading(true);
+    try {
+      const authBase = getAuthRedirectBase();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${authBase}${redirectTarget || '/'}`,
+        },
+      });
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || "Google Sign-In failed. Please try email instead.");
+      setLoading(false);
+    }
+  };
+
+  const handleMagicLink = async () => {
+    const emailError = validateField('email', email);
+    if (emailError) {
+      toast.error(emailError);
+      return;
+    }
+    setLoading(true);
+    try {
+      const authBase = getAuthRedirectBase();
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${authBase}${redirectTarget || '/'}`,
+        },
+      });
+      if (error) throw error;
+      toast.success("Magic link sent! Check your inbox.", {
+        description: "Click the link in your email to sign in instantly — no password needed.",
+        duration: 8000,
+      });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send magic link.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -428,15 +463,32 @@ export default function Auth() {
 
               <CardFooter className="flex flex-col space-y-4">
                 {(!session || !isAdminSetupMode) && (
-                  <Button type="button" variant="outline" className="w-full relative group" onClick={handleGoogleSignIn} disabled={loading}>
-                    <div className="flex items-center justify-center gap-2">
-                      <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
-                      Continue with Google
+                  <>
+                    <div className="relative my-2">
+                      <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border/50" /></div>
+                      <div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">or</span></div>
                     </div>
-                    <span className="ml-2 text-[10px] py-0.5 px-2 border border-mumtaz-plum/20 rounded-full text-mumtaz-plum/60 bg-transparent group-hover:bg-white transition-colors">
-                      Coming Soon
-                    </span>
-                  </Button>
+
+                    <Button type="button" variant="outline" className="w-full h-12 relative" onClick={handleGoogleSignIn} disabled={loading}>
+                      <div className="flex items-center justify-center gap-2">
+                        <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
+                        Continue with Google
+                      </div>
+                    </Button>
+
+                    {isLogin && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full h-10 text-sm text-mumtaz-plum hover:bg-mumtaz-lilac/10"
+                        onClick={handleMagicLink}
+                        disabled={loading || !email}
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Send Magic Link (No Password)
+                      </Button>
+                    )}
+                  </>
                 )}
                 
                 <Button type="button" variant="link" className="text-mumtaz-plum" onClick={() => {
@@ -453,6 +505,14 @@ export default function Auth() {
                     Forgot Password?
                   </Button>
                 )}
+
+                <div className="pt-4 border-t border-border w-full text-center">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium mb-2">Legal & Privacy</p>
+                  <div className="flex justify-center gap-4">
+                    <Link to="/privacy" className="text-[10px] text-mumtaz-plum/60 hover:text-mumtaz-plum underline underline-offset-2">Privacy Policy</Link>
+                    <Link to="/terms" className="text-[10px] text-mumtaz-plum/60 hover:text-mumtaz-plum underline underline-offset-2">Terms of Service</Link>
+                  </div>
+                </div>
               </CardFooter>
             </form>
           </Card>

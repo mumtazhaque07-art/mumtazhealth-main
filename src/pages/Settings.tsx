@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Heart, HelpCircle, Settings as SettingsIcon, Crown } from "lucide-react";
+import { ArrowLeft, Heart, HelpCircle, Settings as SettingsIcon, Crown, LogOut, Moon } from "lucide-react";
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { Navigation } from "@/components/Navigation";
@@ -13,6 +13,8 @@ import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { AccountSettings } from "@/components/AccountSettings";
 import { SubscriptionManagement } from "@/components/SubscriptionManagement";
 import { JourneyPhaseSelector, PRIMARY_FOCUS_OPTIONS, LIFE_PHASE_OPTIONS } from "@/components/JourneyPhaseSelector";
+import { Switch } from "@/components/ui/switch";
+import { useLifeMap } from "@/contexts/LifeMapContext";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [isEditingJourney, setIsEditingJourney] = useState(false);
+  const { islamicMode, setIslamicMode } = useLifeMap();
 
   useEffect(() => {
     fetchProfile();
@@ -147,11 +150,11 @@ export default function Settings() {
       <div className="max-w-4xl mx-auto py-8 pt-24">
         <Button
           variant="ghost"
-          onClick={() => navigate("/tracker")}
+          onClick={() => navigate(-1)}
           className="mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Tracker
+          Back
         </Button>
 
         <Card>
@@ -255,6 +258,30 @@ export default function Settings() {
           </CardContent>
         </Card>
 
+        {/* Preferences Section */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Moon className="w-5 h-5 text-primary" />
+              Preferences
+            </CardTitle>
+            <CardDescription>
+              Adjust your app-wide preferences
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Islamic Mode</Label>
+                <p className="text-xs text-muted-foreground mr-4">
+                  Enable spiritually integrated language, prayer synchronization, and Islamic guidance.
+                </p>
+              </div>
+              <Switch checked={islamicMode} onCheckedChange={setIslamicMode} />
+            </div>
+          </CardContent>
+        </Card>
+
         <NotificationSettings />
         
         <DarkModeToggle />
@@ -298,6 +325,21 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Sign Out Section */}
+        <div className="mt-6 mb-12">
+          <Button 
+            variant="destructive" 
+            className="w-full flex items-center justify-center gap-2" 
+            onClick={async () => {
+              await supabase.auth.signOut();
+              navigate("/auth");
+            }}
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </Button>
+        </div>
       </div>
     </div>
   );

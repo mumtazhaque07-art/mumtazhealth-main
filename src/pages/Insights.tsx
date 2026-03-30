@@ -12,9 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Navigation } from "@/components/Navigation";
 import { DoshaLearningJourney } from "@/components/DoshaLearningJourney";
 import { FeelingPatterns } from "@/components/FeelingPatterns";
-import { MentalWellbeingEducation } from "@/components/MentalWellbeingEducation";
 import { EmotionalWhatWorked } from "@/components/EmotionalWhatWorked";
-import { PostBirthSupportEducation } from "@/components/PostBirthSupportEducation";
 import { WellnessTrendCharts } from "@/components/WellnessTrendCharts";
 import { WellnessExport } from "@/components/WellnessExport";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -51,6 +49,7 @@ export default function Insights() {
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [hasAutoAnalyzed, setHasAutoAnalyzed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,11 +60,23 @@ export default function Insights() {
       }
     });
 
-    setLoading(false);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setUser(session.user);
+      setLoading(false);
+    });
+
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const analyzeInsights = async () => {
+  useEffect(() => {
+    if (user && !analysisData && !analyzing && !hasAutoAnalyzed) {
+      setHasAutoAnalyzed(true);
+      analyzeInsights(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, analysisData, analyzing, hasAutoAnalyzed]);
+
+  const analyzeInsights = async (showToast = true) => {
     if (!user) return;
     
     setAnalyzing(true);
@@ -86,10 +97,10 @@ export default function Insights() {
       }
 
       setAnalysisData(data);
-      toast.success('Insights generated successfully!');
+      if (showToast) toast.success('Insights generated successfully!');
     } catch (error) {
       console.error('Error:', error);
-      toast.error('An unexpected error occurred');
+      if (showToast) toast.error('An unexpected error occurred');
     } finally {
       setAnalyzing(false);
     }
@@ -141,11 +152,9 @@ export default function Insights() {
       <div className="container mx-auto px-4 py-8 pt-24 max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/tracker">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 AI Wellness Insights
@@ -156,7 +165,7 @@ export default function Insights() {
             </div>
           </div>
           <Button 
-            onClick={analyzeInsights} 
+            onClick={() => analyzeInsights(true)} 
             disabled={analyzing}
             size="lg"
             className="gap-2"
@@ -291,19 +300,6 @@ export default function Insights() {
           <WellnessExport />
         </div>
 
-        {/* Post-Birth Support Section */}
-        <div className="mt-8">
-          <PostBirthSupportEducation />
-        </div>
-
-        {/* Mental & Emotional Wellbeing Section */}
-        <div className="mt-8">
-          <div className="mb-4 flex items-center gap-2">
-            <Brain className="w-5 h-5 text-wellness-lilac" />
-            <h2 className="text-lg font-semibold text-foreground">Emotional Support</h2>
-          </div>
-          <MentalWellbeingEducation />
-        </div>
 
         {/* What Worked Tracker - Standalone */}
         <div className="mt-8">

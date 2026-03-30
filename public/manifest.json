@@ -1,26 +1,23 @@
 {
   "name": "Mumtaz Health",
-  "short_name": "Mumtaz Health",
-  "description": "Personalised women's wellbeing — Ayurveda, yoga, nutrition & Islamic wellness",
+  "short_name": "Mumtaz",
+  "description": "A holistic sanctuary for women's biological transitions.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f7f4f0",
-  "theme_color": "#6b3d8a",
-  "orientation": "portrait",
+  "background_color": "#B2AC88",
+  "theme_color": "#C8A2C8",
   "icons": [
     {
-      "src": "/mumtaz-icon.png",
-      "sizes": "192x192",
+      "src": "/og-image.png",
+      "sizes": "1200x630",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/mumtaz-icon.png",
+      "src": "/og-image.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
     }
-  ],
-  "categories": ["health", "lifestyle", "fitness"],
-  "lang": "en-GB"
+  ]
 }

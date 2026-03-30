@@ -137,11 +137,14 @@ export function PersonaSwitcher() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="menstrual_cycle">Cyclical</SelectItem>
-              <SelectItem value="pregnancy">Pregnant</SelectItem>
-              <SelectItem value="postpartum">Postpartum</SelectItem>
-              <SelectItem value="perimenopause">Perimenopause</SelectItem>
-              <SelectItem value="menopause">Menopause</SelectItem>
+              <SelectItem value="menstrual_cycle">Cyclical (Menarche/Cycle)</SelectItem>
+              <SelectItem value="fertility">Fertility (Conscious Conception)</SelectItem>
+              <SelectItem value="pregnancy">Pregnancy (Sacred Carry)</SelectItem>
+              <SelectItem value="postpartum">Postpartum (Sacred 40)</SelectItem>
+              <SelectItem value="post_surgical">Post-Surgical (Healing Sabr)</SelectItem>
+              <SelectItem value="perimenopause">Perimenopause (Transition)</SelectItem>
+              <SelectItem value="menopause">Menopause (Wisdom)</SelectItem>
+              <SelectItem value="post_menopause">Golden Years</SelectItem>
               <SelectItem value="not_sure">Not Sure</SelectItem>
             </SelectContent>
           </Select>

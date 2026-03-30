@@ -8,25 +8,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CHECKIN_MESSAGES, JOURNEY_MESSAGES } from "@/constants/appMessaging";
 
+const feelingCategories = [
+  {
+    name: "Physical Home",
+    feelings: ["tired", "pain", "exhausted", "post-surgery", "period-pain"]
+  },
+  {
+    name: "Body & Digestion",
+    feelings: ["bloated", "digestive", "back-ache", "neck-shoulder", "joint-stiffness", "hot-flushes", "cant-sleep"]
+  },
+  {
+    name: "Mind & Heart",
+    feelings: ["hormonal", "emotional", "restless", "low-mood", "overwhelmed", "stressed"]
+  }
+];
+
 const feelingOptions = [
-  { id: "tired", label: "Tired", emoji: "😴", color: "from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30" },
-  { id: "pain", label: "In pain", emoji: "😣", color: "from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30" },
-  { id: "exhausted", label: "Exhausted", emoji: "😩", color: "from-gray-100 to-slate-100 dark:from-gray-900/30 dark:to-slate-900/30" },
-  { id: "hormonal", label: "Hormonal", emoji: "🌙", color: "from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30" },
-  { id: "emotional", label: "Emotional", emoji: "💧", color: "from-cyan-100 to-blue-100 dark:from-cyan-900/30 dark:to-blue-900/30" },
-  { id: "restless", label: "Restless", emoji: "🦋", color: "from-teal-100 to-emerald-100 dark:from-teal-900/30 dark:to-emerald-900/30" },
-  { id: "bloated", label: "Bloated", emoji: "🎈", color: "from-amber-100 to-yellow-100 dark:from-amber-900/30 dark:to-yellow-900/30" },
-  { id: "cant-sleep", label: "Can't sleep", emoji: "🌃", color: "from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30" },
-  { id: "hot-flushes", label: "Hot flushes", emoji: "🔥", color: "from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30" },
-  { id: "digestive", label: "Digestive issues", emoji: "🍵", color: "from-green-100 to-lime-100 dark:from-green-900/30 dark:to-lime-900/30" },
-  { id: "back-ache", label: "Back ache", emoji: "🧘", color: "from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30" },
-  { id: "neck-shoulder", label: "Neck/shoulder", emoji: "💆", color: "from-fuchsia-100 to-purple-100 dark:from-fuchsia-900/30 dark:to-purple-900/30" },
-  { id: "period-pain", label: "Period pain", emoji: "🩸", color: "from-red-100 to-rose-100 dark:from-red-900/30 dark:to-rose-900/30" },
-  { id: "joint-stiffness", label: "Joint stiffness", emoji: "🦴", color: "from-stone-100 to-zinc-100 dark:from-stone-900/30 dark:to-zinc-900/30" },
-  { id: "post-surgery", label: "Post-surgery discomfort", emoji: "🏥", color: "from-sky-100 to-cyan-100 dark:from-sky-900/30 dark:to-cyan-900/30" },
-  { id: "low-mood", label: "Low mood", emoji: "😢", color: "from-slate-100 to-gray-100 dark:from-slate-900/30 dark:to-gray-900/30" },
-  { id: "overwhelmed", label: "Overwhelmed", emoji: "😵", color: "from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30" },
-  { id: "stressed", label: "Stressed", emoji: "😰", color: "from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30" },
+  { id: "tired", label: "Tired", emoji: "😴", color: "from-blue-50 to-indigo-50 border-blue-100" },
+  { id: "pain", label: "In pain", emoji: "😣", color: "from-red-50 to-orange-50 border-red-100" },
+  { id: "exhausted", label: "Exhausted", emoji: "😩", color: "from-slate-50 to-zinc-50 border-slate-200" },
+  { id: "post-surgery", label: "Post-surgery", emoji: "🏥", color: "from-sky-50 to-cyan-50 border-sky-100" },
+  { id: "period-pain", label: "Period pain", emoji: "🩸", color: "from-rose-50 to-red-50 border-rose-100" },
+  { id: "hormonal", label: "Hormonal", emoji: "🌙", color: "from-purple-50 to-pink-50 border-purple-100" },
+  { id: "emotional", label: "Emotional", emoji: "💧", color: "from-cyan-50 to-blue-50 border-cyan-100" },
+  { id: "restless", label: "Restless", emoji: "🦋", color: "from-teal-50 to-emerald-50 border-teal-100" },
+  { id: "bloated", label: "Bloated", emoji: "🎈", color: "from-amber-50 to-yellow-50 border-amber-100" },
+  { id: "cant-sleep", label: "Can't sleep", emoji: "🌃", color: "from-indigo-50 to-violet-50 border-indigo-100" },
+  { id: "hot-flushes", label: "Hot flushes", emoji: "🔥", color: "from-orange-50 to-red-50 border-orange-100" },
+  { id: "digestive", label: "Digestive", emoji: "🍵", color: "from-green-50 to-lime-50 border-green-100" },
+  { id: "back-ache", label: "Back ache", emoji: "🧘", color: "from-stone-50 to-orange-50 border-stone-100" },
+  { id: "neck-shoulder", label: "Neck/shoulder", emoji: "💆", color: "from-fuchsia-50 to-purple-50 border-fuchsia-100" },
+  { id: "joint-stiffness", label: "Joint stiffness", emoji: "🦴", color: "from-zinc-50 to-slate-50 border-zinc-100" },
+  { id: "low-mood", label: "Low mood", emoji: "😢", color: "from-gray-50 to-slate-50 border-gray-100" },
+  { id: "overwhelmed", label: "Overwhelmed", emoji: "😵", color: "from-violet-50 to-indigo-50 border-violet-100" },
+  { id: "stressed", label: "Stressed", emoji: "😰", color: "from-orange-50 to-amber-50 border-orange-100" },
 ];
 
 const suggestions: Record<string, { tips: string[]; explore: string }> = {
@@ -359,54 +374,58 @@ export function QuickCheckIn({ username }: QuickCheckInProps) {
         )}
 
         {!selectedFeeling ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {favorites.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                  <Star className="h-3 w-3 text-yellow-500" /> Your Favorites
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" /> Your Favorites
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {sortedFeelings.filter(f => isFavorite(f.id)).map((feeling) => (
+                  {feelingOptions.filter(f => isFavorite(f.id)).map((feeling) => (
                     <button
                       key={feeling.id}
                       onClick={() => handleFeelingSelect(feeling.id)}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer 
+                      className={`px-4 py-2.5 rounded-2xl text-sm font-bold cursor-pointer 
                         bg-gradient-to-br ${feeling.color} 
-                        border-2 border-yellow-300 dark:border-yellow-700
+                        border-2 border-yellow-300
                         shadow-sm hover:shadow-md hover:scale-105 
                         transition-all duration-200 ease-out
                         flex items-center gap-2`}
                     >
-                      <span className="text-lg">{feeling.emoji}</span>
-                      <span className="text-foreground">{feeling.label}</span>
+                      <span className="text-xl">{feeling.emoji}</span>
+                      <span className="text-wellness-taupe">{feeling.label}</span>
                     </button>
                   ))}
                 </div>
               </div>
             )}
             
-            <div className="space-y-2">
-              {favorites.length > 0 && (
-                <p className="text-xs font-medium text-muted-foreground">All Options</p>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {sortedFeelings.filter(f => !isFavorite(f.id)).map((feeling) => (
-                  <button
-                    key={feeling.id}
-                    onClick={() => handleFeelingSelect(feeling.id)}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer 
-                      bg-gradient-to-br ${feeling.color} 
-                      border border-border/50 hover:border-wellness-lilac
-                      shadow-sm hover:shadow-md hover:scale-105 
-                      transition-all duration-200 ease-out
-                      flex items-center gap-2`}
-                  >
-                    <span className="text-lg">{feeling.emoji}</span>
-                    <span className="text-foreground">{feeling.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
+            {feelingCategories.map((category) => (
+               <div key={category.name} className="space-y-3">
+                 <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{category.name}</p>
+                 <div className="flex flex-wrap gap-2">
+                   {category.feelings.map(id => {
+                     const feeling = feelingOptions.find(f => f.id === id);
+                     if (!feeling || (isFavorite(id) && favorites.length > 0)) return null;
+                     return (
+                      <button
+                        key={feeling.id}
+                        onClick={() => handleFeelingSelect(feeling.id)}
+                        className={`px-4 py-3 rounded-2xl text-sm font-semibold cursor-pointer 
+                          bg-gradient-to-br ${feeling.color} 
+                          border border-border/40 hover:border-wellness-lilac/50
+                          shadow-sm hover:shadow-md hover:scale-[1.02] 
+                          transition-all duration-200 ease-out
+                          flex items-center gap-2`}
+                      >
+                        <span className="text-xl">{feeling.emoji}</span>
+                        <span className="text-wellness-taupe">{feeling.label}</span>
+                      </button>
+                     );
+                   })}
+                 </div>
+               </div>
+            ))}
           </div>
         ) : (
           <div className="space-y-4 animate-fade-in">

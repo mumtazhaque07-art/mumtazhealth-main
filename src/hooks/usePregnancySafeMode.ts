@@ -89,6 +89,7 @@ export const PREGNANCY_EXCLUDED_CRITERIA = {
     'core-block-work',       // Strong core compression
     'king-pigeon-seated',    // Deep backbend + hip opener
     'pigeon-pose-variation', // Advanced flexibility, deep hip opener
+    'thread-the-needle',     // Deep twist - user flagged as unsafe for pregnancy
   ],
   
   // Categories to exclude

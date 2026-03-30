@@ -11,9 +11,13 @@ export function AppCompanionDisclaimer({
   showMedicalNote = true,
   className = "" 
 }: AppCompanionDisclaimerProps) {
+  if (variant === "subtle") {
+    return (
       <p className={`text-xs text-muted-foreground italic ${className}`}>
-        I am a wellness advisor and practitioner offering supportive advice. This app does NOT provide medical diagnosis or medication. Please consult your physician for all medical guidance.
+        Holistic suggestions only. Not medical advice. Always consult your GP.
       </p>
+    );
+  }
 
   if (variant === "card") {
     return (

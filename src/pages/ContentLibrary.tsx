@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import yogaImage from "@/assets/wellness-yoga.jpg";
+import { HerbalGate, containsHerbalContent } from "@/components/HerbalGate";
 import meditationImage from "@/assets/wellness-meditation.jpg";
 import nutritionImage from "@/assets/wellness-nutrition.jpg";
 import articleImage from "@/assets/wellness-article.jpg";
@@ -83,6 +84,8 @@ import { DailyReminderButton } from "@/components/DailyReminderButton";
 import { PoseSequenceGuide } from "@/components/PoseSequenceGuide";
 import { PoseImageSequence } from "@/components/PoseImageSequence";
 import { FavoritesQuickAccess } from "@/components/FavoritesQuickAccess";
+import { SessionCrossroads } from "@/components/SessionCrossroads";
+import { RecipeCard } from "@/components/RecipeCard";
 import { trackLastActivity } from "@/components/ReturningUserWelcome";
 import { trackRecentActivity } from "@/components/RecentlyViewed";
 import { usePregnancySafeMode } from "@/hooks/usePregnancySafeMode";
@@ -127,7 +130,6 @@ const movementToTagsMap: Record<string, string[]> = {
   recommend: [], // Will be handled based on dosha
 };
 
-// Get recommended tags based on dosha
 const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
   switch (primaryDosha) {
     case "vata":
@@ -141,9 +143,82 @@ const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
   }
 };
 
+const shifaRecipes = [
+  {
+    id: "talbina-recipe",
+    title: "Talbina: The Heart-Ease Porridge",
+    description: "A soft barley porridge recommended in the Sunnah for comforting the heart and relieving anxiety.",
+    prepTime: "20 min",
+    servings: "2",
+    difficulty: "Easy" as const,
+    ingredients: [
+      { item: "Whole grain barley flour", amount: "2 tbsp", shifaBenefit: "Heart-strengthening" },
+      { item: "Organic Milk (or Almond Milk)", amount: "1.5 cups", shifaBenefit: "Nourishing" },
+      { item: "Raw Honey", amount: "To taste", shifaBenefit: "Healing according to Sunnah" },
+      { item: "Ajwa Dates (Chopped)", amount: "3-5", shifaBenefit: "Liver support & Detox" }
+    ],
+    steps: [
+      "Mix barley flour with milk in a small pot over low heat.",
+      "Stir continuously for 15-20 minutes until it thickens into a creamy consistency.",
+      "Remove from heat and stir in the raw honey.",
+      "Top with chopped Ajwa dates and enjoy warm, especially in the early morning."
+    ],
+    sunnahInsight: "The Prophet (SAW) said: 'Talbina gives rest to the heart of the patient and makes it active and relieves some of his sorrow and grief.'",
+    ayurvedicInsight: "Rich in fiber and cooling properties, barley grounds the Vata dosha and clears Kapha congestion.",
+    doshaSuitability: ["Vata", "Kapha"]
+  },
+  {
+    id: "ajwa-honey-water",
+    title: "Ajwa & Honey Shifa Tonic",
+    description: "A simple, powerful immune-boosting tonic for daily detoxification and spiritual protection.",
+    prepTime: "5 min",
+    servings: "1",
+    difficulty: "Easy" as const,
+    ingredients: [
+      { item: "Warm Water", amount: "1 cup", shifaBenefit: "Hydrating" },
+      { item: "Raw Mountain Honey", amount: "1 tsp", shifaBenefit: "Enzymatic healing" },
+      { item: "Ajwa Date Paste", amount: "1 tsp", shifaBenefit: "Protection against toxicity" },
+      { item: "Black Seed Oil", amount: "3 drops", shifaBenefit: "Cure for everything except death" }
+    ],
+    steps: [
+      "Dissolve honey in warm (not boiling) water to preserve its enzymes.",
+      "Stir in the Ajwa date paste until well mixed.",
+      "Add the drops of Black Seed oil and drink on an empty stomach.",
+      "Maintain a state of presence and gratitude while consuming."
+    ],
+    sunnahInsight: "Ajwa dates are known for their protective qualities. Honey is mentioned in the Quran as a 'shifa' for mankind.",
+    ayurvedicInsight: "A powerful Ojas-builder that strengthens the immune system (Vyadhikshamathva).",
+    doshaSuitability: ["Vata", "Pitta", "Kapha"]
+  },
+  {
+    id: "ginger-turmeric-tonic",
+    title: "Vata-Pitta Balancing Tonic",
+    description: "Anti-inflammatory support for joint stiffness, hormonal heat, and digestive sluggishness.",
+    prepTime: "10 min",
+    servings: "1",
+    difficulty: "Easy" as const,
+    ingredients: [
+      { item: "Fresh Ginger Root", amount: "1 inch", shifaBenefit: "Digestive fire (Agni)" },
+      { item: "Ground Turmeric", amount: "1/4 tsp", shifaBenefit: "Anti-inflammatory" },
+      { item: "Fennel Seeds", amount: "1/2 tsp", shifaBenefit: "Cooling Pitta balance" },
+      { item: "Lemon", amount: "1/2", shifaBenefit: "Vitamin C & Alkaline" }
+    ],
+    steps: [
+      "Boil ginger and fennel seeds in water for 5 minutes.",
+      "Add turmeric and simmer for 1 more minute.",
+      "Squeeze in the fresh lemon after removing from heat.",
+      "Strain and sip slowly throughout the morning."
+    ],
+    sunnahInsight: "Ginger (Zanjabil) is mentioned as a drink of Paradise.",
+    ayurvedicInsight: "Balances Pitta fire through fennel while supporting Vata digestion through ginger.",
+    doshaSuitability: ["Vata", "Pitta"]
+  }
+];
+
 const ContentLibrary = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [isCrossroadsOpen, setIsCrossroadsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userTier, setUserTier] = useState<string>("free");
   const [userMovementPreference, setUserMovementPreference] = useState<string | null>(null);
@@ -173,6 +248,15 @@ const ContentLibrary = () => {
   const [selectedCompletion, setSelectedCompletion] = useState<string>("all");
   const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
   const [activeQuickFilters, setActiveQuickFilters] = useState<Set<string>>(new Set());
+
+  // Sanctuary Mode Effect
+  useEffect(() => {
+    if (isPregnancySafeMode || searchParams.get('tag') === 'restorative') {
+      setActiveQuickFilters(new Set(['relaxing', 'beginner', 'chair']));
+      setSelectedCategory('all');
+      setFiltersExpanded(false);
+    }
+  }, [isPregnancySafeMode, searchParams.get('tag')]);
 
   // Quick filter chip definitions
   const quickFilterChips = [
@@ -792,7 +876,7 @@ const ContentLibrary = () => {
       >
         <div className="h-40 overflow-hidden bg-muted relative">
           <img 
-            src={getContentImage(item.content_type, item.tags, item.image_url)}
+            src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
             alt={item.title}
             loading="lazy"
             className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
@@ -942,7 +1026,8 @@ const ContentLibrary = () => {
     return imageUrlMap[imageUrl] || null;
   };
 
-  const getContentImage = (type: string, tags?: string[], imageUrl?: string) => {
+  const getContentImage = (type: string, tags?: string[], imageUrl?: string, title: string = '') => {
+    if (title.toLowerCase().includes('legs up')) return legsUpTheWall;
     // First check if there's a database image URL that maps to an import
     if (imageUrl) {
       const resolved = resolveImageUrl(imageUrl);
@@ -1469,9 +1554,28 @@ const ContentLibrary = () => {
                   <Droplet className="h-4 w-4 mr-1.5 flex-shrink-0" />
                   Diabetes Support
                 </TabsTrigger>
+                <TabsTrigger value="shifa-kitchen" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Apple className="h-4 w-4 mr-1.5 flex-shrink-0 text-wellness-sage" />
+                  Shifa Kitchen
+                </TabsTrigger>
               </TabsList>
             </div>
           </div>
+
+          <TabsContent value="shifa-kitchen" className="space-y-8 mt-6">
+            <div className="max-w-4xl mx-auto space-y-4 text-center mb-8">
+              <h2 className="text-3xl font-bold text-wellness-taupe">Shifa Kitchen</h2>
+              <p className="text-muted-foreground italic max-w-2xl mx-auto">
+                Discover actionable nutritional remedies rooted in Prophetic Medicine (Tibb an-Nabawi) 
+                and Ayurvedic wisdom, designed for modern biological transitions.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-12">
+              {shifaRecipes.map(recipe => (
+                <RecipeCard key={recipe.id} {...recipe} />
+              ))}
+            </div>
+          </TabsContent>
 
           <TabsContent value="for-you" className="space-y-6">
             <Card className="bg-gradient-to-br from-wellness-lilac-light/40 via-background to-wellness-sage-light/40 border-wellness-lilac/20">
@@ -1500,7 +1604,7 @@ const ContentLibrary = () => {
                         >
                           <div className="w-1/3 aspect-[4/5] sm:aspect-video flex-shrink-0 md:w-full md:aspect-video relative overflow-hidden bg-muted">
                             <img 
-                              src={getContentImage(item.content_type, item.tags, item.image_url)}
+                              src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                               alt={item.title}
                               className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : 'group-hover:scale-110 duration-500'}`}
                             />
@@ -1562,7 +1666,7 @@ const ContentLibrary = () => {
                       >
                         <div className="aspect-video relative overflow-hidden">
                           <img
-                            src={getContentImage(item.content_type, item.tags, item.image_url)}
+                            src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                             alt={item.title}
                             loading="lazy"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -1872,7 +1976,7 @@ const ContentLibrary = () => {
                 {/* Content Image with Lock Overlay */}
                 <div className="w-32 sm:w-full sm:h-48 shrink-0 overflow-hidden bg-muted relative">
                   <img 
-                    src={getContentImage(item.content_type, item.tags, item.image_url)}
+                    src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                     alt={item.title}
                     loading="lazy"
                     className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
@@ -2143,7 +2247,7 @@ const ContentLibrary = () => {
                     <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
                       <div className="h-48 overflow-hidden bg-muted relative">
                         <img 
-                          src={getContentImage(item.content_type, item.tags, item.image_url)}
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                           alt={item.title}
                           loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
@@ -2327,7 +2431,7 @@ const ContentLibrary = () => {
                     <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
                       <div className="h-48 overflow-hidden bg-muted relative">
                         <img 
-                          src={getContentImage(item.content_type, item.tags, item.image_url)}
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                           alt={item.title}
                           loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
@@ -2638,7 +2742,7 @@ const ContentLibrary = () => {
                     <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
                       <div className="h-48 overflow-hidden bg-muted relative">
                         <img 
-                          src={getContentImage(item.content_type, item.tags, item.image_url)}
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
                           alt={item.title}
                           loading="lazy"
                           className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
@@ -3041,40 +3145,80 @@ const ContentLibrary = () => {
                       </div>
                     </div>
 
-                    {/* Text Guidance Section */}
-                    <div>
-                      <h3 className="font-semibold mb-2">
-                        {isContentUnlocked(selectedContent) ? 'Guidance' : 'Preview'}
-                      </h3>
-                      <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                        {isContentUnlocked(selectedContent) 
-                          ? selectedContent.detailed_guidance 
-                          : (selectedContent.preview_content || selectedContent.description || 'Unlock to see full content...')
-                        }
-                      </p>
+                    {/* Structural Sections: How to, Options, Benefits */}
+                    <div className="space-y-6 pt-6 border-t border-border">
+                       {/* Description & How to Build */}
+                       <div>
+                         <h3 className="font-semibold text-lg mb-2 text-foreground flex items-center gap-2">
+                            <BookOpen className="h-5 w-5 text-wellness-sage" />
+                            How to Build This Practice
+                         </h3>
+                         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                            {isContentUnlocked(selectedContent) 
+                              ? selectedContent.detailed_guidance 
+                              : (selectedContent.preview_content || selectedContent.description || 'Unlock to see full guidance...')}
+                         </p>
+                       </div>
+
+                       {/* Modifications & Options */}
+                       <div className="bg-wellness-lilac/10 p-5 rounded-2xl border border-wellness-lilac/20">
+                         <h3 className="font-semibold mb-3 text-wellness-plum flex items-center gap-2">
+                            <Activity className="h-4 w-4" />
+                            Modifications & Phase Options
+                         </h3>
+                         <ul className="space-y-3">
+                           <li className="text-sm text-muted-foreground flex items-start gap-2">
+                             <span className="text-wellness-sage font-bold mt-0.5">•</span>
+                             <span><strong>If you feel exhausted:</strong> Use props (pillows/blocks) to fully support your weight. Less effort is more healing in this phase.</span>
+                           </li>
+                           <li className="text-sm text-muted-foreground flex items-start gap-2">
+                             <span className="text-wellness-sage font-bold mt-0.5">•</span>
+                             <span><strong>Based on your phase ({selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'current'}):</strong> {selectedContent.cycle_phases?.[0] === 'menstruation' ? 'Avoid deep twists or inversions. Keep the belly soft and breathing gentle.' : 'Listen to your body\'s feedback—if you feel strain, back off.'}</span>
+                           </li>
+                         </ul>
+                       </div>
+
+                       {/* Practitioner's Guidance & Benefits */}
+                       <div className="p-5 bg-primary/5 rounded-2xl border border-primary/10">
+                         <h3 className="font-semibold mb-3 flex items-center gap-2">
+                           <Sparkles className="h-4 w-4 text-primary" />
+                           Practitioner's Guidance & Benefits
+                         </h3>
+                         <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                           {selectedContent.description}
+                         </p>
+                         
+                         {(selectedContent.benefits?.length > 0) && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-semibold mb-2 text-foreground/90">Key Benefits:</h4>
+                             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                               {selectedContent.benefits.map((benefit: string, i: number) => (
+                                 <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
+                                   <CheckCircle2 className="h-3.5 w-3.5 text-wellness-sage shrink-0 mt-0.5" />
+                                   <span>{benefit}</span>
+                                 </li>
+                               ))}
+                             </ul>
+                           </div>
+                         )}
+
+                         <div className="pt-4 border-t border-primary/10 flex flex-wrap gap-4">
+                           <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                             <CheckCircle2 className="h-4 w-4 text-green-500" />
+                             Alignment: {selectedContent.doshas?.[0] ? selectedContent.doshas[0].charAt(0).toUpperCase() + selectedContent.doshas[0].slice(1) : 'Tridoshic'}
+                           </div>
+                           <div className="text-xs text-muted-foreground flex items-center gap-1.5 font-medium">
+                             <CheckCircle2 className="h-4 w-4 text-green-500" />
+                             Phase: {selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'General Wellbeing'}
+                           </div>
+                         </div>
+                       </div>
                     </div>
 
-                    <div className="pt-6 border-t border-border">
-                      <h3 className="font-semibold mb-3 flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        Practitioner's Guidance
-                      </h3>
-                      <div className="p-4 bg-primary/5 rounded-lg border border-primary/10">
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {selectedContent.description}
-                        </p>
-                        <div className="mt-4 pt-4 border-t border-primary/10 flex flex-wrap gap-4">
-                          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                            Alignment: {selectedContent.doshas?.[0] ? selectedContent.doshas[0].charAt(0).toUpperCase() + selectedContent.doshas[0].slice(1) : 'Tridoshic'}
-                          </div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
-                            Phase: {selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'General Wellbeing'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    {/* Herbal Gate — auto-triggered when content mentions herbs */}
+                    {containsHerbalContent(selectedContent.description + ' ' + (selectedContent.detailed_guidance || '')) && (
+                      <HerbalGate />
+                    )}
 
                     <div className="bg-wellness-sage/10 p-4 rounded-lg border border-wellness-sage/20 space-y-3">
                       <h4 className="text-sm font-semibold text-wellness-sage flex items-center gap-2">
@@ -3129,10 +3273,10 @@ const ContentLibrary = () => {
                     )}
 
                     {/* Content Image - Supporting Visual */}
-                    {isContentUnlocked(selectedContent) && getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url) && (
+                    {isContentUnlocked(selectedContent) && getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url, selectedContent.title) && (
                       <div>
                         <img 
-                          src={getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url)}
+                          src={getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url, selectedContent.title)}
                           alt={selectedContent.title}
                           loading="lazy"
                           className="w-full rounded-lg"
@@ -3153,7 +3297,17 @@ const ContentLibrary = () => {
 
                     {/* Daily Reminder Button */}
                     {isContentUnlocked(selectedContent) && (
-                      <div className="pt-4 border-t border-border">
+                      <div className="pt-6 border-t border-border flex flex-col gap-3">
+                        <Button 
+                          className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white font-bold h-12"
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            setTimeout(() => setIsCrossroadsOpen(true), 300);
+                          }}
+                        >
+                          <CheckCircle2 className="h-5 w-5 mr-2" />
+                          Complete Session
+                        </Button>
                         <DailyReminderButton 
                           contentId={selectedContent.id}
                           contentTitle={selectedContent.title}
@@ -3167,6 +3321,13 @@ const ContentLibrary = () => {
             )}
           </DialogContent>
         </Dialog>
+
+        <SessionCrossroads 
+          open={isCrossroadsOpen}
+          onOpenChange={setIsCrossroadsOpen}
+          nextStepPath="/content-library"
+          nextStepLabel="related therapeutic practices"
+        />
       </div>
     </div>
   );

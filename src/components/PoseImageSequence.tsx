@@ -75,12 +75,12 @@ export const PoseImageSequence = ({
     );
   }
 
-  // If no pose images uploaded, return null to let fallback content show
-  if (poseImages.length === 0) {
+  // If no pose images AND no video uploaded, return null
+  if (poseImages.length === 0 && !videoUrl) {
     return null;
   }
 
-  const currentPose = poseImages[currentIndex];
+  const currentPose = poseImages.length > 0 ? poseImages[currentIndex] : null;
 
   return (
     <div className="space-y-4">
@@ -92,7 +92,7 @@ export const PoseImageSequence = ({
             <span className="text-sm font-medium text-foreground">Full Guided Video</span>
             <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-xs">Premium</Badge>
           </div>
-          <video controls className="w-full rounded-lg bg-black">
+          <video controls className="w-full rounded-2xl bg-black border border-muted/20 shadow-lg">
             <source src={videoUrl} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -101,12 +101,12 @@ export const PoseImageSequence = ({
 
       {/* Premium Video Placeholder - For non-Premium users */}
       {videoUrl && !isPremiumUser && (
-        <div className="relative aspect-video bg-muted rounded-lg overflow-hidden mb-4">
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+        <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 border border-muted-foreground/10 shadow-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
             <div className="text-center p-6">
-              <Crown className="h-10 w-10 mx-auto mb-3 text-amber-500" />
-              <p className="text-sm font-medium mb-2">Join live Premium sessions for full guided practice</p>
-              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">
+              <Crown className="h-10 w-10 mx-auto mb-3 text-amber-500/80" />
+              <p className="text-sm font-medium mb-2 text-foreground/80">Join live Premium sessions for full guided practice</p>
+              <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 shadow-sm border-none">
                 <Crown className="h-3 w-3 mr-1" />
                 Premium
               </Badge>
@@ -115,7 +115,9 @@ export const PoseImageSequence = ({
         </div>
       )}
 
-      {/* Pose Image Section Header */}
+      {poseImages.length > 0 && currentPose && (
+        <>
+          {/* Pose Image Section Header */}
       <div className="flex items-center gap-2 mb-2">
         <Users className="h-4 w-4 text-primary" />
         <span className="text-sm font-medium text-foreground">Step-by-Step Pose Guide</span>
@@ -193,10 +195,10 @@ export const PoseImageSequence = ({
             <button
               key={pose.id}
               onClick={() => setCurrentIndex(index)}
-              className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
+              className={`relative w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 transition-all shadow-sm ${
                 index === currentIndex 
                   ? 'border-primary ring-2 ring-primary/30' 
-                  : 'border-border hover:border-primary/50'
+                  : 'border-transparent hover:border-primary/50'
               }`}
             >
               <img
@@ -204,12 +206,14 @@ export const PoseImageSequence = ({
                 alt={pose.pose_name || `Step ${pose.step_number}`}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm text-xs text-center py-0.5">
+              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md text-xs font-bold text-center py-1">
                 {index + 1}
               </div>
             </button>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );

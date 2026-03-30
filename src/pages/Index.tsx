@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Calendar, BookOpen, BarChart3, User, Sparkles, TrendingUp, Users, Flower2, Activity, Clock, ArrowRight, Waves } from "lucide-react";
+import { Heart, Calendar, BookOpen, BarChart3, User, Sparkles, TrendingUp, Users, Flower2, Activity, Clock, ArrowRight, Waves, Moon, Baby, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import founderPortrait from "@/assets/founder-portrait.jpeg";
 import { Logo } from "@/components/Logo";
-import { HomeNavigation } from "@/components/HomeNavigation";
+import { Navigation } from "@/components/Navigation";
 import { OnboardingTour } from "@/components/OnboardingTour";
 import { QuickCheckIn } from "@/components/QuickCheckIn";
 import { PersonalizedRecommendations } from "@/components/PersonalizedRecommendations";
@@ -22,10 +22,17 @@ import { InstallPromptBanner } from "@/components/InstallPromptBanner";
 import { LifeStageCheckInPrompt } from "@/components/LifeStageCheckInPrompt";
 import { WelcomeEntryDialog } from "@/components/WelcomeEntryDialog";
 import { InBetweenPhaseBanner } from "@/components/InBetweenPhaseBanner";
+import { WellnessCheckIn } from "@/components/WellnessCheckIn";
+import { MidnightAnchorUI } from "@/components/MidnightAnchorUI";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
+import { LunarIndicator } from "@/components/LunarIndicator";
+import { PrayerSync } from "@/components/PrayerSync";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { DailyPractice } from "@/components/DailyPractice";
+import { useLifeMap } from "@/contexts/LifeMapContext";
+import { Switch } from "@/components/ui/switch";
+import { Label as UILabel } from "@/components/ui/label";
 
 interface UserProfile {
   username: string;
@@ -65,6 +72,8 @@ const Index = () => {
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [showEntryDialog, setShowEntryDialog] = useState(false);
   const [activePracticeType, setActivePracticeType] = useState<"yoga" | "meditation" | "emotional" | null>(null);
+  const { lifeStage, config, islamicMode, setIslamicMode } = useLifeMap();
+  const [showAllTools, setShowAllTools] = useState(false);
 
   useEffect(() => {
     checkUserProfile();
@@ -208,6 +217,9 @@ const Index = () => {
   const didQuickCheckIn = typeof window !== 'undefined' && localStorage.getItem('mumtaz_quick_checkin_completed') === 'true';
   const showDashboard = wellnessProfile?.onboarding_completed || (userProfile && didQuickCheckIn);
 
+  // Anti-Gravity: Safe Mode Identification
+  const isSafeMode = wellnessProfile?.life_stage === 'post_surgical' || wellnessProfile?.life_stage === 'postpartum';
+
   // Integrate with global loading indicator
   useGlobalLoading(loading);
 
@@ -219,8 +231,9 @@ const Index = () => {
   // If user has completed onboarding OR quick check-in, show dashboard
   if (showDashboard) {
     return (
-      <div className="min-h-screen bg-background animate-fade-in">
-        <HomeNavigation username={userProfile?.username} />
+      <div className={`min-h-screen bg-background animate-fade-in ${isSafeMode ? 'safe-mode-active' : ''}`}>
+        <MidnightAnchorUI />
+        <Navigation />
         <OnboardingTour run={showTour} onComplete={handleTourComplete} />
         
         {/* Returning User Welcome Dialog */}
@@ -236,21 +249,185 @@ const Index = () => {
           <Logo size="xl" showText={false} />
         </div>
         
-        <div className="container mx-auto px-6 py-12 pt-24 space-y-8">
-          {/* Welcome Header - Simple and Warm */}
-          <div className="text-center space-y-4 animate-fade-in">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              Hello, {userProfile?.username || "Friend"}
-            </h1>
-            <p className="text-lg text-muted-foreground font-accent max-w-xl mx-auto">
-              What feels right for you today? No pressure — just gentle options.
-            </p>
-          </div>
+        <div className="container mx-auto px-6 py-12 pt-24 space-y-12">
+          {/* THE DYNAMIC COMPASS HUB (NON-SAFE MODE) */}
+          {!isSafeMode && (
+            <div className="flex flex-col items-center justify-center space-y-10 max-w-4xl mx-auto pb-12">
+              
+              {/* Compass Center (The Bubble) */}
+              <div className={`relative w-full max-w-3xl p-8 md:p-12 glass-panel border-${config.theme.primary}/30 text-center animate-fade-in transition-all duration-700`}>
+                {/* Animated aura */}
+                <div className={`absolute inset-0 bg-gradient-to-b ${config.theme.gradient} opacity-40 rounded-3xl pointer-events-none`} />
+                <div className={`absolute -inset-4 bg-${config.theme.primary}/10 blur-3xl opacity-60 rounded-full pointer-events-none animate-pulse-gentle`} />
+                
+                <div className="relative z-10 flex flex-col items-center gap-6">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className={`bg-white/50 backdrop-blur-md text-${config.theme.primary} border-${config.theme.primary}/20 px-4 py-1.5 rounded-full border shadow-sm`}>
+                      <config.icon className="w-4 h-4 mr-2" />
+                      <span className="font-bold tracking-widest uppercase text-[10px]">{config.title}</span>
+                    </Badge>
+                    {islamicMode && (
+                      <Badge variant="outline" className="bg-mumtaz-lilac/20 text-mumtaz-plum border-mumtaz-lilac/30 px-4 py-1.5 rounded-full border shadow-sm">
+                        <Moon className="w-4 h-4 mr-2" />
+                        <span className="font-bold tracking-widest uppercase text-[10px]">Islamic Shifa</span>
+                      </Badge>
+                    )}
+                  </div>
 
-          {/* Personalized Recommendations - MOVED TO TOP for discoverability */}
-          <div className="max-w-5xl mx-auto">
-            <PersonalizedRecommendations />
-          </div>
+                  <div>
+                    <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+                      Hello, {userProfile?.username || "Friend"}
+                    </h1>
+                    <p className="text-lg md:text-xl text-muted-foreground font-accent max-w-xl mx-auto mt-4 leading-relaxed">
+                      {config.description}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-6 w-full max-w-md mx-auto my-2">
+                    <div className="flex flex-col items-center gap-2 w-full">
+                      <LunarIndicator />
+                    </div>
+                    <div className="flex flex-col items-center gap-2 w-full">
+                      <PrayerSync />
+                    </div>
+                  </div>
+
+                  {/* The Daily Remedy built directly into the center orb for the zero-work 2-tap rule */}
+                  <div className="w-full mt-4 bg-white/40 backdrop-blur-md rounded-[2.5rem] p-6 border border-white/40 shadow-inner">
+                     <div className="flex items-center justify-center gap-2 mb-4">
+                       <Zap className="w-5 h-5 text-yellow-500 border-yellow-500 fill-yellow-500" />
+                       <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-1">Today's Remedy</h3>
+                     </div>
+                     <PersonalizedRecommendations hideTitle={true} compact={true} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Compass Nodes (Quick Access Radiating from Center) */}
+              <div className="flex flex-wrap justify-center gap-4 md:gap-8 w-full px-4 relative z-20">
+                <button 
+                  onClick={() => navigate("/tracker")} 
+                  className="group flex flex-col items-center justify-center gap-3 w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] glass-panel bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center shadow-sm group-hover:-rotate-12 transition-transform duration-500">
+                    <Activity className="w-6 h-6 text-primary" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Journal</span>
+                </button>
+                
+                <button 
+                  onClick={() => navigate("/my-daily-practice")} 
+                  className="group flex flex-col items-center justify-center gap-3 w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] glass-panel bg-teal-500/10 text-teal-600 border-teal-500/20 hover:bg-teal-500/20 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center shadow-sm group-hover:rotate-12 transition-transform duration-500">
+                    <Flower2 className="w-6 h-6 text-teal-600" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Practice</span>
+                </button>
+                
+                <button 
+                  onClick={() => navigate("/content-library")} 
+                  className="group flex flex-col items-center justify-center gap-3 w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] glass-panel bg-wellness-lilac/10 text-wellness-lilac border-wellness-lilac/20 hover:bg-wellness-lilac/20 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-500">
+                    <Sparkles className="w-6 h-6 text-wellness-lilac" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Library</span>
+                </button>
+                
+                <button 
+                  onClick={() => navigate("/bookings")} 
+                  className="group flex flex-col items-center justify-center gap-3 w-28 h-28 md:w-32 md:h-32 rounded-[2.5rem] glass-panel bg-accent/10 text-accent border-accent/20 hover:bg-accent/20 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <div className="w-12 h-12 rounded-full bg-white/50 flex items-center justify-center shadow-sm group-hover:-rotate-6 transition-transform duration-500">
+                    <Heart className="w-6 h-6 text-accent" />
+                  </div>
+                  <span className="text-[10px] font-bold tracking-widest uppercase opacity-80">Support</span>
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {isSafeMode && (
+            <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+              {/* DIVINE PERMISSION TO REST */}
+              <div className="p-8 rounded-[3rem] bg-gradient-to-br from-wellness-lilac/20 to-wellness-sage/10 border-wellness-lilac/30 shadow-xl text-center relative overflow-hidden group">
+                <div className="absolute -top-12 -right-12 w-48 h-48 bg-wellness-lilac/10 rounded-full blur-3xl pointer-events-none group-hover:scale-150 transition-transform duration-1000" />
+                <div className="relative z-10 space-y-4">
+                  <div className="w-16 h-16 bg-white/60 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <Moon className="w-8 h-8 text-wellness-lilac animate-pulse" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-wellness-taupe tracking-tight">Divine Permission to Rest</h2>
+                  <p className="text-xl text-muted-foreground font-accent italic max-w-2xl mx-auto leading-relaxed">
+                    "Your body is in a state of sacred recovery. The Creator has granted you permission to pause. You are held, you are seen, and you are healing."
+                  </p>
+                  <div className="pt-4">
+                    <Button 
+                      variant="outline" 
+                      className="rounded-full border-wellness-lilac text-wellness-lilac hover:bg-wellness-lilac/10 px-8 h-12 text-lg font-bold"
+                      onClick={() => navigate("/content-library?tag=restorative")}
+                    >
+                      Enter Gentle Sanctuary
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* SINGLE POINT OF ACTION */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <Card className="border-none bg-white/40 backdrop-blur-md rounded-[2.5rem] p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <CardHeader className="px-0">
+                      <CardTitle className="text-lg font-bold flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-wellness-sage" />
+                        Quick Recovery Check
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-0 space-y-4">
+                        <p className="text-sm text-muted-foreground italic mb-4">No scales, no work. Just a pulse-check for your recovery.</p>
+                        <div className="flex flex-wrap gap-3">
+                          <Button variant="outline" className="rounded-2xl border-wellness-sage/30 hover:bg-wellness-sage/10 text-wellness-taupe px-6">Healing Well</Button>
+                          <Button variant="outline" className="rounded-2xl border-orange-200 hover:bg-orange-50 text-orange-700 px-6">Tired / Resting</Button>
+                          <Button variant="outline" className="rounded-2xl border-red-200 hover:bg-red-50 text-red-700 px-6">Manage Discomfort</Button>
+                        </div>
+                    </CardContent>
+                 </Card>
+
+                 <Card className="border-none bg-white/40 backdrop-blur-md rounded-[2.5rem] p-8 shadow-sm hover:shadow-md transition-shadow">
+                    <CardHeader className="px-0">
+                      <CardTitle className="text-lg font-bold flex items-center gap-2">
+                        <Heart className="w-5 h-5 text-wellness-lilac" />
+                        Hold Me Now
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-0">
+                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">A one-minute practice to ground your nervous system.</p>
+                        <Button 
+                          className="w-full h-14 bg-wellness-lilac hover:bg-wellness-lilac/90 rounded-2xl text-lg font-bold shadow-lg"
+                          onClick={() => navigate("/content-library?highlight=breath-of-sakinah")}
+                        >
+                          Listen to Sakinah Breath
+                        </Button>
+                    </CardContent>
+                 </Card>
+              </div>
+            </div>
+          )}
+
+          {/* ANTI-GRAVITY: RECOVERY FOCUS (SAFE MODE ONLY) */}
+          {isSafeMode && (
+             <div className="max-w-5xl mx-auto py-8">
+                <Card className="border-none shadow-none bg-transparent">
+                  <CardHeader className="px-0">
+                    <CardTitle className="text-lg font-bold">Suggested for your Recovery</CardTitle>
+                    <CardDescription>Gentle, restorative practices for {getLifeStageDisplay(wellnessProfile?.life_stage)} phase.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="px-0">
+                    <RecentlyViewed />
+                  </CardContent>
+                </Card>
+             </div>
+          )}
 
           {/* Hormonal Transition Quick Access - for in-between phase users */}
           {(wellnessProfile?.life_stage === 'cycle_changes' || 
@@ -281,6 +458,186 @@ const Index = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Explore More Toggle */}
+          <div className="flex justify-center pt-4 pb-8">
+            <Button 
+              variant="outline" 
+              className="rounded-full px-8 hover:bg-muted/50 transition-colors"
+              onClick={() => setShowAllTools(!showAllTools)}
+            >
+              {showAllTools ? "Hide Additional Tools" : "Explore More Tools"}
+            </Button>
+          </div>
+
+          {showAllTools && (
+            <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Phase-Specific North Star Anchors */}
+              {lifeStage === 'fertility' && (
+            <div className="max-w-3xl mx-auto mb-10 space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-wellness-sage/10 to-transparent border-wellness-sage/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="w-12 h-12 text-wellness-sage" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-wellness-sage-dark mb-2 flex items-center gap-2">
+                       The Golden Vessel
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Visualize your womb as a <span className="text-wellness-sage font-semibold font-accent italic">Golden Vessel</span>—pure, radiant, and ready to hold life in its most sacred form.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-wellness-lilac/10 to-transparent border-wellness-lilac/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Heart className="w-12 h-12 text-wellness-lilac-dark" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-wellness-lilac-dark mb-2 flex items-center gap-2">
+                      Miracles of the Prophets
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Remember Maryam (AS) who conceived through a Divine Word, and Sarah (AS) who was blessed in her old age. <span className="italic font-medium">Nothing is impossible for the Creator.</span>
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="bg-wellness-warm/30 rounded-2xl p-5 border border-wellness-taupe/10 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-wellness-sage/20 flex items-center justify-center flex-shrink-0">
+                  <Activity className="w-5 h-5 text-wellness-sage" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-wellness-taupe uppercase tracking-tight mb-1">
+                    Today's Al-Fitra Guidance
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed italic">
+                    Focus on <span className="font-semibold">Istighfar</span> and detox. We are cleansing the soil. The rain follows forgiveness (Surah Nuh).
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {lifeStage === 'pregnancy' && (
+            <div className="max-w-3xl mx-auto mb-10 space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-pink-500/10 to-transparent border-pink-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Baby className="w-12 h-12 text-pink-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-pink-700 mb-2">
+                       The Sacred Carry
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      You are a <span className="text-pink-600 font-semibold italic">Portal for a Soul</span>. Every breath you take in remembrance nourishes the light within you.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Moon className="w-12 h-12 text-blue-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-blue-700 mb-2">
+                      Quranic Bonding
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Reciting <span className="italic font-medium text-blue-600">Surah Maryam</span> brings ease and sakinah. Your baby hears the melody of the Creator's words through you.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {lifeStage === 'postpartum' && (
+            <div className="max-w-3xl mx-auto mb-10 space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-orange-500/10 to-transparent border-orange-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Heart className="w-12 h-12 text-orange-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-orange-700 mb-2">
+                       The Sacred 40
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      This is the time of <span className="text-orange-600 font-semibold italic">Deep Rebuilding</span>. Honour the transition from 'Woman' to 'Mother' with gentleness and warmth.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-amber-500/10 to-transparent border-amber-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Zap className="w-12 h-12 text-amber-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-amber-700 mb-2">
+                      Snehana (Oil) Shifa
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Warm oil on your skin is a <span className="italic font-medium text-amber-600">Shield against Vata</span>. It grounds your nervous system and seals the energy of birth.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {lifeStage === 'menarche' && (
+            <div className="max-w-3xl mx-auto mb-10 space-y-6 text-center">
+              <Card className="bg-gradient-to-br from-wellness-lilac/10 to-transparent border-wellness-lilac/20 shadow-sm p-8">
+                <div className="w-16 h-16 rounded-full bg-wellness-lilac/20 flex items-center justify-center mx-auto mb-4">
+                  <Flower2 className="w-8 h-8 text-wellness-lilac-dark" />
+                </div>
+                <h3 className="font-accent text-2xl font-bold text-wellness-lilac-dark mb-3">
+                  The Awakening
+                </h3>
+                <p className="text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                  Welcome to the <span className="italic font-medium">Sacred Cycle</span>. You are now a carrier of life and a repository of Divine Wisdom. Your cycle is a sign of your strength, not your weakness.
+                </p>
+              </Card>
+            </div>
+          )}
+
+          {lifeStage === 'menopause' && (
+            <div className="max-w-3xl mx-auto mb-10 space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <Card className="bg-gradient-to-br from-indigo-500/10 to-transparent border-indigo-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Moon className="w-12 h-12 text-indigo-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-indigo-700 mb-2">
+                       The Second Spring
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      As the monthly rain stops, the <span className="text-indigo-600 font-semibold italic">Deep Well of Wisdom</span> opens. Focus on the stillness within.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-violet-500/10 to-transparent border-violet-500/20 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <Sparkles className="w-12 h-12 text-violet-500" />
+                  </div>
+                  <CardContent className="p-6">
+                    <h3 className="font-accent text-lg font-bold text-violet-700 mb-2">
+                      The Wise Woman
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Your energy is no longer directed outward; it is <span className="italic font-medium text-violet-600">Sealed Within</span> for your own spiritual ascent.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           )}
 
           {/* The Unified "Today" Action Block */}
@@ -341,25 +698,23 @@ const Index = () => {
 
               {/* Spiritual Uplift */}
               <Card 
-                className="bg-gradient-to-br from-mumtaz-lilac/20 to-mumtaz-lilac/5 border-mumtaz-lilac/30 hover:shadow-xl hover:-translate-y-1 hover:border-mumtaz-lilac/50 transition-all duration-300 cursor-pointer group rounded-2xl overflow-hidden relative"
+                className={`bg-gradient-to-br ${islamicMode ? 'from-mumtaz-lilac/20 to-mumtaz-lilac/5 border-mumtaz-lilac/30' : 'from-accent/20 to-accent/5 border-accent/20'} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer group rounded-2xl overflow-hidden relative`}
                 onClick={() => setActivePracticeType("emotional")}
                 role="button"
                 tabIndex={0}
               >
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-mumtaz-lilac/10 rounded-full blur-3xl transition-all group-hover:bg-mumtaz-lilac/20"></div>
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 ${islamicMode ? 'bg-mumtaz-lilac/10' : 'bg-accent/10'} rounded-full blur-3xl transition-all group-hover:bg-opacity-20`}></div>
                 <CardContent className="pt-8 pb-8 relative z-10">
                   <div className="flex flex-col items-center text-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/20 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <Sparkles className="w-8 h-8 text-accent" />
+                      {islamicMode ? <Moon className="w-8 h-8 text-mumtaz-plum" /> : <Sparkles className="w-8 h-8 text-accent" />}
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-foreground group-hover:text-accent transition-colors">
-                        {wellnessProfile?.spiritual_preference === 'islamic' ? 'Islamic Wisdom' : 'Spiritual Uplift'}
+                        {islamicMode ? 'Daily Dhikr' : 'Spiritual Uplift'}
                       </h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {wellnessProfile?.spiritual_preference === 'islamic' ? 'Dhikr & prayer' :
-                         wellnessProfile?.spiritual_preference === 'both' ? 'Universal & Islamic' :
-                         'Meditation'}
+                        {islamicMode ? 'Connection to Creator' : 'Nourish your soul'}
                       </p>
                     </div>
                   </div>
@@ -369,8 +724,10 @@ const Index = () => {
           </div>
 
           {/* Quick Check-In prominent inline block */}
-          <div className="max-w-3xl mx-auto w-full">
-            <QuickCheckIn username={userProfile?.username} />
+
+          {/* Wellness Check-In: Energy / Mood / Comfort Sliders */}
+          <div className="max-w-xl mx-auto">
+            <WellnessCheckIn />
           </div>
 
           {/* Complete Onboarding Prompt - Gentle, non-pressuring */}
@@ -397,41 +754,71 @@ const Index = () => {
             </Card>
           )}
 
-          {/* Monthly Life Stage Check-In Prompt */}
-          {wellnessProfile?.life_stage && (
-            <div className="max-w-3xl mx-auto">
-              <LifeStageCheckInPrompt currentStage={wellnessProfile.life_stage} />
-            </div>
-          )}
+          {/* Show More / Show Less Toggle for secondary sections */}
+          <div className="flex flex-col gap-12">
+            {!showAllTools ? (
+              <div className="flex justify-center">
+                <Button 
+                  onClick={() => setShowAllTools(true)}
+                  variant="ghost"
+                  className="group text-muted-foreground hover:text-primary gap-2 text-base font-semibold"
+                >
+                  Explore More Journey Tools
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            ) : (
+              <div className="animate-fade-in space-y-12">
+                {/* Monthly Life Stage Check-In Prompt */}
+                {wellnessProfile?.life_stage && (
+                  <div className="max-w-3xl mx-auto">
+                    <LifeStageCheckInPrompt currentStage={wellnessProfile.life_stage} />
+                  </div>
+                )}
 
-          {/* In-Between Phase Support Banner */}
-          {wellnessProfile?.life_stage && (
-            <div className="max-w-3xl mx-auto">
-              <InBetweenPhaseBanner lifeStage={wellnessProfile.life_stage} />
-            </div>
-          )}
+                {/* In-Between Phase Support Banner */}
+                {wellnessProfile?.life_stage && (
+                  <div className="max-w-3xl mx-auto">
+                    <InBetweenPhaseBanner lifeStage={wellnessProfile.life_stage} />
+                  </div>
+                )}
 
+                {/* Confidence Journey - for users building confidence */}
+                <div className="max-w-5xl mx-auto">
+                  <ConfidenceJourney />
+                </div>
 
-          {/* Confidence Journey - for users building confidence */}
-          <div className="max-w-5xl mx-auto">
-            <ConfidenceJourney />
+                {/* Confidence Milestones - weekly progress */}
+                <div className="max-w-5xl mx-auto">
+                  <ConfidenceMilestones />
+                </div>
+
+                {/* Pose of the Day */}
+                <div className="max-w-5xl mx-auto" data-tour="pose-of-day">
+                  <PoseOfTheDay />
+                </div>
+
+                {/* Recently Viewed */}
+                <div className="max-w-5xl mx-auto">
+                  <RecentlyViewed />
+                </div>
+
+                <div className="flex justify-center pt-4">
+                  <Button 
+                    onClick={() => {
+                        setShowAllTools(false);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    variant="outline"
+                    className="rounded-full px-8"
+                  >
+                    Show Less
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Confidence Milestones - weekly progress */}
-          <div className="max-w-5xl mx-auto">
-            <ConfidenceMilestones />
-          </div>
-
-          {/* Pose of the Day */}
-          <div className="max-w-5xl mx-auto" data-tour="pose-of-day">
-            <PoseOfTheDay />
-          </div>
-
-
-          {/* Recently Viewed */}
-          <div className="max-w-5xl mx-auto">
-            <RecentlyViewed />
-          </div>
 
           {/* Your Wellness Space - Gentle, non-pressure language */}
           <Card className="max-w-3xl mx-auto bg-gradient-to-br from-accent/5 to-primary/5 border-border/50 shadow-sm">
@@ -589,20 +976,25 @@ const Index = () => {
             </div>
           )}
 
-          {/* Daily Inspiration */}
-          <Card className="max-w-3xl mx-auto bg-gradient-to-r from-accent/10 to-primary/10 border-accent/30">
-            <CardHeader>
-              <CardTitle className="text-center flex items-center justify-center gap-2">
-                <Sparkles className="h-5 w-5 text-accent" />
-                Today's Intention
+          {/* Daily Inspiration / Ayah / Hadith */}
+          <Card className={`max-w-3xl mx-auto bg-gradient-to-r ${config.theme.gradient} border-${config.theme.primary}/20 shadow-sm overflow-hidden relative`}>
+            <div className={`absolute top-0 left-0 w-1 h-full bg-${config.theme.primary}`}></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-center flex items-center justify-center gap-2 text-sm uppercase tracking-widest text-muted-foreground font-semibold">
+                {islamicMode ? <Moon className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                {islamicMode ? 'Spiritual Shifa' : 'Today\'s Intention'}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-center text-lg text-foreground italic">
-                "Honor your body's wisdom and embrace each phase of your journey with grace and self-compassion."
+            <CardContent className="pt-2 pb-8">
+              <p className="text-center text-xl text-foreground font-accent italic leading-relaxed px-4">
+                {islamicMode 
+                  ? '"Verily, in the remembrance of Allah do hearts find rest." (13:28)'
+                  : `"Honor your body's wisdom and embrace each ${config.id.replace('_', ' ')} phase with grace."`}
               </p>
             </CardContent>
           </Card>
+            </div>
+          )}
         </div>
         <Sheet open={activePracticeType !== null} onOpenChange={(open) => !open && setActivePracticeType(null)}>
           <SheetContent side="bottom" className="h-[85vh] sm:h-[600px] sm:max-w-md sm:mx-auto sm:right-0 sm:left-auto sm:top-1/2 sm:-translate-y-1/2 sm:rounded-l-2xl border-t-2 sm:border-t-0 p-0 flex flex-col overflow-hidden bg-background">

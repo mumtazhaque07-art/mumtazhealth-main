@@ -188,7 +188,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: "Holistic Wellness <onboarding@resend.dev>",
+      from: "Mumtaz Health <hello@mumtazhealth.app>",
+      reply_to: ADMIN_EMAIL,
       to: [to],
       subject,
       html,
