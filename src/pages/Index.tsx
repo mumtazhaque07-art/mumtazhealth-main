@@ -1071,8 +1071,11 @@ const Index = () => {
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                 Your Body. Your Phase.<br />Your Journey.
               </h1>
+              <p className="text-xl md:text-2xl text-wellness-sage-dark font-accent italic leading-relaxed font-semibold">
+                "I'm here to support, not judge. Your journey is yours—and you are not alone."
+              </p>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                As the founder and practitioner of Mumtaz Health, I bring 30+ years of Ayurvedic wisdom and lived experience to guide you. This app provides supportive advice for your wellness journey—not medical diagnosis, medication, or treatment. No pressure, just gentle support for wherever you are right now.
+                As the founder of Mumtaz Health, I bring 30+ years of Ayurvedic wisdom and lived experience to honor your recovery. No pressure, just a gentle sanctuary for wherever you are right now.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
@@ -1124,13 +1127,9 @@ const Index = () => {
             <p className="text-xl text-muted-foreground leading-relaxed">
               I am here to walk alongside you as an advisor and practitioner. This space is designed for supportive guidance—please always consult with your physician for medical concerns. You are also welcome to book a personal session with me for deeper, one-on-one wellness support.
             </p>
-            <p className="text-2xl font-semibold text-foreground italic">
-              "I'm here to support, not judge. Your journey is yours — and you are not alone."
-            </p>
-            <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 mt-6">
-              <p className="text-sm text-destructive font-medium uppercase tracking-wider mb-2">Legal Disclaimer</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                The content provided by Mumtaz Health and its founder is for informational and educational purposes only. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.
+            <div className="mt-12 opacity-80 transition-opacity hover:opacity-100">
+              <p className="text-xs text-muted-foreground leading-relaxed font-medium">
+                The content provided by Mumtaz Health is a supportive wellness tool. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician regarding any medical conditions.
               </p>
             </div>
           </div>

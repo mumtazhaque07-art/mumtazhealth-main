@@ -208,7 +208,8 @@ export default function DoshaAssessment({ onComplete, onBack, currentStep = 2, t
               {question.options.map((option) => (
                 <div
                   key={option.value}
-                  className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg border transition-colors ${
+                  onClick={() => handleAnswer(question.id, option.value)}
+                  className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg border transition-colors cursor-pointer ${
                     currentAnswer === option.value 
                       ? "border-primary bg-primary/5" 
                       : "border-border hover:border-primary/50"

@@ -9,6 +9,23 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
+
+// Standardize Ayurvedic Terms
+const formatAyurvedic = (text?: string) => {
+  if (!text) return '';
+  const terms = ['dosha', 'vata', 'pitta', 'kapha', 'pranayama', 'yoga', 'ayurveda', 'ayurvedic'];
+  let formatted = text;
+  terms.forEach(term => {
+    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+    formatted = formatted.replace(regex, (match) => {
+      // Don't modify if it's already properly capitalized
+      if (match.charAt(0) === match.charAt(0).toUpperCase()) return match;
+      return match.charAt(0).toUpperCase() + match.slice(1);
+    });
+  });
+  return formatted;
+};
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -3150,7 +3167,7 @@ const ContentLibrary = () => {
                        {/* High-Level Description (Why this helps) */}
                        <div className="mb-6">
                          <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
-                           {selectedContent.description}
+                           {formatAyurvedic(selectedContent.description)}
                          </p>
                        </div>
 
@@ -3166,13 +3183,13 @@ const ContentLibrary = () => {
                          </h3>
                          <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2">
                             {isContentUnlocked(selectedContent) 
-                              ? selectedContent.detailed_guidance 
-                              : (selectedContent.preview_content || 'Unlock to see full guidance...')}
+                              ? formatAyurvedic(selectedContent.detailed_guidance) 
+                              : formatAyurvedic(selectedContent.preview_content || 'Unlock to see full guidance...')}
                          </div>
                        </div>
 
                        {/* Benefits */}
-                       {(selectedContent.benefits?.length > 0) && (
+                       {(Array.isArray(selectedContent.benefits) && selectedContent.benefits.length > 0) && (
                          <div className="mb-6 bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10">
                            <h3 className="font-semibold text-lg mb-3 text-wellness-sage flex items-center gap-2">
                              <Sparkles className="h-5 w-5" />
@@ -3182,7 +3199,7 @@ const ContentLibrary = () => {
                              {selectedContent.benefits.map((benefit: string, i: number) => (
                                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                                  <CheckCircle2 className="h-4 w-4 text-wellness-sage shrink-0 mt-0.5" />
-                                 <span>{benefit}</span>
+                                 <span>{formatAyurvedic(benefit)}</span>
                                </li>
                              ))}
                            </ul>
@@ -3209,7 +3226,7 @@ const ContentLibrary = () => {
                     </div>
 
                     {/* Herbal Gate — auto-triggered when content mentions herbs */}
-                    {containsHerbalContent(selectedContent.description + ' ' + (selectedContent.detailed_guidance || '')) && (
+                    {containsHerbalContent(String(selectedContent.description || '') + ' ' + String(selectedContent.detailed_guidance || '')) && (
                       <HerbalGate />
                     )}
 

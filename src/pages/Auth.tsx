@@ -20,8 +20,8 @@ const usernameSchema = z.string().trim().min(3, { message: "Username must be at 
 const RESEND_COOLDOWN_SECONDS = 60;
 
 function getAuthRedirectBase() {
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  return isLocal ? window.location.origin : 'https://mumtazhealth.app';
+  // Always use standard origin to ensure Vercel previews and Prod share exactly matching OAuth handshakes
+  return window.location.origin;
 }
 
 interface FieldError {

@@ -74,9 +74,15 @@ export const VoiceNavigation = () => {
     if (command.includes("home") || command.includes("dashboard")) {
       navigate("/");
       toast.success("Navigating to Home");
+    } else if (command.includes("start") || command.includes("begin") || command.includes("onboard")) {
+      navigate("/onboarding");
+      toast.success("Navigating to Get Started");
     } else if (command.includes("tracker") || command.includes("track") || command.includes("journal")) {
       navigate("/tracker");
       toast.success("Navigating to Journal");
+    } else if (command.includes("auth") || command.includes("sign in") || command.includes("login")) {
+      navigate("/auth");
+      toast.success("Navigating to Sign In");
     } else if (command.includes("book") || command.includes("consultation")) {
       navigate("/bookings");
       toast.success("Navigating to Bookings");
