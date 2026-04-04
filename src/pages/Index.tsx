@@ -1124,14 +1124,9 @@ const Index = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               From Mumtaz, With Love
             </h2>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              I am here to walk alongside you as an advisor and practitioner. This space is designed for supportive guidance—please always consult with your physician for medical concerns. You are also welcome to book a personal session with me for deeper, one-on-one wellness support.
+            <p className="text-xl text-muted-foreground leading-relaxed italic max-w-2xl mx-auto">
+              "I am here to walk alongside you. This library is designed for gentle, supportive guidance to help you reclaim your vitality. Whenever you feel ready for deeper support, you are welcome to book a personal 1-to-1 session with me."
             </p>
-            <div className="mt-12 opacity-80 transition-opacity hover:opacity-100">
-              <p className="text-xs text-muted-foreground leading-relaxed font-medium">
-                The content provided by Mumtaz Health is a supportive wellness tool. It is not intended as a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician regarding any medical conditions.
-              </p>
-            </div>
           </div>
         </div>
       </section>

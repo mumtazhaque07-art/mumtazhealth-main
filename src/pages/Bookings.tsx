@@ -178,59 +178,12 @@ export default function Bookings() {
       return;
     }
 
-    // Send admin notification email - wrapped in try/catch to prevent 404s/network errors from blocking UI
-    try {
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('user_id', user.id)
-        .single();
-
-      // 1. Send admin notification email
-      await supabase.functions.invoke('send-booking-email', {
-        body: {
-          type: 'admin_notification',
-          bookingId: bookingData?.id,
-          userEmail: user.email,
-          userName: profileData?.username || user.email?.split('@')[0] || 'User',
-          serviceTitle: selectedService.title,
-          bookingDate: new Date(bookingDate).toLocaleString(),
-          duration: selectedService.duration_days 
-            ? `${selectedService.duration_days} days` 
-            : `${selectedService.duration_hours} hours`,
-          price: `${selectedService.currency} ${selectedService.price}`,
-          notes: bookingNotes || undefined,
-          adminEmail: 'admin@holistic-wellness.com',
-        },
-      }).catch(err => {
-        console.warn('Admin booking email function unreachable:', err);
-      });
-
-      // 2. Send user confirmation email (The consumer copy)
-      await supabase.functions.invoke('send-booking-email', {
-        body: {
-          type: 'confirmed',
-          bookingId: bookingData?.id,
-          userEmail: user.email,
-          userName: profileData?.username || user.email?.split('@')[0] || 'User',
-          serviceTitle: selectedService.title,
-          bookingDate: new Date(bookingDate).toLocaleString(),
-          duration: selectedService.duration_days 
-            ? `${selectedService.duration_days} days` 
-            : `${selectedService.duration_hours} hours`,
-          price: `${selectedService.currency} ${selectedService.price}`,
-          notes: bookingNotes || undefined,
-        },
-      }).catch(err => {
-        console.warn('User confirmation email function unreachable:', err);
-      });
-    } catch (emailError) {
-      console.error('Error in email preparation flow:', emailError);
-    }
-
-    toast.success('Booking request submitted! A confirmation has been sent to your email.');
+    toast.success('Your healing space is reserved. We look forward to connecting with you!');
     setIsDialogOpen(false);
     loadMyBookings();
+    
+    // Auto-direct to calendar
+    window.open("https://calendly.com", "_blank");
   };
 
   const executeCancelBooking = async () => {
@@ -666,53 +619,38 @@ export default function Bookings() {
 
         {/* Booking Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Request Consultation</DialogTitle>
-              <DialogDescription>
-                Mumtaz will review your request and contact you to confirm the details.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div>
-                <Label htmlFor="booking-date">Preferred Date *</Label>
-                <Input
-                  id="booking-date"
-                  type="datetime-local"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  className="mt-2"
-                  min={new Date().toISOString().slice(0, 16)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="booking-notes">Additional Notes (Optional)</Label>
-                <Textarea
-                  id="booking-notes"
-                  value={bookingNotes}
-                  onChange={(e) => setBookingNotes(e.target.value)}
-                  placeholder="Any specific requirements or questions..."
-                  className="mt-2"
-                  rows={4}
-                />
-              </div>
-                <div className="bg-wellness-lilac/5 p-3 rounded-lg border border-wellness-lilac/10">
-                  <p className="text-xs text-wellness-taupe italic">
-                    Note: This is a booking request. You will be contacted regarding session availability and fees.
-                  </p>
-                </div>
+          <DialogContent className="max-w-md rounded-3xl overflow-hidden p-0 border-0 shadow-2xl">
+            <div className="bg-gradient-to-br from-wellness-sage to-wellness-sage/90 text-white p-8 pb-10">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-white mb-2">Reserve Your Space</DialogTitle>
+                <DialogDescription className="text-white/80 text-base">
+                  Choose a sanctuary time that honors your daily rhythm.
+                </DialogDescription>
+              </DialogHeader>
             </div>
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
-                Cancel
-              </Button>
-              <Button 
-                onClick={executeBooking}
-                className="bg-wellness-sage hover:bg-wellness-sage/90 text-white min-w-[140px] rounded-xl shadow-lg shadow-wellness-sage/20 transition-all active:scale-[0.98]"
-              >
-                Confirm Booking
-              </Button>
-            </DialogFooter>
+            <div className="space-y-5 p-8 -mt-6 bg-white rounded-t-3xl relative z-10">
+              <div className="bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10 text-center space-y-4">
+                <Calendar className="w-8 h-8 text-wellness-sage mx-auto" />
+                <p className="text-sm text-wellness-taupe/80 leading-relaxed font-medium">
+                  We have integrated our digital calendar so you can instantly reserve a time that works perfectly for your timezone and rhythm.
+                </p>
+                <Button 
+                  onClick={() => {
+                    executeBooking();
+                  }}
+                  className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold"
+                >
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Select Date & Time (Calendly)
+                </Button>
+              </div>
+
+              <div className="border-t border-gray-100 pt-4">
+                 <p className="text-xs text-center text-wellness-taupe/60 italic">
+                   Once selected, an invitation will be automatically added to your Apple or Google Calendar.
+                 </p>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

@@ -3230,20 +3230,26 @@ const ContentLibrary = () => {
                       <HerbalGate />
                     )}
 
-                    <div className="bg-wellness-sage/10 p-4 rounded-lg border border-wellness-sage/20 space-y-3">
-                      <h4 className="text-sm font-semibold text-wellness-sage flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        Want Personalised Advice?
-                      </h4>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        Every woman's journey is unique. For a tailored plan that maps specifically to your current phase, dosha, and health goals, consider a 1-to-1 consultation.
-                      </p>
-                      <Button 
-                        className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white"
-                        onClick={() => navigate('/bookings')}
-                      >
-                        Book a Consultation with Mumtaz
-                      </Button>
+                    <div className="bg-gradient-to-br from-wellness-sage/10 to-wellness-lilac/10 p-5 rounded-2xl border border-wellness-sage/20 shadow-sm relative overflow-hidden">
+                      <div className="flex flex-col sm:flex-row gap-5 items-center relative z-10">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-2 border-white shadow-md">
+                          <img src={mumtazYoga8} alt="Mumtaz Haque" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="text-center sm:text-left space-y-2 flex-1">
+                          <h4 className="text-base font-semibold text-wellness-taupe">
+                            Need Personalized Healing?
+                          </h4>
+                          <p className="text-sm text-wellness-taupe/80 leading-relaxed max-w-sm">
+                            Every woman's journey is unique. Let's create a tailored plan for your current phase and dosha.
+                          </p>
+                          <Button 
+                            className="w-full sm:w-auto mt-2 bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full shadow-md font-medium"
+                            onClick={() => navigate('/bookings')}
+                          >
+                            <Calendar className="w-4 h-4 mr-2" /> Book a Consultation
+                          </Button>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Locked Content Overlay for Text */}
