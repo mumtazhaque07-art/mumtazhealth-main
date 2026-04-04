@@ -17,9 +17,11 @@ interface AdminNotificationEmailProps {
   serviceTitle: string
   bookingDate: string
   duration: string
+  durationMinutes: number
   price: string
   notes?: string
   bookingId: string
+  bookingDateIso?: string
 }
 
 export const AdminNotificationEmail = ({
@@ -28,10 +30,29 @@ export const AdminNotificationEmail = ({
   serviceTitle,
   bookingDate,
   duration,
+  durationMinutes,
   price,
   notes,
   bookingId,
-}: AdminNotificationEmailProps) => (
+  bookingDateIso,
+}: AdminNotificationEmailProps) => {
+  // Format the dates for Google Calendar TEMPLATE
+  // It uses YYYYMMDDTHHmmssZ format
+  let calendarHref = 'https://calendar.google.com/calendar/render?action=TEMPLATE';
+  
+  if (bookingDateIso) {
+    const startDate = new Date(bookingDateIso);
+    const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+    
+    // Format removing -, :, and .000
+    const startStr = startDate.toISOString().replace(/(-|:|\.\d+)/g, '');
+    const endStr = endDate.toISOString().replace(/(-|:|\.\d+)/g, '');
+    
+    const details = encodeURIComponent(`Client Email: ${userEmail}\n\nNotes: ${notes || 'None provided'}`);
+    calendarHref += `&text=Consultation%20with%20${encodeURIComponent(userName)}&dates=${startStr}/${endStr}&details=${details}`;
+  }
+
+  return (
   <Html>
     <Head />
     <Preview>New booking request from {userName}</Preview>
@@ -73,8 +94,16 @@ export const AdminNotificationEmail = ({
         </Section>
 
         <Text style={text}>
-          Please review and confirm this booking in your admin dashboard.
+          Please review and confirm this booking in your admin dashboard, or instantly add it to your schedule:
         </Text>
+
+        {bookingDateIso && (
+          <Section style={btnContainer}>
+            <Link style={button} href={calendarHref}>
+              Add to Google Calendar
+            </Link>
+          </Section>
+        )}
         
         <Text style={footer}>
           <strong>Holistic Wellness Admin</strong>
@@ -82,7 +111,8 @@ export const AdminNotificationEmail = ({
       </Container>
     </Body>
   </Html>
-)
+  );
+}
 
 export default AdminNotificationEmail
 
@@ -145,4 +175,20 @@ const footer = {
   marginTop: '32px',
   paddingTop: '24px',
   borderTop: '1px solid #e8ebe8',
+}
+
+const btnContainer = {
+  textAlign: 'center' as const,
+  margin: '24px 0',
+}
+
+const button = {
+  backgroundColor: '#4285F4',
+  borderRadius: '5px',
+  color: '#fff',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+  padding: '12px 24px',
+  display: 'inline-block',
 }

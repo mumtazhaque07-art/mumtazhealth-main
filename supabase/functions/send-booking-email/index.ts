@@ -138,6 +138,10 @@ const handler = async (req: Request): Promise<Response> => {
       : `${bookingData.services?.duration_hours || 60} minutes`;
     const price = `${bookingData.services?.currency || 'USD'} ${bookingData.services?.price || 'TBD'}`;
     const notes = sanitizeString(bookingData.notes, 500);
+    const bookingDateIso = new Date(bookingData.booking_date).toISOString();
+    const durationMinutes = bookingData.services?.duration_days 
+      ? bookingData.services.duration_days * 24 * 60 
+      : bookingData.services?.duration_hours * 60 || 60;
 
     console.log("Sending booking email:", { type, bookingId, userEmail: userEmail.substring(0, 3) + '***', userName, serviceTitle });
 
@@ -175,7 +179,9 @@ const handler = async (req: Request): Promise<Response> => {
           userEmail,
           serviceTitle,
           bookingDate,
+          bookingDateIso,
           duration,
+          durationMinutes,
           price,
           notes: notes || "",
           bookingId,
