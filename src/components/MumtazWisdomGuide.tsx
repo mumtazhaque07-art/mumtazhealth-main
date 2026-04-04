@@ -396,8 +396,8 @@ export function MumtazWisdomGuide() {
         console.error("[CHATBOT_API_ERROR] API returned error:", data.error, data.errorCode);
         
         // Check if we should auto-retry (once for transient errors)
-        if (!isRetry && retryCount < 1 && data.errorCode === 'INTERNAL_ERROR') {
-          console.log("[CHATBOT_API] Auto-retrying after transient error...");
+        if (!isRetry && retryCount < 1) {
+          console.log("[CHATBOT_API] Auto-retrying after error:", data.error);
           setRetryCount(prev => prev + 1);
           setTimeout(() => sendMessage(textToSend, true), 1500);
           return;
@@ -425,7 +425,7 @@ export function MumtazWisdomGuide() {
     } catch (error: any) {
       console.error("[CHATBOT_API_ERROR] Unexpected error:", error);
       
-      // Auto-retry once for network errors
+      // Auto-retry once for network errors or unexpected Supabase function throwing
       if (!isRetry && retryCount < 1) {
         console.log("[CHATBOT_API] Auto-retrying after network error...");
         setRetryCount(prev => prev + 1);
@@ -433,9 +433,11 @@ export function MumtazWisdomGuide() {
         return;
       }
       
+      const errorMessage = error?.message || "I'm having trouble connecting right now. Please try again in a moment.";
+      
       toast({
         title: "Connection Issue",
-        description: "I'm having trouble responding right now. Please try again in a moment.",
+        description: errorMessage.length > 100 ? "I'm having trouble responding right now. Please try again in a moment." : errorMessage,
         variant: "destructive",
       });
       setLastFailedMessage(textToSend);
