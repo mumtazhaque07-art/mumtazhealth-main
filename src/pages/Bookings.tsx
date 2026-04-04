@@ -178,12 +178,9 @@ export default function Bookings() {
       return;
     }
 
-    toast.success('Your healing space is reserved. We look forward to connecting with you!');
+    toast.success('Your healing space is requested. You will receive a Google Calendar invite shortly.');
     setIsDialogOpen(false);
     loadMyBookings();
-    
-    // Auto-direct to calendar
-    window.open("https://calendly.com", "_blank");
   };
 
   const executeCancelBooking = async () => {
@@ -628,26 +625,46 @@ export default function Bookings() {
                 </DialogDescription>
               </DialogHeader>
             </div>
-            <div className="space-y-5 p-8 -mt-6 bg-white rounded-t-3xl relative z-10">
-              <div className="bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10 text-center space-y-4">
-                <Calendar className="w-8 h-8 text-wellness-sage mx-auto" />
-                <p className="text-sm text-wellness-taupe/80 leading-relaxed font-medium">
-                  We have integrated our digital calendar so you can instantly reserve a time that works perfectly for your timezone and rhythm.
+            <div className="space-y-4 p-8 -mt-6 bg-white rounded-t-3xl relative z-10">
+              <div className="bg-wellness-sage/5 p-4 rounded-xl border border-wellness-sage/10 mb-2">
+                <p className="text-sm text-wellness-taupe/80 leading-relaxed">
+                  Select your preferred time below. Mumtaz will review your request and send a direct <strong>Google Calendar Invitation</strong> to your email.
                 </p>
-                <Button 
-                  onClick={() => {
-                    executeBooking();
-                  }}
-                  className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Select Date & Time (Calendly)
-                </Button>
+              </div>
+              
+              <div>
+                <Label htmlFor="booking-date" className="text-wellness-taupe text-sm">Preferred Time</Label>
+                <Input
+                  id="booking-date"
+                  type="datetime-local"
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                  className="mt-2 h-12 rounded-xl"
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="booking-notes" className="text-wellness-taupe text-sm">How can I support you today?</Label>
+                <Textarea
+                  id="booking-notes"
+                  value={bookingNotes}
+                  onChange={(e) => setBookingNotes(e.target.value)}
+                  placeholder="Share a little about what you are going through..."
+                  className="mt-2 rounded-xl resize-none"
+                  rows={3}
+                />
               </div>
 
-              <div className="border-t border-gray-100 pt-4">
-                 <p className="text-xs text-center text-wellness-taupe/60 italic">
-                   Once selected, an invitation will be automatically added to your Apple or Google Calendar.
+              <Button 
+                onClick={executeBooking}
+                className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold mt-4"
+              >
+                Send Request
+              </Button>
+              
+              <div className="pt-2">
+                 <p className="text-xs text-center text-wellness-taupe/50">
+                   You are not charged yet. Fees are discussed after schedule confirmation.
                  </p>
               </div>
             </div>

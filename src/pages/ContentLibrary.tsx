@@ -3254,24 +3254,24 @@ const ContentLibrary = () => {
 
                     {/* Locked Content Overlay for Text */}
                     {!isContentUnlocked(selectedContent) && (
-                      <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                        <div className="text-center">
-                          <Lock className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
-                          <p className="font-semibold mb-1">Unlock Full Content</p>
-                          {selectedContent.tier_requirement !== 'free' && (
-                            <Badge className="bg-primary/90 text-primary-foreground mb-2">
-                              <Crown className="h-4 w-4 mr-1" />
-                              Upgrade to {selectedContent.tier_requirement === 'basic' ? 'Basic' : 
-                                           selectedContent.tier_requirement === 'standard' ? 'Standard' : 'Premium'}
-                            </Badge>
-                          )}
-                          {selectedContent.unlock_after_completions > 0 && (
-                            <p className="text-sm text-muted-foreground">
-                              Complete {selectedContent.unlock_after_completions} items to unlock
-                              <br />
-                              Progress: {progressStats.completed}/{selectedContent.unlock_after_completions}
-                            </p>
-                          )}
+                      <div className="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100 text-center shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <Lock className="w-24 h-24" />
+                        </div>
+                        <div className="relative z-10">
+                          <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                            <Lock className="h-8 w-8 text-purple-600" />
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">Deepen Your Practice</h3>
+                          <p className="text-gray-600 mb-6 max-w-sm mx-auto leading-relaxed">
+                            This extended wellness guide is part of the <strong className="text-purple-700">Standard Signature</strong> tier. Unlock the entire holistic library, advanced routines, and recipes for just £5.99/month.
+                          </p>
+                          <Button 
+                            className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 py-6 text-lg font-medium shadow-md shadow-purple-200"
+                            onClick={() => navigate('/auth?tab=subscription')}
+                          >
+                            <Crown className="w-5 h-5 mr-2" /> Unlock Standard Access
+                          </Button>
                         </div>
                       </div>
                     )}
