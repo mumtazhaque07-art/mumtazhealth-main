@@ -58,81 +58,80 @@ const PRIMARY_FOCUS_OPTIONS = [
 const LIFE_PHASE_OPTIONS = [
   { 
     value: "regular_cycle", 
-    label: "Regular cycle", 
+    label: "Flowing with my monthly rhythm", 
     icon: Sun,
-    description: "Consistent monthly cycling"
+    description: "Connecting with the steady, natural cycle of my body."
   },
   { 
     value: "cycle_changes", 
-    label: "Cycle changes / hormonal transition", 
+    label: "Noticing shifts in my cycle",
     icon: Activity,
-    description: "Experiencing shifts in your cycle"
+    description: "Gentle support for when your hormones start to dance a different tune."
   },
   { 
     value: "perimenopause", 
-    label: "Perimenopause", 
+    label: "The Awakening Season (Perimenopause)", 
     icon: Sparkles,
-    description: "Cycles becoming irregular"
+    description: "Navigating the transition toward your years of deep wisdom."
   },
   { 
     value: "menopause", 
-    label: "Menopause", 
+    label: "The Wisdom Years (Menopause)", 
     icon: Moon,
-    description: "No period for 12+ months"
+    description: "Embracing the profound stillness and clarity of this sacred season."
   },
   { 
     value: "post_menopause", 
-    label: "Post-menopause / beyond", 
+    label: "The Season of Grace (Post-menopause)", 
     icon: Compass,
-    description: "Settled into life after menopause"
+    description: "Living with settled vitality and a deep connection to your inner guidance."
   },
   { 
     value: "trying_to_conceive", 
-    label: "Trying to conceive", 
+    label: "Preparing the Soil (Conception Journey)", 
     icon: Baby,
-    description: "Actively working toward pregnancy"
+    description: "Nurturing your body and spirit as you open space for new life."
   },
   { 
-    value: "pregnancy", 
-    label: "Currently pregnant", 
+    value: "The Sacred Portal (Pregnancy)", 
     icon: Baby,
-    description: "Expecting a baby"
+    description: "Nurturing two souls as your body prepares for the miracle of birth."
   },
   { 
     value: "postpartum_natural", 
-    label: "Post-birth (vaginal)", 
+    label: "The Fourth Trimester (Natural Birth Recovery)",
     icon: Leaf,
-    description: "Recovering after natural birth"
+    description: "Honouring your body’s strength and healing after a natural delivery."
   },
   { 
     value: "postpartum_csection", 
-    label: "Post-birth (C-section)", 
+    label: "The Fourth Trimester (C-section Recovery)", 
     icon: Stethoscope,
-    description: "Recovering after caesarean"
+    description: "Nurturing your physical recovery and spirit following a caesarean birth."
   },
   { 
     value: "postpartum", 
-    label: "Post-birth recovery (general)", 
+    label: "Post-birth Sanctuary", 
     icon: Leaf,
-    description: "Ongoing recovery after childbirth"
+    description: "Gentle restoration and care as you transition into your new rhythm."
   },
   { 
     value: "pregnancy_loss", 
-    label: "Experienced loss", 
+    label: "Honouring My Journey (Healing After Loss)", 
     icon: Feather,
-    description: "Miscarriage or pregnancy loss"
+    description: "A tender, supportive space for reflection, physical recovery, and finding peace."
   },
   { 
     value: "emotional_support", 
-    label: "Emotional support needed", 
+    label: "Nurturing My Heart & Mind", 
     icon: HandHeart,
-    description: "Processing feelings after birth or loss"
+    description: "Finding steady ground and gentle care for my emotional wellbeing."
   },
   { 
     value: "not_sure", 
-    label: "Not sure / exploring", 
+    label: "Beginning My Discovery", 
     icon: Compass,
-    description: "Still figuring things out"
+    description: "I am open to the journey and ready to explore what my body and soul need."
   },
 ];
 
