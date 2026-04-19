@@ -67,8 +67,8 @@ const App = () => (
           <LifeMapProvider>
             <RouteLogger />
             <MumtazWisdomGuide />
-            <PersonaSwitcher />
-            <VoiceNavigation />
+            {/* <PersonaSwitcher /> */}
+           {/* <VoiceNavigation /> */} 
             <DynamicBackground>
             <Suspense fallback={<PageLoadingSkeleton variant="simple" />}>
               <Routes>
