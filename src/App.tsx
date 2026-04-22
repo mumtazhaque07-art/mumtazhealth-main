@@ -19,6 +19,7 @@ import { MorningReviewModal } from "@/components/MorningReviewModal";
 
 // Core pages — loaded immediately on first visit
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +59,30 @@ function RouteLogger() {
   return null;
 }
 
+import { supabase } from "@/integrations/supabase/client";
+
+function RootPage() {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) return <PageLoadingSkeleton variant="simple" />;
+  if (!user) return <Landing />;
+  return <Index />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ErrorBoundary>
@@ -75,7 +100,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={
                   <RouteErrorBoundary variant="dashboard">
-                    <PageTransition><Index /></PageTransition>
+                    <PageTransition><RootPage /></PageTransition>
                   </RouteErrorBoundary>
                 } />
 

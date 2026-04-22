@@ -290,38 +290,38 @@ export function SupportPlanRecommendations({
   };
 
   const RecommendationCard = ({ rec, type }: { rec: Recommendation; type: string }) => (
-    <Card className="bg-card/50 border-wellness-sage/20 hover:shadow-md transition-shadow">
+    <Card className="bg-card border-wellness-sage/20 hover:shadow-md transition-shadow">
       <CardContent className="p-5">
         <div className="flex justify-between items-start mb-2">
           <h4 className="font-semibold text-foreground text-base tracking-tight">{rec.title}</h4>
           {rec.duration && (
-            <span className="text-xs text-wellness-sage-dark bg-wellness-sage/10 px-2 py-1 rounded-full font-medium">
+            <span className="text-xs text-wellness-sage-dark dark:text-wellness-sage-light bg-wellness-sage/10 dark:bg-wellness-sage/20 px-2 py-1 rounded-full font-medium">
               {rec.duration}
             </span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground mb-4 font-medium">{rec.description}</p>
+        <p className="text-sm text-foreground mb-4 font-medium">{rec.description}</p>
         
         {rec.mumtaz_thought_process && (
-          <div className="mb-4 space-y-3 bg-wellness-lilac/5 p-4 rounded-xl border border-wellness-lilac/10">
+          <div className="mb-4 space-y-3 bg-muted/50 dark:bg-slate-800/50 p-4 rounded-xl border border-muted">
             <div className="space-y-1">
-              <span className="text-xs font-bold text-wellness-plum uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5 opacity-80">
                 <Sparkles className="w-3 h-3" /> Mumtaz's Guidance
               </span>
-              <p className="text-sm italic text-slate-700">"{rec.mumtaz_thought_process}"</p>
+              <p className="text-sm italic text-foreground opacity-90">"{rec.mumtaz_thought_process}"</p>
             </div>
             
             {rec.anatomical_benefit && (
               <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Anatomical Benefit</span>
-                <p className="text-sm text-slate-600">{rec.anatomical_benefit}</p>
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider block opacity-70">Anatomical Benefit</span>
+                <p className="text-sm text-foreground opacity-80">{rec.anatomical_benefit}</p>
               </div>
             )}
             
             {rec.modifications && (
               <div className="space-y-1">
-                <span className="text-xs font-bold text-wellness-sage-dark uppercase tracking-wider block">Modifications</span>
-                <p className="text-sm text-slate-600 bg-white/50 p-2 rounded-md">{rec.modifications}</p>
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider block opacity-70">Modifications</span>
+                <p className="text-sm text-foreground opacity-80 bg-background p-2 rounded-md border border-border/50">{rec.modifications}</p>
               </div>
             )}
           </div>
@@ -362,13 +362,13 @@ export function SupportPlanRecommendations({
   );
 
   return (
-    <Card className="border-wellness-sage/30 bg-gradient-to-br from-wellness-sage/5 to-wellness-cream/30">
+    <Card className="border-border bg-card">
       <CardHeader className="text-center pb-2">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Sparkles className="w-5 h-5 text-wellness-taupe" />
-          <CardTitle className="text-xl text-wellness-taupe">Your Support Plan</CardTitle>
+          <Sparkles className="w-5 h-5 text-foreground opacity-80" />
+          <CardTitle className="text-xl text-foreground">Your Support Plan</CardTitle>
         </div>
-        <CardDescription className="text-sm leading-relaxed">
+        <CardDescription className="text-sm leading-relaxed text-muted-foreground">
           Based on how you're feeling today, here are some gentle suggestions. 
           There's no pressure — explore what feels right for you.
         </CardDescription>

@@ -59,7 +59,7 @@ interface WellnessEntry {
   daily_practices: any;
 }
 
-const Index = () => {
+const Landing = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -1288,4 +1288,4 @@ const Index = () => {
   );
 };
 
-export default Index;
+export default Landing;

@@ -107,11 +107,11 @@ export function SupportPlanModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-2 border-b bg-gradient-to-r from-wellness-sage/10 to-wellness-cream/20">
+        <DialogHeader className="p-6 pb-2 border-b bg-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-wellness-taupe" />
-              <DialogTitle className="text-xl text-wellness-taupe">
+              <Sparkles className="w-5 h-5 text-foreground opacity-80" />
+              <DialogTitle className="text-xl text-foreground">
                 {step === 'recommendations' ? 'Your Support Plan' : 'Reflect on Today'}
               </DialogTitle>
             </div>
