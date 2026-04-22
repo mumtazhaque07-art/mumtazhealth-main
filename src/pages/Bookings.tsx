@@ -357,7 +357,7 @@ export default function Bookings() {
       <Navigation />
       <div className="max-w-6xl mx-auto p-4 pb-8 pt-24">
         {/* Header - Improved with image and better welcoming */}
-        <Card className="mb-8 overflow-hidden border-none shadow-2xl bg-gradient-to-br from-wellness-taupe/20 to-white">
+        <Card className="mb-8 overflow-hidden border-none shadow-2xl bg-gradient-to-br from-wellness-taupe/10 to-background/50">
           <div className="flex flex-col md:flex-row">
             <div className="w-full md:w-1/3 h-64 md:h-auto overflow-hidden relative">
               <img 
@@ -365,17 +365,17 @@ export default function Bookings() {
                 alt="Mumtaz Haque" 
                 className="w-full h-full object-cover transition-transform hover:scale-105 duration-700" 
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-white/10 md:to-white hidden md:block"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-card/50 md:to-card hidden md:block"></div>
             </div>
-            <div className="flex-1 p-8 md:p-10 flex flex-col justify-center bg-white/40 backdrop-blur-sm">
+            <div className="flex-1 p-8 md:p-10 flex flex-col justify-center bg-card/60 backdrop-blur-sm">
               <div className="flex items-center gap-3 mb-4">
                 <Badge className="bg-wellness-lilac text-white border-none px-4 py-1">Direct Guidance</Badge>
                 <div className="h-1 w-12 bg-wellness-sage/30 rounded-full"></div>
               </div>
-              <h1 className="text-4xl font-bold text-wellness-taupe mb-4 leading-tight">
+              <h1 className="text-4xl font-bold text-foreground mb-4 leading-tight">
                 Consult with Mumtaz
               </h1>
-              <p className="text-wellness-taupe/80 text-lg max-w-xl leading-relaxed">
+              <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
                 "My mission is to hold space for your healing. Through a holistic and Ayurvedic approach—integrating therapeutic yoga and transformational inner child healing—we reclaim your vitality together."
               </p>
               <div className="mt-8 flex items-center gap-4">
@@ -425,13 +425,13 @@ export default function Bookings() {
             <>
               <div className="max-w-4xl mx-auto py-8">
                 <div className="grid md:grid-cols-2 gap-8">
-                <Card className="overflow-hidden border-white/40 shadow-xl bg-white/40 backdrop-blur-xl hover:bg-white/60 glow-card-accent transition-all duration-500 group rounded-[2.5rem]">
+                <Card className="overflow-hidden border-border/40 shadow-xl bg-card/60 backdrop-blur-xl hover:bg-card/80 glow-card-accent transition-all duration-500 group rounded-[2.5rem]">
                    <div className="p-8">
                     <div className="w-16 h-16 rounded-[2rem] bg-accent/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner">
                       <Heart className="w-8 h-8 text-accent" />
                     </div>
                     <div className="flex flex-col mb-8">
-                      <CardTitle className="text-3xl font-bold text-wellness-taupe mb-2 tracking-tight">1-to-1 Consultation</CardTitle>
+                      <CardTitle className="text-3xl font-bold text-foreground mb-2 tracking-tight">1-to-1 Consultation</CardTitle>
                       {consultationService ? (
                         <div className="inline-flex items-center text-accent font-bold text-xl">
                           {consultationService.currency === 'GBP' ? '£' : ''}{consultationService.price.toFixed(2)}
@@ -476,13 +476,13 @@ export default function Bookings() {
                   </div>
                 </Card>
 
-                <Card className="overflow-hidden border-wellness-taupe/10 shadow-xl bg-white hover:shadow-2xl transition-all group">
+                <Card className="overflow-hidden border-border/10 shadow-xl bg-card hover:bg-muted/30 hover:shadow-2xl transition-all group">
                    <div className="p-6">
-                    <div className="w-12 h-12 rounded-2xl bg-wellness-taupe/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                      <Users className="w-6 h-6 text-wellness-taupe" />
+                    <div className="w-12 h-12 rounded-2xl bg-muted flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Users className="w-6 h-6 text-foreground" />
                     </div>
                     <div className="flex flex-col mb-6">
-                      <CardTitle className="text-2xl font-bold text-wellness-taupe mb-2">Workshops & Group</CardTitle>
+                      <CardTitle className="text-2xl font-bold text-foreground mb-2">Workshops & Group</CardTitle>
                       {workshopService ? (
                         <div className="inline-flex items-center text-wellness-sage font-bold text-xl">
                           {workshopService.currency === 'GBP' ? '£' : ''}{workshopService.price.toFixed(2)}
@@ -625,15 +625,15 @@ export default function Bookings() {
                 </DialogDescription>
               </DialogHeader>
             </div>
-            <div className="space-y-4 p-8 -mt-6 bg-white rounded-t-3xl relative z-10">
-              <div className="bg-wellness-sage/5 p-4 rounded-xl border border-wellness-sage/10 mb-2">
-                <p className="text-sm text-wellness-taupe/80 leading-relaxed">
+            <div className="space-y-4 p-8 -mt-6 bg-card rounded-t-3xl relative z-10">
+              <div className="bg-muted p-4 rounded-xl border border-border mb-2">
+                <p className="text-sm text-foreground leading-relaxed">
                   Select your preferred time below. Mumtaz will review your request and send a direct <strong>Google Calendar Invitation</strong> to your email.
                 </p>
               </div>
               
               <div>
-                <Label htmlFor="booking-date" className="text-wellness-taupe text-sm">Preferred Time</Label>
+                <Label htmlFor="booking-date" className="text-foreground text-sm">Preferred Time</Label>
                 <Input
                   id="booking-date"
                   type="datetime-local"
@@ -644,7 +644,7 @@ export default function Bookings() {
                 />
               </div>
               <div>
-                <Label htmlFor="booking-notes" className="text-wellness-taupe text-sm">How can I support you today?</Label>
+                <Label htmlFor="booking-notes" className="text-foreground text-sm">How can I support you today?</Label>
                 <Textarea
                   id="booking-notes"
                   value={bookingNotes}

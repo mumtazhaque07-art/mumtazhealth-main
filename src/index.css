@@ -51,6 +51,9 @@ All colors MUST be HSL.
     --mumtaz-sand: 35 35% 88%;
     --mumtaz-warm-white: 45 30% 97%;
     
+    --mumtaz-sage-light: 100 20% 90%;
+    --mumtaz-lilac-light: 280 40% 92%;
+
     /* Dosha element colors */
     --dosha-pitta: 25 95% 53%;
     --dosha-vata: 200 80% 60%;
@@ -67,15 +70,15 @@ All colors MUST be HSL.
   }
 
 .dark {
-    /* Deep Midnight #1A2B3C */
-    --background: 210 40% 17%;
-    --foreground: 35 30% 96%;
+    /* Deep Sanctuary Plum/Lilac Shadow */
+    --background: 280 15% 12%;
+    --foreground: 35 30% 92%;
 
-    --card: 280 25% 12%;
-    --card-foreground: 35 30% 96%;
+    --card: 280 15% 15%;
+    --card-foreground: 35 30% 92%;
 
-    --popover: 280 25% 12%;
-    --popover-foreground: 35 30% 96%;
+    --popover: 280 15% 15%;
+    --popover-foreground: 35 30% 92%;
 
     --primary: 140 20% 70%;
     --primary-foreground: 0 0% 100%;
@@ -84,9 +87,9 @@ All colors MUST be HSL.
     --secondary-foreground: 35 30% 96%;
 
     --muted: 280 15% 20%;
-    --muted-foreground: 35 20% 60%;
+    --muted-foreground: 35 25% 80%;
 
-    --accent: 300 25% 71%;
+    --accent: 300 25% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 60% 45%;
@@ -103,6 +106,15 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 35 30% 96%;
     --sidebar-border: 280 15% 25%;
     --sidebar-ring: 280 40% 60%;
+
+    /* Soft Dark Mode Gradients */
+    --mumtaz-sage-light: 102 12% 20%;
+    --mumtaz-lilac-light: 282 15% 22%;
+
+    /* Softer Dosha Colors for High Contrast Text in Dark Mode */
+    --dosha-pitta: 25 80% 65%;
+    --dosha-vata: 200 70% 70%;
+    --dosha-kapha: 120 20% 60%;
   }
 }
 
@@ -113,14 +125,13 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-body;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 1.125rem; /* ~18px for better accessibility */
     line-height: 1.7; /* Extra relaxed line height for tired eyes */
     -webkit-font-smoothing: antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply font-sans;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
@@ -308,5 +319,9 @@ All colors MUST be HSL.
   /* Safe area padding for mobile devices */
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pb-safe-offset-8 {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 2rem);
   }
 }

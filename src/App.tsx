@@ -35,6 +35,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const ConditionTracker = lazy(() => import("./pages/ConditionTracker"));
 const MyDailyPractice = lazy(() => import("./pages/MyDailyPractice"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Chat = lazy(() => import("./pages/Chat"));
 const HormonalTransitionTracker = lazy(() => import("./pages/HormonalTransitionTracker"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -68,7 +69,7 @@ const App = () => (
             <RouteLogger />
             <MumtazWisdomGuide />
             {/* <PersonaSwitcher /> */}
-           {/* <VoiceNavigation /> */} 
+            {/* <VoiceNavigation /> */}
             <DynamicBackground>
             <Suspense fallback={<PageLoadingSkeleton variant="simple" />}>
               <Routes>
@@ -109,6 +110,12 @@ const App = () => (
                 } />
 
                 <Route path="/content" element={<Navigate replace to="/content-library" />} />
+
+                <Route path="/chat" element={
+                  <RouteErrorBoundary variant="simple">
+                    <PageTransition><Chat /></PageTransition>
+                  </RouteErrorBoundary>
+                } />
 
                 <Route path="/content-library" element={
                   <RouteErrorBoundary variant="content">

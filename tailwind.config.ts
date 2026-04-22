@@ -33,9 +33,9 @@ export default {
         },
         wellness: {
           sage: "hsl(var(--mumtaz-sage))",
-          "sage-light": "hsl(100 20% 90%)",
+          "sage-light": "hsl(var(--mumtaz-sage-light))",
           lilac: "hsl(var(--mumtaz-lilac))",
-          "lilac-light": "hsl(280 40% 92%)",
+          "lilac-light": "hsl(var(--mumtaz-lilac-light))",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",

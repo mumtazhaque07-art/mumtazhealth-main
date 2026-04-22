@@ -148,9 +148,13 @@ export function MumtazWisdomGuide() {
 
   useEffect(() => {
     if (open && messages.length === 0 && userProfile && !isAuthPage) {
+      const greetingStr = userProfile.spiritualPreference === 'islamic'
+        ? `As-Salamu Alaikum ${userProfile.username}, I'm here to support you on your wellness journey. How can I help you today?\n\nYou can ask me about yoga, Ayurveda, nutrition, breathwork, or simply check in with yourself. 💜`
+        : `Hello ${userProfile.username}, I'm here to support you on your wellness journey. How can I help you today?\n\nYou can ask me about yoga, Ayurveda, nutrition, breathwork, or simply check in with yourself. 💜`;
+
       const greeting: Message = {
         role: "assistant",
-        content: `Hello ${userProfile.username}, I'm here to support you on your wellness journey. How can I help you today?\n\nYou can ask me about yoga, Ayurveda, nutrition, breathwork, or simply check in with yourself. 💜`,
+        content: greetingStr,
       };
       setMessages([greeting]);
     }

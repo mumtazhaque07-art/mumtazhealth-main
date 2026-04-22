@@ -134,8 +134,16 @@ export function SubscriptionManagement() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // For now, just downgrade to free tier
-      // In production, this would integrate with Stripe to handle billing period end
+      // Attempt to invoke the Stripe Customer Portal
+      const { data: portalData, error: portalError } = await supabase.functions.invoke("create-portal-session");
+      
+      if (!portalError && portalData?.url) {
+        // Redirect securely to Stripe Billing Portal to manage/cancel
+        window.location.href = portalData.url;
+        return;
+      }
+
+      // Fallback: If Stripe is not fully configured, downgrade locally
       const { error } = await supabase
         .from("user_wellness_profiles")
         .update({ subscription_tier: "free" })
@@ -146,12 +154,12 @@ export function SubscriptionManagement() {
       setCurrentTier("free");
       setShowCancelDialog(false);
       toast.success(
-        "Your subscription has been cancelled. You'll retain access until the end of your billing period.",
+        "Your subscription has been cancelled locally. You'll retain access until the end of your billing period.",
         { duration: 5000 }
       );
     } catch (error) {
       console.error("Cancel subscription error:", error);
-      toast.error("Unable to cancel subscription. Please try again or contact support.");
+      toast.error("Unable to connect to the billing portal. Please contact support.");
     } finally {
       setCancelLoading(false);
     }

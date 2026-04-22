@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { toast } from "sonner";
 import { z } from "zod";
 import { Logo } from "@/components/Logo";
-import { ArrowLeft, KeyRound, Mail, RefreshCw, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Star, Quote, Shield } from "lucide-react";
+import { ArrowLeft, KeyRound, Mail, RefreshCw, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Star, Quote, Shield, Fingerprint } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 // Badge import removed to resolve runtime definition issue
 import { usePageMeta } from "@/hooks/usePageMeta";
@@ -344,6 +344,20 @@ export default function Auth() {
     }
   };
 
+  const handleFaceIDSignIn = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPasskey();
+      if (error) throw error;
+      toast.success("Signed in with Face/Touch ID!");
+      navigate(redirectTarget ? `/${redirectTarget}` : "/");
+    } catch (error: any) {
+      toast.error(error.message || "Face ID failed. Ensure Passkeys are setup and enabled.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleMagicLink = async () => {
     const emailError = validateField('email', email);
     if (emailError) {
@@ -473,6 +487,13 @@ export default function Auth() {
                       <div className="flex items-center justify-center gap-2">
                         <img src="https://www.google.com/favicon.ico" alt="Google" className="w-4 h-4" />
                         Continue with Google
+                      </div>
+                    </Button>
+
+                    <Button type="button" variant="outline" className="w-full h-12 relative border-mumtaz-plum/20 hover:bg-mumtaz-plum/5" onClick={handleFaceIDSignIn} disabled={loading}>
+                      <div className="flex items-center justify-center gap-2 text-mumtaz-plum">
+                        <Fingerprint className="w-4 h-4" />
+                        Use Face / Touch ID
                       </div>
                     </Button>
 

@@ -12,6 +12,9 @@ interface Recommendation {
   description: string;
   duration?: string;
   tags?: string[];
+  mumtaz_thought_process?: string;
+  anatomical_benefit?: string;
+  modifications?: string;
 }
 
 interface SupportPlanRecommendationsProps {
@@ -27,37 +30,115 @@ interface SupportPlanRecommendationsProps {
 const getYogaRecommendations = (lifeStage: string, symptoms: string[]): Recommendation[] => {
   const recommendations: Recommendation[] = [];
   
-  // Base recommendations by life stage
+  // Mumtaz's customized Yoga Posology
   if (lifeStage === 'pregnancy') {
     recommendations.push(
-      { id: 'prenatal-gentle', title: 'Gentle Prenatal Stretches', description: 'Soft movements to ease tension and support your changing body', duration: '10 min', tags: ['pregnancy', 'gentle'] },
-      { id: 'prenatal-breathing', title: 'Calming Breath Practice', description: 'Pranayama techniques safe for pregnancy to reduce anxiety', duration: '5 min', tags: ['pregnancy', 'breathwork'] },
+      { 
+        id: 'prenatal-baddha-konasana', 
+        title: 'Baddha Konasana (Bound Angle)', 
+        description: 'Soft hip-opening movement to ease tension and create space for baby.', 
+        duration: '5 min', 
+        tags: ['pregnancy', 'gentle'],
+        mumtaz_thought_process: "We want to create space and softness. This isn't about pushing your knees to the floor; it's about feeling grounded and connected to the life growing inside you.",
+        anatomical_benefit: "Opens the inner thighs, hips, and groin. Encourages downward blood flow to the pelvic floor.",
+        modifications: "Place pillows or bolsters under each knee to support the weight of your legs so you can truly surrender."
+      },
+      { 
+        id: 'prenatal-cat-cow', 
+        title: 'Marjaryasana-Bitilasana (Gentle Cat-Cow)', 
+        description: 'Soothing spinal waves to release lower back pressure.', 
+        duration: '5 min', 
+        tags: ['pregnancy', 'breathwork'],
+        mumtaz_thought_process: "As the belly grows, the lower back takes on so much pressure. Move slowly with the breath to release the sacrum without overstretching the abdomen.",
+        anatomical_benefit: "Increases spinal mobility, relieves lower back tension, and shifts the weight of the baby off the spine.",
+        modifications: "If wrists hurt, lower onto the forearms, or do this seated on a birthing ball."
+      }
     );
   } else if (lifeStage === 'postpartum') {
     recommendations.push(
-      { id: 'postpartum-restore', title: 'Restorative Recovery Poses', description: 'Gentle poses to support healing and reconnect with your body', duration: '15 min', tags: ['postpartum', 'recovery'] },
-      { id: 'postpartum-core', title: 'Gentle Core Reconnection', description: 'Safe, slow movements to rebuild core strength', duration: '10 min', tags: ['postpartum', 'core'] },
+      { 
+        id: 'postpartum-supta-baddha', 
+        title: 'Supta Baddha Konasana (Reclined Rest)', 
+        description: 'Deep, restoring rest to support profound healing.', 
+        duration: '15 min', 
+        tags: ['postpartum', 'recovery'],
+        mumtaz_thought_process: "Your body just performed a miracle and needs profound rest. Lie down completely supported. Do nothing but let gravity hold you unconditionally.",
+        anatomical_benefit: "Gently stretches the groin and inner thighs while relaxing the pelvic floor and calming the nervous system.",
+        modifications: "Must use a bolster under the spine and blocks under the knees. If healing from a Cesarean, do NOT stretch the belly—stay elevated."
+      },
+      { 
+        id: 'postpartum-legs-up', 
+        title: 'Viparita Karani (Legs Up The Wall)', 
+        description: 'A soothing structural reset for exhausted legs and nervous system.', 
+        duration: '10 min', 
+        tags: ['postpartum', 'core'],
+        mumtaz_thought_process: "When you are constantly holding a baby, your energy pools downward. This pose safely returns energy and blood flow back to your heart.",
+        anatomical_benefit: "Drains lymphatic fluid from the legs, relieves lower back tension, and shifts the nervous system into rest-and-digest.",
+        modifications: "If the wall feels too intense on your hamstrings, simply rest your calves on a chair or the sofa."
+      }
     );
   } else if (['perimenopause', 'menopause', 'post_menopause'].includes(lifeStage)) {
     recommendations.push(
-      { id: 'meno-cooling', title: 'Cooling Yoga Flow', description: 'Movements that may help with temperature regulation', duration: '15 min', tags: ['menopause', 'cooling'] },
-      { id: 'meno-joints', title: 'Joint-Friendly Movement', description: 'Gentle stretches to support flexibility and ease stiffness', duration: '10 min', tags: ['menopause', 'mobility'] },
+      { 
+        id: 'meno-sitali', 
+        title: 'Sitali Pranayama (Cooling Breath)', 
+        description: 'A specific breathing pattern to cool the physical and emotional body.', 
+        duration: '5 min', 
+        tags: ['menopause', 'cooling'],
+        mumtaz_thought_process: "When the heat rises—whether as a hot flush or emotional frustration—this magical breath acts as an internal air conditioner.",
+        anatomical_benefit: "Physiologically cools the body temperature and activates the parasympathetic nervous system.",
+        modifications: "If you cannot roll your tongue, simply breathe in through pursed lips like you are drinking from a straw."
+      },
+      { 
+        id: 'meno-joints', 
+        title: 'Pawanmuktasana (Joint Freeing)', 
+        description: 'Gentle, isolated movements to lubricate the joints.', 
+        duration: '10 min', 
+        tags: ['menopause', 'mobility'],
+        mumtaz_thought_process: "As estrogen levels shift, joints can feel incredibly stiff. Our goal here isn't a 'workout', but to intentionally send lubricating fluid to every creaky joint.",
+        anatomical_benefit: "Stimulates synovial fluid in the joints, improving mobility and reducing stiffness.",
+        modifications: "Can be done entirely seated in a chair or even lying in bed."
+      }
     );
   } else {
     recommendations.push(
-      { id: 'cycle-gentle', title: 'Cycle-Supportive Yoga', description: 'Movements that honor where you are in your cycle', duration: '15 min', tags: ['cycle', 'gentle'] },
+      { 
+        id: 'cycle-balasana', 
+        title: 'Balasana (Child’s Pose)', 
+        description: 'Movements that honor the inward pull of your cycle.', 
+        duration: '10 min', 
+        tags: ['cycle', 'gentle'],
+        mumtaz_thought_process: "We are cyclic beings. When you feel tired or are menstruating, it is not a weakness to rest—it is a biological requirement. Surrender to the ground.",
+        anatomical_benefit: "Gently elongates the lower back, massages the reproductive organs, and signals the brain to rest.",
+        modifications: "Keep knees wide to make space for the belly. Place a thick bolster under your torso if the floor feels too far away."
+      }
     );
   }
   
   // Symptom-based additions
   if (symptoms.includes('tired') || symptoms.includes('fatigue')) {
-    recommendations.push({ id: 'energy-restore', title: 'Energy-Restoring Practice', description: 'Gentle movements to support your energy without depleting you', duration: '10 min', tags: ['energy', 'restorative'] });
+    recommendations.push({ 
+      id: 'energy-savasana', 
+      title: 'Supported Savasana (Corpse Pose)', 
+      description: 'The ultimate posture of integration and rest.', 
+      duration: '15 min', 
+      tags: ['energy', 'restorative'],
+      mumtaz_thought_process: "True exhaustion cannot be pushed through. Stop trying to 'fix' it with movement today. Just lie down, close your eyes, and let yourself be held.",
+      anatomical_benefit: "Drops brainwaves into alpha/theta states, allowing deep cellular repair and metabolic reset.",
+      modifications: "Use an eye pillow to block out light and place a blanket over yourself for warmth and grounding weight."
+    });
   }
   if (symptoms.includes('pain') || symptoms.includes('aches')) {
-    recommendations.push({ id: 'pain-relief', title: 'Soothing Stretch Sequence', description: 'Targeted stretches that may help ease discomfort', duration: '12 min', tags: ['pain', 'stretch'] });
-  }
-  if (symptoms.includes('anxious') || symptoms.includes('stressed')) {
-    recommendations.push({ id: 'calm-anxiety', title: 'Grounding & Calming Practice', description: 'Slow, intentional movements to help settle the nervous system', duration: '10 min', tags: ['anxiety', 'grounding'] });
+    recommendations.push({ 
+      id: 'pain-supta-matsyendrasana', 
+      title: 'Supta Matsyendrasana (Supine Twist)', 
+      description: 'A gentle, wringing out of the spine.', 
+      duration: '8 min', 
+      tags: ['pain', 'stretch'],
+      mumtaz_thought_process: "When the body aches, the fascia becomes rigid. We gently twist to ring out tension like a sponge, allowing fresh, oxygenated blood to rush back in upon release.",
+      anatomical_benefit: "Hydrates the spinal discs, stretches the glutes/outer hips, and massages abdominal organs.",
+      modifications: "Do not force the knees to the floor. Place a block or pillow under the knees so they have something to rest on."
+    });
   }
   
   return recommendations.slice(0, 5);
@@ -210,17 +291,43 @@ export function SupportPlanRecommendations({
 
   const RecommendationCard = ({ rec, type }: { rec: Recommendation; type: string }) => (
     <Card className="bg-card/50 border-wellness-sage/20 hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
+      <CardContent className="p-5">
         <div className="flex justify-between items-start mb-2">
-          <h4 className="font-medium text-foreground">{rec.title}</h4>
+          <h4 className="font-semibold text-foreground text-base tracking-tight">{rec.title}</h4>
           {rec.duration && (
-            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+            <span className="text-xs text-wellness-sage-dark bg-wellness-sage/10 px-2 py-1 rounded-full font-medium">
               {rec.duration}
             </span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground mb-4">{rec.description}</p>
-        <div className="flex gap-2 flex-wrap">
+        <p className="text-sm text-muted-foreground mb-4 font-medium">{rec.description}</p>
+        
+        {rec.mumtaz_thought_process && (
+          <div className="mb-4 space-y-3 bg-wellness-lilac/5 p-4 rounded-xl border border-wellness-lilac/10">
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-wellness-plum uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3" /> Mumtaz's Guidance
+              </span>
+              <p className="text-sm italic text-slate-700">"{rec.mumtaz_thought_process}"</p>
+            </div>
+            
+            {rec.anatomical_benefit && (
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Anatomical Benefit</span>
+                <p className="text-sm text-slate-600">{rec.anatomical_benefit}</p>
+              </div>
+            )}
+            
+            {rec.modifications && (
+              <div className="space-y-1">
+                <span className="text-xs font-bold text-wellness-sage-dark uppercase tracking-wider block">Modifications</span>
+                <p className="text-sm text-slate-600 bg-white/50 p-2 rounded-md">{rec.modifications}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-2 flex-wrap mt-2">
           <Button
             size="sm"
             variant="outline"
