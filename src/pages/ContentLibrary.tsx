@@ -246,13 +246,24 @@ const ContentLibrary = () => {
       let matchScore = 0;
       let reasons: string[] = [];
       
+      const itemTags = item.tags || [];
+      const itemDoshas = item.doshas || [];
+      const itemCyclePhases = item.cycle_phases || [];
+      
+      // STRICT EXCLUSION: Do not recommend highly phase-specific content (like postpartum) to the wrong life stage (like perimenopause)
+      if (userLifeStage && itemCyclePhases.length > 0) {
+        if (!itemCyclePhases.includes(userLifeStage) && !itemCyclePhases.includes('all')) {
+          return; // Skip this item entirely
+        }
+      }
+      
       // Check if content matches user's saved content tags (prioritize favorites-based recommendations)
       const savedItems = content.filter(c => savedContentIds.has(c.id));
       const savedTags = savedItems.flatMap(c => c.tags || []);
       const savedTypes = savedItems.map(c => c.content_type);
       
       if (savedTags.length > 0) {
-        const tagMatches = item.tags?.filter(tag => savedTags.includes(tag)).length || 0;
+        const tagMatches = itemTags.filter(tag => savedTags.includes(tag)).length;
         if (tagMatches > 0 && !savedContentIds.has(item.id)) {
           matchScore += tagMatches * 3;
           const matchedType = savedTypes.find(t => t === item.content_type);
@@ -263,14 +274,14 @@ const ContentLibrary = () => {
       }
       
       // Check dosha match
-      if (userPrimaryDosha && item.doshas?.includes(userPrimaryDosha)) {
+      if (userPrimaryDosha && itemDoshas.includes(userPrimaryDosha)) {
         matchScore += 5;
         const doshaName = userPrimaryDosha.charAt(0).toUpperCase() + userPrimaryDosha.slice(1);
         reasons.push(`${doshaName} support`);
       }
       
       // Check life phase match
-      if (userLifeStage && item.cycle_phases?.includes(userLifeStage)) {
+      if (userLifeStage && itemCyclePhases.includes(userLifeStage)) {
         matchScore += 4;
         const phaseName = userLifeStage.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
         reasons.push(`${phaseName}`);
@@ -281,9 +292,9 @@ const ContentLibrary = () => {
         ? movementToTagsMap[userMovementPreference] || []
         : getDoshaMovementTags(userPrimaryDosha);
       
-      const movementMatches = item.tags?.filter(tag => 
+      const movementMatches = itemTags.filter(tag => 
         preferredTags.some(pt => tag.toLowerCase().includes(pt))
-      ).length || 0;
+      ).length;
       
       if (movementMatches > 0) {
         matchScore += movementMatches * 2;
@@ -306,7 +317,7 @@ const ContentLibrary = () => {
         if (item.duration_minutes && item.duration_minutes <= 15) {
           matchScore += 2; // Prefer short, achievable sessions
         }
-        if (item.tags?.some(tag => ['grounding', 'confidence', 'calming', 'rehabilitation', 'recovery'].includes(tag.toLowerCase()))) {
+        if (itemTags.some(tag => ['grounding', 'confidence', 'calming', 'rehabilitation', 'recovery'].includes(tag.toLowerCase()))) {
           matchScore += 2;
         }
       }
@@ -549,14 +560,20 @@ const ContentLibrary = () => {
     // Search query filter - search across titles, descriptions, and tags
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(item => 
-        item.title?.toLowerCase().includes(query) ||
-        item.description?.toLowerCase().includes(query) ||
-        item.tags?.some(tag => tag.toLowerCase().includes(query)) ||
-        item.benefits?.some(benefit => benefit.toLowerCase().includes(query)) ||
-        item.cycle_phases?.some(phase => phase.toLowerCase().includes(query)) ||
-        item.doshas?.some(dosha => dosha.toLowerCase().includes(query))
-      );
+      filtered = filtered.filter(item => {
+        const itemTags = item.tags || [];
+        const itemBenefits = item.benefits || [];
+        const itemCyclePhases = item.cycle_phases || [];
+        const itemDoshas = item.doshas || [];
+        return (
+          (item.title && item.title.toLowerCase().includes(query)) ||
+          (item.description && item.description.toLowerCase().includes(query)) ||
+          itemTags.some(tag => tag.toLowerCase().includes(query)) ||
+          itemBenefits.some(benefit => benefit.toLowerCase().includes(query)) ||
+          itemCyclePhases.some(phase => phase.toLowerCase().includes(query)) ||
+          itemDoshas.some(dosha => dosha.toLowerCase().includes(query))
+        );
+      });
     }
 
     // Category filter - maps to content types and tags
@@ -575,10 +592,13 @@ const ContentLibrary = () => {
 
       const mapping = categoryMappings[selectedCategory];
       if (mapping) {
-        filtered = filtered.filter(item => 
-          mapping.types.includes(item.content_type) ||
-          item.tags?.some(tag => mapping.tags.some(t => tag.toLowerCase().includes(t)))
-        );
+        filtered = filtered.filter(item => {
+          const itemTags = item.tags || [];
+          return (
+            mapping.types.includes(item.content_type) ||
+            itemTags.some(tag => mapping.tags.some(t => tag.toLowerCase().includes(t)))
+          );
+        });
       }
     }
 
@@ -605,8 +625,9 @@ const ContentLibrary = () => {
       };
       const mobilityTags = mobilityMappings[selectedMobility] || [];
       filtered = filtered.filter(item => {
-        if (!item.tags || item.tags.length === 0) return selectedMobility === "gentle";
-        return item.tags.some(tag => 
+        const itemTags = item.tags || [];
+        if (itemTags.length === 0) return selectedMobility === "gentle";
+        return itemTags.some(tag => 
           mobilityTags.some(mTag => tag.toLowerCase().includes(mTag))
         ) || item.difficulty_level?.toLowerCase() === selectedMobility;
       });
@@ -625,14 +646,14 @@ const ContentLibrary = () => {
         hormonal: ["hormonal", "hormone", "menopause", "perimenopause", "menstrual", "pms"],
       };
       const concernTags = concernMappings[selectedConcern] || [];
-      filtered = filtered.filter(item => 
-        item.tags?.some(tag => 
-          concernTags.some(cTag => tag.toLowerCase().includes(cTag))
-        ) ||
-        item.benefits?.some(benefit => 
-          concernTags.some(cTag => benefit.toLowerCase().includes(cTag))
-        )
-      );
+      filtered = filtered.filter(item => {
+        const itemTags = item.tags || [];
+        const itemBenefits = item.benefits || [];
+        return (
+          itemTags.some(tag => concernTags.some(cTag => tag.toLowerCase().includes(cTag))) ||
+          itemBenefits.some(benefit => concernTags.some(cTag => benefit.toLowerCase().includes(cTag)))
+        );
+      });
     }
 
     if (selectedCompletion !== "all") {
