@@ -7,7 +7,7 @@ import { LifeMapProvider } from "@/contexts/LifeMapContext";
 import { MumtazWisdomGuide } from "@/components/MumtazWisdomGuide";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { RouteErrorBoundary } from "@/components/RouteErrorBoundary";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
 import { PageTransition } from "@/components/PageTransition";
 import { PersonaSwitcher } from "@/components/PersonaSwitcher";
