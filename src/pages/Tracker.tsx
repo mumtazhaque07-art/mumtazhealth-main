@@ -93,17 +93,20 @@ interface DailyPractice {
   id: string;
   label: string;
   type: 'checkbox' | 'time' | 'number' | 'text';
+  subtext?: string;
+  iconName?: string;
+  colorClass?: string;
   status?: boolean;
   detail?: string;
   notes?: string;
 }
 
 const DAILY_PRACTICES_BASE: DailyPractice[] = [
-  { id: 'sleep', label: 'Hours of Sleep', type: 'number' },
-  { id: 'water', label: 'Drank Warm Water or Tea', type: 'checkbox' },
-  { id: 'pause', label: 'Took a 5-Minute Pause', type: 'checkbox' },
-  { id: 'movement', label: 'Moved Gently Today', type: 'checkbox' },
-  { id: 'curfew', label: 'Unplugged Before Bed', type: 'checkbox' },
+  { id: 'sleep', label: 'Hours of Sleep', type: 'number', subtext: 'Deep cellular restoration', iconName: 'Moon', colorClass: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/20' },
+  { id: 'water', label: 'Drank Warm Water or Tea', type: 'checkbox', subtext: 'Flushes toxins & awakens digestion', iconName: 'Droplets', colorClass: 'bg-sky-50 text-sky-500 dark:bg-sky-500/20' },
+  { id: 'pause', label: 'Took a 5-Minute Pause', type: 'checkbox', subtext: 'Grounds your nervous system', iconName: 'Wind', colorClass: 'bg-amber-50 text-amber-500 dark:bg-amber-500/20' },
+  { id: 'movement', label: 'Moved Gently Today', type: 'checkbox', subtext: 'Encourages circulation & prana', iconName: 'Activity', colorClass: 'bg-rose-50 text-rose-500 dark:bg-rose-500/20' },
+  { id: 'curfew', label: 'Unplugged Before Bed', type: 'checkbox', subtext: 'Protects your natural melatonin', iconName: 'Sun', colorClass: 'bg-purple-50 text-purple-500 dark:bg-purple-500/20' },
 ];
 
 const MENSTRUAL_ADJUSTMENTS: Record<string, string> = {
@@ -114,46 +117,46 @@ const MENSTRUAL_ADJUSTMENTS: Record<string, string> = {
 
 const PHASE_SPECIFIC_PRACTICES: Record<LifeStage, DailyPractice[]> = {
   menarche: [
-    { id: 'cycle_track', label: 'Noticed my body changing today', type: 'checkbox' },
-    { id: 'emotional_journal', label: 'Wrote down my feelings', type: 'checkbox' },
+    { id: 'cycle_track', label: 'Noticed my body changing today', type: 'checkbox', subtext: 'Honoring your rhythmic shifts', iconName: 'Sparkles', colorClass: 'bg-pink-50 text-pink-500' },
+    { id: 'emotional_journal', label: 'Wrote down my feelings', type: 'checkbox', subtext: 'Releasing emotional weight', iconName: 'BookOpen', colorClass: 'bg-teal-50 text-teal-500' },
   ],
   fertility: [
-    { id: 'cervical_mucus', label: 'Checked Body Signs (e.g., Mucus)', type: 'checkbox' },
-    { id: 'nourishing_morning', label: 'Nourishing Morning Bite (e.g. Dates)', type: 'checkbox' },
-    { id: 'temp', label: 'Basal Body Temp', type: 'number' },
+    { id: 'cervical_mucus', label: 'Checked Body Signs', type: 'checkbox', subtext: 'Connecting to your fertility window', iconName: 'Activity', colorClass: 'bg-emerald-50 text-emerald-500' },
+    { id: 'nourishing_morning', label: 'Nourishing Morning Bite', type: 'checkbox', subtext: 'Dates or honey to fuel agni', iconName: 'Sun', colorClass: 'bg-orange-50 text-orange-500' },
+    { id: 'temp', label: 'Basal Body Temp', type: 'number', subtext: 'Tracking thermal shifts', iconName: 'Activity', colorClass: 'bg-rose-50 text-rose-500' },
   ],
   pregnancy: [
-    { id: 'fetal_movement', label: 'Felt Baby Move / Found a connection', type: 'checkbox' },
-    { id: 'hydration_plus', label: 'Stayed Extra Hydrated', type: 'checkbox' },
-    { id: 'gentle_rub', label: 'Rubbed belly with oil/lotion', type: 'checkbox' },
+    { id: 'fetal_movement', label: 'Felt Baby Move', type: 'checkbox', subtext: 'Soul bonding & reassurance', iconName: 'Baby', colorClass: 'bg-blue-50 text-blue-500' },
+    { id: 'hydration_plus', label: 'Stayed Extra Hydrated', type: 'checkbox', subtext: 'Amniotic fluid & cellular support', iconName: 'Droplets', colorClass: 'bg-sky-50 text-sky-500' },
+    { id: 'gentle_rub', label: 'Belly Massage', type: 'checkbox', subtext: 'Preventing stretch marks with love', iconName: 'Flower2', colorClass: 'bg-purple-50 text-purple-500' },
   ],
   postpartum: [
-    { id: 'snehana', label: 'Gentle Body Oiling/Massage', type: 'checkbox' },
-    { id: 'warming_soups', label: 'Ate a warm, easy-to-digest meal', type: 'checkbox' },
-    { id: 'pelvic_rest', label: 'Rested entirely / Stayed off feet', type: 'checkbox' },
+    { id: 'snehana', label: 'Gentle Body Oiling/Massage', type: 'checkbox', subtext: 'Grounding the weary nervous system', iconName: 'Flower2', colorClass: 'bg-amber-50 text-amber-500' },
+    { id: 'warming_soups', label: 'Ate a warm, digestible meal', type: 'checkbox', subtext: 'Restoring digestive fire (Agni)', iconName: 'Sun', colorClass: 'bg-orange-50 text-orange-500' },
+    { id: 'pelvic_rest', label: 'Rested entirely', type: 'checkbox', subtext: 'The sacred 40-day tissue healing', iconName: 'Wind', colorClass: 'bg-indigo-50 text-indigo-500' },
   ],
   post_surgical: [
-    { id: 'wound_care', label: 'Tended to my healing delicately', type: 'checkbox' },
-    { id: 'anti_inflam_tonic', label: 'Drank a healing broth or tea', type: 'checkbox' },
-    { id: 'sabr_check', label: 'Patience Level (1-10)', type: 'number' },
+    { id: 'wound_care', label: 'Tended to my healing', type: 'checkbox', subtext: 'Delicate physical restoration', iconName: 'Sparkles', colorClass: 'bg-teal-50 text-teal-500' },
+    { id: 'anti_inflam_tonic', label: 'Healing broth or tea', type: 'checkbox', subtext: 'Reducing internal heat', iconName: 'Droplets', colorClass: 'bg-emerald-50 text-emerald-500' },
+    { id: 'sabr_check', label: 'Patience Level (1-10)', type: 'number', subtext: 'Acknowledging the emotional toll', iconName: 'BookOpen', colorClass: 'bg-purple-50 text-purple-500' },
   ],
   perimenopause: [
-    { id: 'cooling_practice', label: 'Did a cooling breath or practice', type: 'checkbox' },
-    { id: 'heart_health', label: 'Did something protecting my heart', type: 'checkbox' },
+    { id: 'cooling_practice', label: 'Cooling practice / Sitali breath', type: 'checkbox', subtext: 'Calming hot flashes and heat', iconName: 'Wind', colorClass: 'bg-sky-50 text-sky-500' },
+    { id: 'heart_health', label: 'Protected my heart space', type: 'checkbox', subtext: 'Emotional boundary check', iconName: 'Activity', colorClass: 'bg-rose-50 text-rose-500' },
   ],
   menopause: [
-    { id: 'stillness', label: 'Found a moment of absolute stillness', type: 'checkbox' },
-    { id: 'ghee_moisture', label: 'Used healthy fats for inner moisture', type: 'checkbox' },
+    { id: 'stillness', label: 'Found absolute stillness', type: 'checkbox', subtext: 'Embracing the wisdom phase', iconName: 'Moon', colorClass: 'bg-indigo-50 text-indigo-500' },
+    { id: 'ghee_moisture', label: 'Healthy fats (Inner moisture)', type: 'checkbox', subtext: 'Lubricating joints & tissues', iconName: 'Droplets', colorClass: 'bg-amber-50 text-amber-500' },
   ],
   golden_years: [
-    { id: 'joint_mobility', label: 'Gentle Joint Movement', type: 'checkbox' },
-    { id: 'legacy_dhikr', label: 'Spent time in reflection or prayer', type: 'checkbox' },
+    { id: 'joint_mobility', label: 'Gentle Joint Movement', type: 'checkbox', subtext: 'Releasing trapped vata energy', iconName: 'Activity', colorClass: 'bg-teal-50 text-teal-500' },
+    { id: 'legacy_dhikr', label: 'Reflection or Prayer', type: 'checkbox', subtext: 'Connecting to legacy & peace', iconName: 'BookOpen', colorClass: 'bg-purple-50 text-purple-500' },
   ],
 };
 
 const ISLAMIC_PRACTICES: DailyPractice[] = [
-  { id: 'prayer_sync', label: 'Found peace in Prayer / Dhikr', type: 'checkbox' },
-  { id: 'quran_read', label: 'Listened to or read Quran', type: 'checkbox' },
+  { id: 'prayer_sync', label: 'Found peace in Prayer', type: 'checkbox', subtext: 'Your mandatory spiritual anchor', iconName: 'Sparkles', colorClass: 'bg-emerald-50 text-emerald-600' },
+  { id: 'quran_read', label: 'Listened to or read Quran', type: 'checkbox', subtext: 'Healing for the grieving heart', iconName: 'BookOpen', colorClass: 'bg-teal-50 text-teal-600' },
 ];
 
 export default function Tracker() {
@@ -821,87 +824,129 @@ export default function Tracker() {
                 <CardDescription>Flow with your body's natural clock</CardDescription>
               </CardHeader>
               <CardContent className="pt-8 space-y-6">
-                {/* Spacious Grid for Checkbox Items */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {dailyPractices.filter(p => p.type === 'checkbox').map((practice) => (
-                    <div key={practice.id} className={`flex items-center justify-between p-5 rounded-3xl border-2 transition-all hover:shadow-md ${practices[practice.id]?.status ? 'bg-wellness-sage/20 border-wellness-sage/30' : 'bg-muted/10 border-transparent hover:border-muted-foreground/10'}`}>
-                      <Label 
-                        htmlFor={practice.id}
-                        className={`text-lg font-medium leading-relaxed cursor-pointer pr-4 ${practices[practice.id]?.status ? 'text-muted-foreground line-through opacity-70' : 'text-foreground'}`}
+                {/* Beautiful Modern Vertical List for Checkbox Items */}
+                <div className="grid grid-cols-1 gap-3">
+                  {dailyPractices.map((practice) => {
+                    const isChecked = practices[practice.id]?.status || false;
+                    
+                    const renderIcon = (name?: string) => {
+                      switch(name) {
+                        case 'Moon': return <Moon className="w-5 h-5" />;
+                        case 'Droplets': return <Droplets className="w-5 h-5" />;
+                        case 'Wind': return <Wind className="w-5 h-5" />;
+                        case 'Activity': return <Activity className="w-5 h-5" />;
+                        case 'Sun': return <Sun className="w-5 h-5" />;
+                        case 'Flower2': return <Flower2 className="w-5 h-5" />;
+                        case 'Baby': return <Baby className="w-5 h-5" />;
+                        case 'BookOpen': return <BookOpen className="w-5 h-5" />;
+                        case 'Sparkles': return <Sparkles className="w-5 h-5" />;
+                        default: return <Check className="w-5 h-5" />;
+                      }
+                    };
+
+                    if (practice.type !== 'checkbox') return null;
+
+                    return (
+                      <div 
+                        key={practice.id} 
+                        className={`flex items-center justify-between p-4 rounded-[1.5rem] transition-all hover:shadow-md border border-transparent ${isChecked ? 'bg-wellness-sage/10 backdrop-blur-md shadow-sm border-wellness-sage/20' : 'bg-white/60 dark:bg-slate-900/40 backdrop-blur-md shadow-sm hover:border-muted-foreground/10'}`}
                       >
-                        {isMenstrual && MENSTRUAL_ADJUSTMENTS[practice.id] 
-                          ? MENSTRUAL_ADJUSTMENTS[practice.id] 
-                          : practice.label}
-                      </Label>
-                      <Checkbox
-                        id={practice.id}
-                        checked={practices[practice.id]?.status || false}
-                        onCheckedChange={(checked) => setPractices({
-                          ...practices,
-                          [practice.id]: { ...practices[practice.id], status: checked }
-                        })}
-                        className={`w-8 h-8 rounded-full flex-shrink-0 shadow-sm data-[state=checked]:bg-${config.theme.primary} data-[state=checked]:text-white data-[state=checked]:border-${config.theme.primary}`}
-                      />
-                    </div>
-                  ))}
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-2xl flex-shrink-0 ${practice.colorClass || 'bg-slate-100 text-slate-500'} ${isChecked ? 'opacity-80' : ''}`}>
+                            {renderIcon(practice.iconName)}
+                          </div>
+                          <div className="flex flex-col">
+                            <Label 
+                              htmlFor={practice.id}
+                              className={`text-[15px] sm:text-base font-semibold cursor-pointer ${isChecked ? 'text-slate-500 line-through' : 'text-slate-800 dark:text-slate-200'}`}
+                            >
+                              {isMenstrual && MENSTRUAL_ADJUSTMENTS[practice.id] 
+                                ? MENSTRUAL_ADJUSTMENTS[practice.id] 
+                                : practice.label}
+                            </Label>
+                            {practice.subtext && (
+                              <span className={`text-xs mt-0.5 ${isChecked ? 'text-slate-400 opacity-60' : 'text-slate-500'}`}>
+                                {practice.subtext}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <Checkbox
+                          id={practice.id}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => setPractices({
+                            ...practices,
+                            [practice.id]: { ...practices[practice.id], status: checked }
+                          })}
+                          className={`w-8 h-8 rounded-full flex-shrink-0 border-2 ml-4 ${isChecked ? `bg-wellness-sage text-white border-wellness-sage` : `border-slate-200 dark:border-slate-700 data-[state=checked]:bg-wellness-sage data-[state=checked]:text-white dark:bg-slate-800`}`}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Vertical Layout for Input Items (Time/Number) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-muted-foreground/10">
-                  {dailyPractices.filter(p => p.type !== 'checkbox').map((practice) => (
-                    <div key={practice.id} className="flex flex-col gap-4 p-5 bg-white/40 backdrop-blur-md rounded-3xl border border-muted-foreground/10 hover:shadow-md transition-all">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {practice.id === 'wake' ? (
-                            <div className={`p-3 rounded-xl bg-${config.theme.primary}/10`}>
-                              <Sun className={`h-6 w-6 text-${config.theme.primary}`} />
-                            </div>
-                          ) : practice.id === 'sleep' ? (
-                            <div className={`p-3 rounded-xl bg-indigo-50 dark:bg-indigo-900/20`}>
-                              <Moon className={`h-6 w-6 text-indigo-500`} />
-                            </div>
-                          ) : (
-                            <div className={`p-3 rounded-xl bg-muted/50`}>
-                              <Activity className={`h-6 w-6 text-muted-foreground`} />
-                            </div>
-                          )}
-                          <Label className="text-lg font-medium flex items-center">
-                            {practice.label}
-                            <AyurvedicTooltip term={practice.label} />
-                          </Label>
-                        </div>
+                  {dailyPractices.filter(p => p.type !== 'checkbox').map((practice) => {
+                    const renderIcon = (name?: string) => {
+                      switch(name) {
+                        case 'Moon': return <Moon className="w-5 h-5 text-indigo-500" />;
+                        case 'Activity': return <Activity className="w-5 h-5 text-rose-500" />;
+                        case 'Sun': return <Sun className="w-5 h-5 text-orange-500" />;
+                        default: return <Activity className="w-5 h-5 text-muted-foreground" />;
+                      }
+                    };
 
-                        {practice.type === 'time' && (
-                          <Input
-                            type="time"
-                            value={practices[practice.id]?.detail || ''}
-                            onChange={(e) => setPractices({
-                              ...practices,
-                              [practice.id]: { ...practices[practice.id], detail: e.target.value }
-                            })}
-                            className="w-32 h-12 text-lg rounded-2xl border-muted-foreground/20 focus:ring-2 focus:ring-primary text-center"
-                          />
-                        )}
-                        {practice.type === 'number' && (
-                          <div className="flex items-center gap-2 bg-white/50 rounded-2xl border border-muted-foreground/20 px-3 h-12">
+                    return (
+                      <div key={practice.id} className="flex flex-col gap-4 p-5 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md rounded-[1.5rem] shadow-sm border border-transparent hover:border-muted-foreground/10 transition-all">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-2xl flex-shrink-0 ${practice.colorClass || 'bg-slate-100 text-slate-500'}`}>
+                              {renderIcon(practice.iconName)}
+                            </div>
+                            <div className="flex flex-col">
+                              <Label className="text-[15px] sm:text-base font-semibold flex items-center text-slate-800 dark:text-slate-200">
+                                {practice.label}
+                                <AyurvedicTooltip term={practice.label} />
+                              </Label>
+                              {practice.subtext && (
+                                <span className="text-xs text-slate-500 mt-0.5">
+                                  {practice.subtext}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {practice.type === 'time' && (
                             <Input
-                              type="number"
-                              step="0.1"
+                              type="time"
                               value={practices[practice.id]?.detail || ''}
                               onChange={(e) => setPractices({
                                 ...practices,
                                 [practice.id]: { ...practices[practice.id], detail: e.target.value }
                               })}
-                              className="w-16 border-none bg-transparent h-10 text-lg font-medium p-0 text-center"
+                              className="w-[100px] h-12 text-base rounded-2xl border-muted/50 focus:ring-2 focus:ring-wellness-sage text-center bg-white dark:bg-slate-800 font-medium"
                             />
-                            <span className="text-xs text-muted-foreground font-bold uppercase pr-2">
-                              {practice.id === 'sleep' ? 'hrs' : practice.id === 'temp' ? '°C' : 'min'}
-                            </span>
-                          </div>
-                        )}
+                          )}
+                          {practice.type === 'number' && (
+                            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-2xl border border-muted/50 px-2 h-12 ml-2 shrink-0 shadow-sm focus-within:ring-2 focus-within:ring-wellness-sage transition-shadow">
+                              <Input
+                                type="number"
+                                step="0.1"
+                                value={practices[practice.id]?.detail || ''}
+                                onChange={(e) => setPractices({
+                                  ...practices,
+                                  [practice.id]: { ...practices[practice.id], detail: e.target.value }
+                                })}
+                                className="w-12 border-none bg-transparent h-10 text-lg font-bold p-0 text-center text-slate-800 dark:text-slate-100 placeholder:text-slate-300 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                placeholder="0"
+                              />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Global Notes Section - One field instead of many */}
