@@ -66,7 +66,7 @@ export default function Index() {
 
         <main className="px-6">
           {/* ONE-CLICK REMEDY HERO CARD */}
-          <section className="mb-6 group cursor-pointer" onClick={() => navigate('/content-library')}>
+          <section className="mb-6 group cursor-pointer" onClick={() => navigate(`/content-library?stage=${config.id === 'menarche' ? 'menstrual' : config.id}`)}>
             <div className={`relative w-full h-52 rounded-[2rem] overflow-hidden ${config.color} border ${config.border} flex flex-col justify-between p-6 transition-transform duration-300 group-hover:scale-[1.02]`}>
               <div className={`absolute -right-8 -top-8 w-40 h-40 rounded-full blur-3xl opacity-40 ${config.accentBg}`}></div>
               <div className="relative z-10 flex justify-between items-start">

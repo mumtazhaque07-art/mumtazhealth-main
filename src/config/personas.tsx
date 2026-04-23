@@ -25,7 +25,7 @@ export const PERSONA_CONFIG: Record<string, any> = {
   menopause: {
     id: 'menopause',
     title: 'Peri & Menopause', color: 'bg-[#F4F0F8]', accent: 'text-[#9B8BA7]', accentBg: 'bg-[#9B8BA7]', border: 'border-[#9B8BA7]/20',
-    icon: <Wind className="w-8 h-8" />, remedy: 'Weight-Bearing Routine', action: 'Start Session', metric: 'Thermoregulation'
+    icon: <Wind className="w-8 h-8" />, remedy: 'Gentle Strength Flow', action: 'Start Session', metric: 'Thermoregulation'
   },
   mobility: {
     id: 'mobility',
