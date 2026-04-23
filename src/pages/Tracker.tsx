@@ -65,14 +65,11 @@ import { Wind, Droplets } from "lucide-react";
 import { VoiceInput } from "@/components/VoiceInput";
 
 const AyurvedicTooltip = ({ term }: { term: string }) => {
+  // We have intentionally removed complex Sanskrit from the UI to reduce overwhelm.
+  // This tooltip now only exists for a few critical terms if needed, otherwise it remains hidden.
   const dictionary: Record<string, string> = {
-    "Abhyanga (Self-Massage)": "Abhyanga is a warm oil massage that grounds the nervous system and improves circulation.",
-    "Shatavari Protocol (Warm Milk)": "Shatavari is a powerful Ayurvedic rejuvenative herb for female reproductive health.",
-    "Snehana (Oil Massage) Log": "Snehana is an Ayurvedic oil therapy, essential for postpartum tissue recovery and nervous system grounding.",
-    "Syam": "Islamic fasting, which provides physical detox and deep spiritual discipline.",
-    "Syam (Fasting) Manager": "Islamic fasting, which provides physical detox and deep spiritual discipline.",
-    "Total Tawakkul": "Complete reliance and trust in God's plan, bringing profound peace to the heart.",
-    "Dinacharya": "Ayurvedic daily routine that aligns your body with nature's rhythms."
+    "Syam": "Fasting. A beautiful way to give your digestive system and mind a complete rest.",
+    "Basal Body Temp": "Your resting body temperature, taken first thing in the morning."
   };
 
   const text = dictionary[term];
@@ -82,10 +79,10 @@ const AyurvedicTooltip = ({ term }: { term: string }) => {
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <HelpCircle className="h-3.5 w-3.5 text-wellness-sage/70 hover:text-wellness-sage inline-block ml-1.5 mb-0.5 cursor-help" />
+          <HelpCircle className="h-4 w-4 text-wellness-sage/60 hover:text-wellness-sage transition-colors inline-block ml-1.5 mb-0.5 cursor-help" />
         </TooltipTrigger>
-        <TooltipContent side="top">
-          <p className="max-w-xs text-xs font-normal text-left">{text}</p>
+        <TooltipContent side="top" className="bg-slate-800 text-white border-none shadow-xl rounded-xl p-3">
+          <p className="max-w-xs text-xs font-medium text-left leading-relaxed">{text}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -102,70 +99,61 @@ interface DailyPractice {
 }
 
 const DAILY_PRACTICES_BASE: DailyPractice[] = [
-  { id: 'wake', label: 'Early Wake Up', type: 'time' },
-  { id: 'water', label: 'Warm Water/Tea', type: 'checkbox' },
-  { id: 'abhyanga', label: 'Abhyanga (Self-Massage)', type: 'checkbox' },
-  { id: 'breathing', label: 'Mindful Breathing', type: 'checkbox' },
-  { id: 'tawakkul', label: 'Spiritual Anchor', type: 'checkbox' },
-  { id: 'curfew', label: 'Device Curfew', type: 'checkbox' },
-  { id: 'sleep', label: 'Total Sleep Achieved (Hours)', type: 'number' },
+  { id: 'sleep', label: 'Hours of Sleep', type: 'number' },
+  { id: 'water', label: 'Drank Warm Water or Tea', type: 'checkbox' },
+  { id: 'pause', label: 'Took a 5-Minute Pause', type: 'checkbox' },
+  { id: 'movement', label: 'Moved Gently Today', type: 'checkbox' },
+  { id: 'curfew', label: 'Unplugged Before Bed', type: 'checkbox' },
 ];
 
 const MENSTRUAL_ADJUSTMENTS: Record<string, string> = {
-  'abhyanga': 'Passive Oil Application (Pelvic Area Only)',
-  'breathing': 'Gentle Restorative Pranayama',
-  'wake': 'Wake at Natural Time (REST)',
-  'water': 'Warm Ginger Tea (No Milk)',
+  'movement': 'Gentle Stretching (No heavy lifting)',
+  'pause': 'Deep Rest / Allowed myself to do nothing',
+  'water': 'Warm Herbal Tea',
 };
 
 const PHASE_SPECIFIC_PRACTICES: Record<LifeStage, DailyPractice[]> = {
   menarche: [
-    { id: 'cycle_track', label: 'Cycle Awareness / Mapping', type: 'checkbox' },
-    { id: 'iron_shifa', label: 'Iron-Rich Shifa (Beet/Dates)', type: 'checkbox' },
-    { id: 'emotional_journal', label: 'Emotional Resilience Journal', type: 'checkbox' },
+    { id: 'cycle_track', label: 'Noticed my body changing today', type: 'checkbox' },
+    { id: 'emotional_journal', label: 'Wrote down my feelings', type: 'checkbox' },
   ],
   fertility: [
-    { id: 'cervical_mucus', label: 'Al-Fitra (Cervical Mucus)', type: 'checkbox' },
-    { id: 'shatavari', label: 'Shatavari Protocol (Warm Milk)', type: 'checkbox' },
-    { id: 'sunnah_morning', label: 'Ajwa & Honey (Sunnah Morning)', type: 'checkbox' },
-    { id: 'temp', label: 'Basal Body Temperature (Agni)', type: 'number' },
+    { id: 'cervical_mucus', label: 'Checked Body Signs (e.g., Mucus)', type: 'checkbox' },
+    { id: 'nourishing_morning', label: 'Nourishing Morning Bite (e.g. Dates)', type: 'checkbox' },
+    { id: 'temp', label: 'Basal Body Temp', type: 'number' },
   ],
   pregnancy: [
-    { id: 'fetal_movement', label: 'Fetal Movement / Soul Bonding', type: 'checkbox' },
-    { id: 'quran_bonding', label: 'Quranic Recitation for Baby', type: 'checkbox' },
-    { id: 'trimester_shifa', label: 'Trimester Shifa (Ajwa/Talbina)', type: 'checkbox' },
-    { id: 'hydration_plus', label: 'Hydration+ (Copper Vessel Water)', type: 'checkbox' },
+    { id: 'fetal_movement', label: 'Felt Baby Move / Found a connection', type: 'checkbox' },
+    { id: 'hydration_plus', label: 'Stayed Extra Hydrated', type: 'checkbox' },
+    { id: 'gentle_rub', label: 'Rubbed belly with oil/lotion', type: 'checkbox' },
   ],
   postpartum: [
-    { id: 'snehana', label: 'Snehana (Oil Massage) Log', type: 'checkbox' },
-    { id: 'warming_soups', label: 'Warming Sunnah Soups', type: 'checkbox' },
-    { id: 'pelvic_rest', label: 'Sacred 40 Pelvic Restoration', type: 'checkbox' },
+    { id: 'snehana', label: 'Gentle Body Oiling/Massage', type: 'checkbox' },
+    { id: 'warming_soups', label: 'Ate a warm, easy-to-digest meal', type: 'checkbox' },
+    { id: 'pelvic_rest', label: 'Rested entirely / Stayed off feet', type: 'checkbox' },
   ],
   post_surgical: [
-    { id: 'wound_care', label: 'Wound Care / Healing Sabr', type: 'checkbox' },
-    { id: 'anti_inflam_tonic', label: 'Anti-Inflammatory Shifa Tonic', type: 'checkbox' },
-    { id: 'sabr_check', label: 'Sabr (Patience) Level', type: 'number' },
+    { id: 'wound_care', label: 'Tended to my healing delicately', type: 'checkbox' },
+    { id: 'anti_inflam_tonic', label: 'Drank a healing broth or tea', type: 'checkbox' },
+    { id: 'sabr_check', label: 'Patience Level (1-10)', type: 'number' },
   ],
   perimenopause: [
-    { id: 'cooling_practice', label: 'Cooling Practice (Sitali)', type: 'checkbox' },
-    { id: 'strength', label: 'Bone Density Resistance Work', type: 'checkbox' },
-    { id: 'phyto_shifa', label: 'Phytoestrogen Shifa (Flax/Soy)', type: 'checkbox' },
+    { id: 'cooling_practice', label: 'Did a cooling breath or practice', type: 'checkbox' },
+    { id: 'heart_health', label: 'Did something protecting my heart', type: 'checkbox' },
   ],
   menopause: [
-    { id: 'stillness', label: 'Found a Moment of Stillness', type: 'checkbox' },
-    { id: 'heart_health', label: 'Heart-Focused Moon Breathing', type: 'checkbox' },
-    { id: 'ghee_moisture', label: 'Internal Moisture (Ghee)', type: 'checkbox' },
+    { id: 'stillness', label: 'Found a moment of absolute stillness', type: 'checkbox' },
+    { id: 'ghee_moisture', label: 'Used healthy fats for inner moisture', type: 'checkbox' },
   ],
   golden_years: [
-    { id: 'joint_mobility', label: 'Joint Mobility / Tejas Sequence', type: 'checkbox' },
-    { id: 'antioxidant_shifa', label: 'Antioxidant Shifa Tonic', type: 'checkbox' },
-    { id: 'legacy_dhikr', label: 'Legacy Dhikr / Reflection', type: 'checkbox' },
+    { id: 'joint_mobility', label: 'Gentle Joint Movement', type: 'checkbox' },
+    { id: 'legacy_dhikr', label: 'Spent time in reflection or prayer', type: 'checkbox' },
   ],
 };
 
 const ISLAMIC_PRACTICES: DailyPractice[] = [
-  { id: 'prayer_sync', label: 'Prayer/Dhikr Consistency', type: 'checkbox' },
-  { id: 'quran_read', label: 'Quranic Connection (Reading/Listening)', type: 'checkbox' },
+  { id: 'prayer_sync', label: 'Found peace in Prayer / Dhikr', type: 'checkbox' },
+  { id: 'quran_read', label: 'Listened to or read Quran', type: 'checkbox' },
 ];
 
 export default function Tracker() {
