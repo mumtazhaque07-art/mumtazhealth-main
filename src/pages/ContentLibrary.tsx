@@ -3168,18 +3168,18 @@ const ContentLibrary = () => {
 
                        {/* Holistic Context: Dosha & Life Phase */}
                        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         {(selectedContent.doshas && selectedContent.doshas.length > 0) && (
+                         {(Array.isArray(selectedContent.doshas) && selectedContent.doshas.length > 0) && (
                            <div className="bg-orange-50/50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100">
                              <h4 className="font-semibold text-sm text-orange-800 dark:text-orange-300 flex items-center gap-2 mb-2">
                                <Flower2 className="h-4 w-4" />
                                Ayurvedic Wisdom
                              </h4>
                              <p className="text-xs text-orange-700/80 dark:text-orange-400">
-                               This practice specifically balances the {selectedContent.doshas.map(d => d.toUpperCase()).join(' & ')} dosha(s) by regulating its core elemental qualities through targeted movement and breath.
+                               This practice specifically balances the {selectedContent.doshas.map(d => String(d).toUpperCase()).join(' & ')} dosha(s) by regulating its core elemental qualities through targeted movement and breath.
                              </p>
                            </div>
                          )}
-                         {(selectedContent.cycle_phases && selectedContent.cycle_phases.length > 0) && (
+                         {(Array.isArray(selectedContent.cycle_phases) && selectedContent.cycle_phases.length > 0 && typeof selectedContent.cycle_phases[0] === 'string') && (
                            <div className="bg-indigo-50/50 dark:bg-indigo-950/20 p-4 rounded-xl border border-indigo-100">
                              <h4 className="font-semibold text-sm text-indigo-800 dark:text-indigo-300 flex items-center gap-2 mb-2">
                                <Moon className="h-4 w-4" />

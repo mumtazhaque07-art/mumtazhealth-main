@@ -21,21 +21,24 @@ export function SanctuaryManifesto() {
           <div>
             <h3 className="text-xl font-bold text-slate-800 tracking-tight">A Letter from Mumtaz</h3>
             <p className="text-wellness-taupe text-sm font-medium">To whatever phase you are in...</p>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">A Letter from Mumtaz</h3>
+            <p className="text-wellness-taupe dark:text-wellness-taupe/80 text-sm font-medium">To whatever phase you are in...</p>
           </div>
         </div>
 
-        <div className="space-y-4 text-slate-700 text-sm md:text-base leading-relaxed">
-          <p className="font-medium text-slate-800 text-lg">You are not alone, and this moment too shall pass.</p>
+        <div className="space-y-4 text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed">
+          <p className="font-medium text-slate-800 dark:text-slate-200 text-lg">You are not alone, and this moment too shall pass.</p>
           
-          <p>
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
             This space is for you to be heard and to understand your body and your unique makeup deeper than perhaps has ever been explained to you. Each season of our lives impacts us biologically, mentally, and spiritually. Every season possesses its own beauty, even when it feels unbearably heavy in the moment.
           </p>
 
-          <div className="bg-white/40 p-4 rounded-2xl border border-white/60 shadow-sm my-5 italic text-slate-600 text-center relative">
+          <div className="bg-white/40 dark:bg-slate-800/40 p-4 rounded-2xl border border-white/60 dark:border-slate-700/50 shadow-sm my-5 text-center relative">
             <span className="absolute text-5xl text-wellness-sage/20 font-serif leading-none -top-2 left-2">"</span>
-            &quot;Watch your thoughts, for they become your words. Watch your words, for they become your actions. Watch your actions, for they become your consequences.&quot;
-            <br />
-            <span className="text-sm font-semibold mt-2 block text-slate-500">— Rumi</span>
+            <p className="italic text-slate-700 dark:text-slate-200">
+              "Watch your thoughts, for they become your words. Watch your words, for they become your actions. Watch your actions, for they become your consequences."
+            </p>
+            <span className="text-sm font-semibold mt-2 block text-slate-500 dark:text-slate-400">— Rumi</span>
           </div>
 
           {!isExpanded && (
