@@ -150,36 +150,58 @@ const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosh
   // Dosha-based recommendations
   if (dosha === 'vata' || symptoms.includes('anxious') || symptoms.includes('cold')) {
     recommendations.push(
-      { id: 'vata-warm', title: 'Warm, Nourishing Bowl', description: 'Grounding foods that may help calm Vata energy', tags: ['vata', 'warming'] },
-      { id: 'vata-tea', title: 'Calming Ginger Tea', description: 'A soothing warm drink to support digestion and warmth', tags: ['vata', 'tea'] },
+      { 
+        id: 'vata-warm', title: 'Warm, Rooted Nourishment', 
+        description: 'Grounding foods that calm scattered Vata energy.', 
+        tags: ['vata', 'warming'],
+        mumtaz_thought_process: "When you feel anxious or cold, your nervous system is like a leaf in the wind. We ground this erratic energy through warm, heavy, root-based foods. Think sweet potatoes, ghee, and warming broths.",
+        anatomical_benefit: "Soothing warm fats lubricate a dry intestinal tract and stabilize erratic blood sugar.",
+        modifications: "If digestion feels sluggish, add fresh ginger and black pepper."
+      },
+      { 
+        id: 'vata-tea', title: 'Calming Ginger & Ashwagandha Tea', 
+        description: 'A soothing warm drink to support digestion and warmth.', 
+        tags: ['vata', 'tea'],
+        mumtaz_thought_process: "Cold drinks shock a Vata system. This warm spiced tea acts like a gentle internal hug, coaxing the parasympathetic nervous system online.",
+        anatomical_benefit: "Ginger stimulates digestive juices (agni) without aggravating acid, while Ashwagandha blunts cortisol.",
+        modifications: "Avoid adding honey while the tea is boiling hot; stir it in once it reaches a drinkable warmth."
+      },
     );
   }
   if (dosha === 'pitta' || symptoms.includes('hot') || symptoms.includes('irritable')) {
     recommendations.push(
-      { id: 'pitta-cool', title: 'Cooling Cucumber Salad', description: 'Refreshing foods that may help balance heat', tags: ['pitta', 'cooling'] },
-      { id: 'pitta-milk', title: 'Rose & Cardamom Milk', description: 'A calming evening drink to support rest', tags: ['pitta', 'calming'] },
+      { 
+        id: 'pitta-cool', title: 'Cooling Hydration Bowl', 
+        description: 'Refreshing moisture-rich foods to balance internal heat.', 
+        tags: ['pitta', 'cooling'],
+        mumtaz_thought_process: "When Pitta flares, anger and inflammation rise. We douse this internal fire with sweet, bitter, and astringent tastes—cucumber, mint, coriander, and coconut.",
+        anatomical_benefit: "Reduces systemic inflammation and cools the liver, the primary seat of Pitta.",
+        modifications: "Avoid tomatoes, vinegar, and chili entirely today."
+      },
     );
   }
   if (dosha === 'kapha' || symptoms.includes('sluggish') || symptoms.includes('heavy')) {
     recommendations.push(
-      { id: 'kapha-light', title: 'Light & Spiced Meal', description: 'Energizing foods that may help lift heaviness', tags: ['kapha', 'energizing'] },
+      { 
+        id: 'kapha-light', title: 'Light & Spiced Broth', 
+        description: 'Energizing foods that lift heaviness and clear stagnation.', 
+        tags: ['kapha', 'energizing'],
+        mumtaz_thought_process: "Heavy, sluggish days require the medicine of lightness and heat. We want pungent, bitter, and astringent flavors to cut through the lethargy.",
+        anatomical_benefit: "Spices like turmeric and black pepper stimulate metabolism and clear excess mucus.",
+        modifications: "Avoid dairy, wheat, and refined sugars entirely today to prevent further stagnation."
+      },
     );
   }
   
-  // Life stage additions
-  if (lifeStage === 'pregnancy') {
-    recommendations.push({ id: 'preg-nourish', title: 'Iron-Rich Nourishment', description: 'Foods to support you and baby during this time', tags: ['pregnancy', 'nourishing'] });
-  }
-  if (lifeStage === 'postpartum') {
-    recommendations.push({ id: 'post-rebuild', title: 'Ojas-Building Foods', description: 'Traditional postpartum nourishment for recovery', tags: ['postpartum', 'rebuilding'] });
-  }
-  if (['perimenopause', 'menopause'].includes(lifeStage)) {
-    recommendations.push({ id: 'meno-bone', title: 'Bone-Supportive Nutrition', description: 'Foods rich in nutrients for bone health', tags: ['menopause', 'bones'] });
-  }
-  
-  // Symptom additions
-  if (symptoms.includes('bloated')) {
-    recommendations.push({ id: 'digest-ease', title: 'Digestive-Friendly Meal', description: 'Simple foods that are gentle on digestion', tags: ['digestion', 'gentle'] });
+  if (recommendations.length === 0) {
+    recommendations.push({ 
+      id: 'general-nourish', title: 'Intuitive Eating Plate', 
+      description: 'A balanced plate guided by your body\'s requests.', 
+      tags: ['balance'],
+      mumtaz_thought_process: "Sometimes the best nutrition plan is simply pausing, breathing, and asking your body what it genuinely craves right now.",
+      anatomical_benefit: "Minimizes digestive distress by honoring true hunger signals rather than emotional cravings.",
+      modifications: "Chew your food until it is liquid before swallowing."
+    });
   }
   
   return recommendations.slice(0, 5);
@@ -188,43 +210,35 @@ const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosh
 const getLifestyleRecommendations = (lifeStage: string, symptoms: string[]): Recommendation[] => {
   const recommendations: Recommendation[] = [];
   
-  // Sleep support
   if (symptoms.includes('tired') || symptoms.includes('insomnia')) {
-    recommendations.push(
-      { id: 'sleep-routine', title: 'Evening Wind-Down Ritual', description: 'A gentle routine to prepare your body for rest', duration: '15 min', tags: ['sleep', 'evening'] },
-    );
+    recommendations.push({ 
+      id: 'sleep-routine', title: 'Digital Sunset Ritual', 
+      description: 'A gentle routine to prepare your body for rest.', duration: '15 min', tags: ['sleep', 'evening'],
+      mumtaz_thought_process: "Artificial light confuses our ancient pineal gland. Turning off screens allows natural melatonin production to begin.",
+      anatomical_benefit: "Signals the hypothalamus that it is time to shift from sympathetic (active) to parasympathetic (rest).",
+      modifications: "If you must use a screen, wear blue-light blocking glasses."
+    });
   }
   
-  // Stress support
   if (symptoms.includes('anxious') || symptoms.includes('stressed')) {
-    recommendations.push(
-      { id: 'stress-pause', title: 'Midday Pause Practice', description: 'A brief reset to support your nervous system', duration: '5 min', tags: ['stress', 'reset'] },
-    );
+    recommendations.push({ 
+      id: 'stress-pause', title: 'The 3-Minute Vagus Nerve Reset', 
+      description: 'A brief reset to support your nervous system.', duration: '5 min', tags: ['stress', 'reset'],
+      mumtaz_thought_process: "When overwhelmed, we unconsciously hold our breath. A long, audible sigh instantly reminds the body it is safe.",
+      anatomical_benefit: "Extending the exhale physically stretches the vagus nerve, immediately slowing heart rate.",
+      modifications: "Place one hand on your heart and one on your belly to feel the breath physically."
+    });
   }
-  
-  // Energy support
-  if (symptoms.includes('tired') || symptoms.includes('fatigue')) {
-    recommendations.push(
-      { id: 'energy-morning', title: 'Gentle Morning Awakening', description: 'Start your day with care, not rush', duration: '10 min', tags: ['energy', 'morning'] },
-    );
+
+  if (recommendations.length === 0) {
+    recommendations.push({ 
+      id: 'nature-connection', title: 'Sensory Nature Walk', 
+      description: 'A few minutes outdoors focusing on sensory input.', duration: '10 min', tags: ['grounding', 'nature'],
+      mumtaz_thought_process: "Nature does not hurry, yet everything is accomplished. Stepping outside resets our internal pacing.",
+      anatomical_benefit: "Exposure to fractal patterns in nature significantly reduces cortisol levels in the bloodstream.",
+      modifications: "If you cannot go outside, sit by an open window and focus on the furthest point on the horizon." 
+    });
   }
-  
-  // Life stage specific
-  if (lifeStage === 'pregnancy') {
-    recommendations.push({ id: 'preg-rest', title: 'Sacred Rest Moments', description: 'Permission to pause throughout your day', duration: 'As needed', tags: ['pregnancy', 'rest'] });
-  }
-  if (lifeStage === 'postpartum') {
-    recommendations.push({ id: 'post-grace', title: 'Self-Compassion Practice', description: 'Gentle reminders that you are doing enough', duration: '5 min', tags: ['postpartum', 'self-care'] });
-  }
-  if (['perimenopause', 'menopause'].includes(lifeStage)) {
-    recommendations.push({ id: 'meno-cool', title: 'Cooling Environment Tips', description: 'Simple ways to manage temperature changes', tags: ['menopause', 'comfort'] });
-  }
-  
-  // Default additions
-  recommendations.push(
-    { id: 'nature-connection', title: 'Nature Connection', description: 'A few minutes outdoors can support wellbeing', duration: '10 min', tags: ['grounding', 'nature'] },
-    { id: 'gratitude-moment', title: 'Gratitude Moment', description: 'Noticing small blessings in your day', duration: '3 min', tags: ['mindset', 'gratitude'] },
-  );
   
   return recommendations.slice(0, 5);
 };
@@ -232,19 +246,37 @@ const getLifestyleRecommendations = (lifeStage: string, symptoms: string[]): Rec
 const getSpiritualRecommendations = (lifeStage: string, symptoms: string[], isIslamic: boolean): Recommendation[] => {
   if (isIslamic) {
     return [
-      { id: 'dhikr', title: 'Dhikr for Peace', description: 'Simple remembrance phrases to calm the heart', duration: '5 min', tags: ['islamic', 'peace'] },
-      { id: 'dua', title: 'Du\'a for Wellbeing', description: 'Prayers for health, patience, and gratitude', duration: '3 min', tags: ['islamic', 'prayer'] },
-      { id: 'gratitude-islamic', title: 'Shukr Practice', description: 'Reflecting on blessings with intention', duration: '5 min', tags: ['islamic', 'gratitude'] },
-      { id: 'intention', title: 'Morning Intention Setting', description: 'Beginning your day with niyyah and purpose', duration: '3 min', tags: ['islamic', 'intention'] },
-      { id: 'quran-reflection', title: 'Quranic Reflection', description: 'A verse to carry with you through the day', duration: '5 min', tags: ['islamic', 'quran'] },
+      { 
+        id: 'dhikr', title: 'Dhikr holding the Heart', 
+        description: 'Simple remembrance phrases to calm the heart.', duration: '5 min', tags: ['islamic', 'peace'],
+        mumtaz_thought_process: "The heart finds rest only in remembrance. Place your right hand over your physical heart to anchor your mind while you repeat 'Ya Salaam' (The Source of Peace).",
+        anatomical_benefit: "Rhythmic reciting physically slows respiratory rates to the ideal 5.5 breaths per minute.",
+        modifications: "Can be done silently in bed if you are completely exhausted."
+      },
+      { 
+        id: 'dua', title: 'Du\'a of Surrender', 
+        description: 'Pouring out your worries to The Most Merciful.', duration: '3 min', tags: ['islamic', 'prayer'],
+        mumtaz_thought_process: "We often carry burdens meant for Allah. Release the illusion of control. Speak to Him as you are—tired, overwhelmed, or confused.",
+        anatomical_benefit: "Emotional vocalization deeply releases tension in the jaw, throat, and chest.",
+        modifications: "You do not need to be in formal wudu or prayer clothes to make sincere Du'a."
+      }
     ];
   } else {
     return [
-      { id: 'breath-prayer', title: 'Breath Prayer', description: 'Using breath as a gentle anchor for stillness', duration: '5 min', tags: ['universal', 'breath'] },
-      { id: 'grounding', title: 'Grounding Meditation', description: 'Connecting with the earth and present moment', duration: '7 min', tags: ['universal', 'grounding'] },
-      { id: 'compassion', title: 'Self-Compassion Practice', description: 'Offering yourself kindness and understanding', duration: '5 min', tags: ['universal', 'compassion'] },
-      { id: 'gratitude-universal', title: 'Gratitude Reflection', description: 'Noticing and appreciating what supports you', duration: '5 min', tags: ['universal', 'gratitude'] },
-      { id: 'body-awareness', title: 'Body Awareness Check-In', description: 'Listening to what your body is telling you', duration: '5 min', tags: ['universal', 'awareness'] },
+      { 
+        id: 'breath-prayer', title: 'Anchoring Breath Meditation', 
+        description: 'Using breath as a gentle anchor for stillness.', duration: '5 min', tags: ['universal', 'breath'],
+        mumtaz_thought_process: "The mind will wander; that is its nature. The practice is the gentle, non-judgmental return to feeling the air enter your nostrils.",
+        anatomical_benefit: "Unplugs the brain's default mode network (the rumination center).",
+        modifications: "If focusing on the breath causes anxiety, focus on the physical sensation of your feet touching the floor instead."
+      },
+      { 
+        id: 'compassion', title: 'Radical Self-Compassion', 
+        description: 'Offering yourself kindness and understanding.', duration: '5 min', tags: ['universal', 'compassion'],
+        mumtaz_thought_process: "We are often our own harshest critics. Talk to yourself the way you would talk to a beloved friend who is struggling exactly as you are.",
+        anatomical_benefit: "Self-compassion physically lowers blood pressure and reduces inflammatory markers.",
+        modifications: "Place both hands over your heart to release oxytocin, the bonding hormone."
+      }
     ];
   }
 };

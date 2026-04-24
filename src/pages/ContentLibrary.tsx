@@ -200,6 +200,7 @@ const ContentLibrary = () => {
   const [selectedCompletion, setSelectedCompletion] = useState<string>("all");
   const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
   const [activeQuickFilters, setActiveQuickFilters] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<string>("for-you");
 
   // Sanctuary Mode Effect
   useEffect(() => {
@@ -1436,14 +1437,11 @@ const ContentLibrary = () => {
                     setSelectedConcern("all");
                     setSelectedCompletion("all");
                     setActiveQuickFilters(new Set());
-                    // Navigate to favorites tab
-                    const favoritesTab = document.querySelector('[value="saved"]') as HTMLButtonElement;
-                    if (favoritesTab) {
-                      favoritesTab.click();
-                      setTimeout(() => {
-                        favoritesTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }, 100);
-                    }
+                    
+                    setActiveTab("saved");
+                    setTimeout(() => {
+                      document.getElementById('library-tabs-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
                   }}
                 >
                   <Heart className="h-5 w-5 text-wellness-lilac" />
@@ -1463,12 +1461,10 @@ const ContentLibrary = () => {
                     setSelectedConcern("all");
                     setSelectedCompletion("all");
                     setActiveQuickFilters(new Set());
-                    // Scroll to content section
+                    
+                    setActiveTab("all");
                     setTimeout(() => {
-                      const contentSection = document.querySelector('[data-content-grid]');
-                      if (contentSection) {
-                        contentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                      }
+                      document.getElementById('library-tabs-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }, 100);
                   }}
                 >
@@ -1481,7 +1477,8 @@ const ContentLibrary = () => {
         )}
 
         {/* Category Tabs */}
-        <Tabs defaultValue="for-you" className="w-full">
+        <div id="library-tabs-container">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="mb-6 relative">
             {/* Scroll hint gradient on right */}
             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 md:hidden" />
@@ -3021,6 +3018,7 @@ const ContentLibrary = () => {
             )}
           </TabsContent>
         </Tabs>
+        </div>
 
         {/* Content Detail Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -3131,7 +3129,7 @@ const ContentLibrary = () => {
                          </p>
                        </div>
 
-                       {/* Instructions (How to get into it) */}
+                       {/* The Practice (Instructions) */}
                        <div className="mb-6">
                          <h3 className="font-semibold text-lg mb-3 text-wellness-plum border-b border-wellness-plum/10 pb-2 flex items-center gap-2">
                             {selectedContent.content_type === 'nutrition' ? (
@@ -3139,12 +3137,14 @@ const ContentLibrary = () => {
                             ) : (
                               <BookOpen className="h-5 w-5" />
                             )}
-                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'Instructions & Guidance'}
+                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'The Practice Steps'}
                          </h3>
                          <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2">
                             {isContentUnlocked(selectedContent) 
-                              ? formatAyurvedic(selectedContent.detailed_guidance) 
-                              : formatAyurvedic(selectedContent.preview_content || 'Unlock to see full guidance...')}
+                              ? (selectedContent.detailed_guidance && selectedContent.detailed_guidance.length > 50 
+                                  ? formatAyurvedic(selectedContent.detailed_guidance) 
+                                  : "Since this is an intuitively guided practice, please follow along with the video/audio above. Move slowly, allowing your breath to lead your body without forcing any depth.")
+                              : formatAyurvedic(selectedContent.preview_content || 'Unlock to see full practice steps...')}
                          </div>
                        </div>
 
@@ -3153,7 +3153,7 @@ const ContentLibrary = () => {
                          <div className="mb-6 bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10">
                            <h3 className="font-semibold text-lg mb-3 text-wellness-sage flex items-center gap-2">
                              <Sparkles className="h-5 w-5" />
-                             Key Benefits
+                             Anatomical & Ayurvedic Benefits
                            </h3>
                            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                              {selectedContent.benefits.map((benefit: string, i: number) => (
@@ -3166,21 +3166,53 @@ const ContentLibrary = () => {
                          </div>
                        )}
 
+                       {/* Holistic Context: Dosha & Life Phase */}
+                       <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         {(selectedContent.doshas && selectedContent.doshas.length > 0) && (
+                           <div className="bg-orange-50/50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100">
+                             <h4 className="font-semibold text-sm text-orange-800 dark:text-orange-300 flex items-center gap-2 mb-2">
+                               <Flower2 className="h-4 w-4" />
+                               Ayurvedic Wisdom
+                             </h4>
+                             <p className="text-xs text-orange-700/80 dark:text-orange-400">
+                               This practice specifically balances the {selectedContent.doshas.map(d => d.toUpperCase()).join(' & ')} dosha(s) by regulating its core elemental qualities through targeted movement and breath.
+                             </p>
+                           </div>
+                         )}
+                         {(selectedContent.cycle_phases && selectedContent.cycle_phases.length > 0) && (
+                           <div className="bg-indigo-50/50 dark:bg-indigo-950/20 p-4 rounded-xl border border-indigo-100">
+                             <h4 className="font-semibold text-sm text-indigo-800 dark:text-indigo-300 flex items-center gap-2 mb-2">
+                               <Moon className="h-4 w-4" />
+                               Honoring Your Phase
+                             </h4>
+                             <p className="text-xs text-indigo-700/80 dark:text-indigo-400">
+                               Selected to support the shifting hormones and energy demands of the {selectedContent.cycle_phases[0].replace(/-/g, ' ').toUpperCase()} season of your life.
+                             </p>
+                           </div>
+                         )}
+                       </div>
+
                        {/* Modifications & Options */}
                        <div className="bg-wellness-lilac/10 p-5 rounded-2xl border border-wellness-lilac/20 mb-2">
                          <h3 className="font-semibold text-lg mb-3 text-wellness-plum flex items-center gap-2">
                             <Activity className="h-5 w-5" />
-                            Modifications & Safety Notes
+                            Gentle Modifications
                          </h3>
-                         <ul className="space-y-3">
-                           <li className="text-sm text-muted-foreground flex items-start gap-2">
+                         <ul className="space-y-3 prose prose-sm text-muted-foreground">
+                           <li className="flex items-start gap-2">
                              <span className="text-wellness-plum font-bold mt-0.5">•</span>
-                             <span><strong>Listen to your body:</strong> Use props (pillows/blocks) to fully support your weight if needed. Never push through pain. Less effort is often more healing.</span>
+                             <span><strong>Listen to your body:</strong> Never push through pain. Connect deeply with your breath. Less effort is often more healing.</span>
                            </li>
-                           <li className="text-sm text-muted-foreground flex items-start gap-2">
+                           <li className="flex items-start gap-2">
                              <span className="text-wellness-plum font-bold mt-0.5">•</span>
-                             <span><strong>Based on your phase ({selectedContent.cycle_phases?.[0]?.replace(/-/g, ' ') || 'current'}):</strong> {selectedContent.cycle_phases?.[0] === 'menstruation' ? 'Avoid deep twists or inversions. Keep the belly soft.' : 'Adapt movements to honor your daily energy level.'}</span>
+                             <span><strong>Chair & Bed Support:</strong> If standing or floor-work feels exhausting, perform the upper-body movements seated or lying deeply supported by pillows.</span>
                            </li>
+                           {selectedContent.detailed_guidance && selectedContent.detailed_guidance.includes('Safe for') && (
+                             <li className="flex items-start gap-2">
+                               <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                               <span>{selectedContent.detailed_guidance.split(';').find(s => s.includes('Safe for')) || 'Always consult your practitioner before moving.'}</span>
+                             </li>
+                           )}
                          </ul>
                        </div>
                     </div>

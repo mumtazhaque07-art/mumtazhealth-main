@@ -106,8 +106,8 @@ export function SupportPlanModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="p-6 pb-2 border-b bg-card">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
+        <DialogHeader className="p-6 pb-2 border-b bg-card shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-foreground opacity-80" />
@@ -132,7 +132,7 @@ export function SupportPlanModal({
           </DialogDescription>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 max-h-[60vh]">
+        <div className="flex-1 overflow-y-auto min-h-0">
           <div className="p-6">
             {step === 'recommendations' ? (
               <SupportPlanRecommendations
@@ -153,9 +153,9 @@ export function SupportPlanModal({
               />
             )}
           </div>
-        </ScrollArea>
+        </div>
 
-        <div className="p-4 border-t bg-muted/30 space-y-3">
+        <div className="p-4 border-t bg-muted/30 space-y-3 shrink-0">
           {step === 'recommendations' ? (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
