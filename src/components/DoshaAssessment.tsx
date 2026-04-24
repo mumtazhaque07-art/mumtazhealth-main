@@ -21,7 +21,7 @@ interface Question {
 const doshaQuestions: Question[] = [
   {
     id: "body_frame",
-    question: "How would you describe your natural body frame?",
+    question: "How would you describe your natural shape?",
     options: [
       { value: "thin", label: "Thin", description: "Slender build, long limbs, light bones", dosha: "vata" },
       { value: "medium", label: "Medium", description: "Athletic build, moderate frame", dosha: "pitta" },
