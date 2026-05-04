@@ -19,8 +19,7 @@ export function SanctuaryManifesto() {
             <img src={mumtazYoga8} alt="Mumtaz Haque" className="w-full h-full object-cover" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-800 tracking-tight">A Letter from Mumtaz</h3>
-            <p className="text-wellness-taupe text-sm font-medium">To whatever phase you are in...</p>
+            
             <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">A Letter from Mumtaz</h3>
             <p className="text-wellness-taupe dark:text-wellness-taupe/80 text-sm font-medium">To whatever phase you are in...</p>
           </div>
