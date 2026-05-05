@@ -98,15 +98,14 @@ export function DailyPractice({ type, lifeStage, spiritualPreference }: DailyPra
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-opacity group-hover:bg-black/40">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="rounded-full bg-white/20 border-white/50 text-white hover:bg-white hover:text-black backdrop-blur-sm transition-all border-2"
-            onClick={() => navigate(`/content-library?highlight=${content.id}`)}
-          >
-            <PlayCircle className="w-6 h-6 mr-2" />
-            Start Practice
-          </Button>
+         <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full bg-white/20 border-white/50 text-white hover:bg-white hover:text-black backdrop-blur-sm transition-all"
+              onClick={() => {}}
+            >
+              View Today's Protocol
+            </Button>
         </div>
       </div>
 
