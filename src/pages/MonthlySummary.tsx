@@ -195,10 +195,11 @@ export default function MonthlySummary() {
   };
 
   const getVataCrashData = () => {
-    const crashes: Record<string, number> = { No: 0, Mild: 0, Severe: 0 };
+    const crashes: Record<string, number> = {};
     entries.forEach(entry => {
-      if (entry.vata_crash) {
-        crashes[entry.vata_crash] = (crashes[entry.vata_crash] || 0) + 1;
+      if (entry.vata_crash && entry.vata_crash !== 'None - Feeling balanced' && entry.vata_crash !== 'No') {
+        const shortName = entry.vata_crash.split(' - ')[0]; // Gets "Air (Vata)", "Fire (Pitta)", etc.
+        crashes[shortName] = (crashes[shortName] || 0) + 1;
       }
     });
     return Object.entries(crashes).map(([name, value]) => ({ name, value }));
@@ -473,13 +474,14 @@ export default function MonthlySummary() {
               </Card>
             )}
 
-            {/* Vata Crash Analysis */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Vata Crash Analysis</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+            {/* Energy Imbalance Analysis */}
+            {vataCrashData.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Energy Imbalance Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={vataCrashData}
@@ -500,6 +502,7 @@ export default function MonthlySummary() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            )}
 
             {/* Insights Summary */}
             <Card className="bg-wellness-pink/20">

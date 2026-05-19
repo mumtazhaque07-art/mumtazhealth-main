@@ -117,8 +117,11 @@ export function ElementsGuideModal({ isOpen, onClose }: { isOpen: boolean, onClo
         {!quizMode && (
           <div className="animate-in fade-in">
             <div className="space-y-4 mb-6 text-slate-600 text-[15px] leading-relaxed">
+              <p className="font-medium text-slate-800 text-base">
+                In Ayurveda, we look at three fundamental energies (called Doshas) that exist in everyone: Vata (Air), Pitta (Fire), and Kapha (Earth).
+              </p>
               <p>
-                When we think of Ayurveda, we usually do a quick online quiz and think, <em>"Okay, I am Pitta. This is exactly what I must do."</em> But we are not using these labels to define you. 
+                When we think of these elements, we usually do a quick online quiz and think, <em>"Okay, I am Pitta. This is exactly what I must do."</em> But we do not use these labels to define you. If you are feeling out of balance, it is usually just one of these elements acting up temporarily.
               </p>
               <div className="bg-wellness-sage/10 p-4 rounded-xl border border-wellness-sage/20 text-slate-700 italic">
                 "There is only one unique blueprint of yourself. We do not place you in a pigeon hole or a box."

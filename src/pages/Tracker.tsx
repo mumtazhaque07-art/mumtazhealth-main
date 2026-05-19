@@ -61,8 +61,8 @@ import { FiqhCycleStatus } from "@/components/FiqhCycleStatus";
 import { CheckInReminder } from "@/components/CheckInReminder";
 import { useLifeMap } from "@/contexts/LifeMapContext";
 import { LifeStage } from "@/types/lifemap";
-import { Wind, Droplets } from "lucide-react";
 import { VoiceInput } from "@/components/VoiceInput";
+import { ElementsGuideModal } from "@/components/ElementsGuideModal";
 
 const AyurvedicTooltip = ({ term }: { term: string }) => {
   // We have intentionally removed complex Sanskrit from the UI to reduce overwhelm.
@@ -248,6 +248,9 @@ export default function Tracker() {
   const [fidyaPaid, setFidyaPaid] = useState('');
   const [syamType, setSyamType] = useState('None');
   const [syamNotes, setSyamNotes] = useState('');
+  
+  // Element Guide State
+  const [showElementsGuide, setShowElementsGuide] = useState(false);
   
   // Support Plan modal state
   const [showSupportPlan, setShowSupportPlan] = useState(false);
@@ -514,7 +517,7 @@ export default function Tracker() {
       setSpiritualAnchor(data.spiritual_anchor || 'Istighfar');
       setEmotionalState(data.emotional_state || '');
       setPhysicalSymptoms(data.physical_symptoms || '');
-      setVataCrash(data.vata_crash || 'No');
+      setVataCrash(data.vata_crash || 'None - Feeling balanced');
       setTweakPlan(data.tweak_plan || '');
       setMonthlyReflection(data.monthly_reflection || '');
       setPractices(typeof data.daily_practices === 'object' && data.daily_practices !== null ? data.daily_practices as Record<string, any> : {});
@@ -578,7 +581,7 @@ export default function Tracker() {
       setSpiritualAnchor('Istighfar');
       setEmotionalState('');
       setPhysicalSymptoms('');
-      setVataCrash('No');
+      setVataCrash('None - Feeling balanced');
       setTweakPlan('');
       setPractices({});
       setPregnancyNausea('');
@@ -1355,21 +1358,27 @@ export default function Tracker() {
                 )}
 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Label className="text-xs">Vata Energy Crash?</Label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild><HelpCircle className="h-4 w-4 text-wellness-sage" /></TooltipTrigger>
-                        <TooltipContent><p className="max-w-xs text-xs">Vata crash: sudden depletion or anxiety.</p></TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-xs font-bold text-wellness-taupe uppercase tracking-wider">Energy Imbalance Today?</Label>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowElementsGuide(true)}
+                      className="h-6 px-2 text-[10px] text-wellness-sage hover:bg-wellness-sage/10 rounded-full"
+                    >
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      What are these elements?
+                    </Button>
                   </div>
                   <Select value={vataCrash} onValueChange={setVataCrash}>
-                    <SelectTrigger className="bg-white/50"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="bg-white/50 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="No">No</SelectItem>
-                      <SelectItem value="Mild">Mild</SelectItem>
-                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="None - Feeling balanced">None - Feeling balanced</SelectItem>
+                      <SelectItem value="Air (Vata) - Anxious, scattered, sudden crash">Air (Vata) - Anxious, scattered, sudden crash</SelectItem>
+                      <SelectItem value="Fire (Pitta) - Irritable, overheated, frustrated">Fire (Pitta) - Irritable, overheated, frustrated</SelectItem>
+                      <SelectItem value="Earth (Kapha) - Sluggish, heavy, unmotivated">Earth (Kapha) - Sluggish, heavy, unmotivated</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1478,6 +1487,8 @@ export default function Tracker() {
           </div>
         </div>
       </div>
+      
+      <ElementsGuideModal isOpen={showElementsGuide} onClose={() => setShowElementsGuide(false)} />
 
       <AlertDialog open={isClearDataOpen} onOpenChange={setIsClearDataOpen}>
         <AlertDialogContent>
