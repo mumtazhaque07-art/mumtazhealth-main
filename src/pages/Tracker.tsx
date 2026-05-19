@@ -960,7 +960,29 @@ export default function Tracker() {
                               className="w-[100px] h-12 text-base rounded-2xl border-muted/50 focus:ring-2 focus:ring-wellness-sage text-center bg-white dark:bg-slate-800 font-medium"
                             />
                           )}
-                          {practice.type === 'number' && (
+                          {practice.type === 'number' && practice.id === 'sleep' ? (
+                            <div className="flex gap-1.5 overflow-x-auto hide-scrollbar py-1 pl-2">
+                              {['<5', '5', '6', '7', '8', '9+'].map(hrs => {
+                                const isSelected = practices[practice.id]?.detail === hrs;
+                                return (
+                                  <button
+                                    key={hrs}
+                                    onClick={() => setPractices({
+                                      ...practices,
+                                      [practice.id]: { ...practices[practice.id], detail: isSelected ? '' : hrs }
+                                    })}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${
+                                      isSelected 
+                                        ? 'bg-indigo-500 text-white shadow-md ring-2 ring-indigo-500/20' 
+                                        : 'bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    {hrs}h
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : practice.type === 'number' && (
                             <div className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-2xl border border-muted/50 px-2 h-12 ml-2 shrink-0 shadow-sm focus-within:ring-2 focus-within:ring-wellness-sage transition-shadow">
                               <Input
                                 type="number"
