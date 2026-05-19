@@ -5,6 +5,7 @@ import { Sparkles, Send, Loader2, Heart, Leaf, Wind, Moon, BookOpen, Users, Mess
 import { toast } from "@/hooks/use-toast";
 import { PERSONA_CONFIG } from "@/config/personas";
 import { useLifeMap } from "@/contexts/LifeMapContext";
+import { VoiceInput } from "@/components/VoiceInput";
 
 interface Message {
   role: "user" | "assistant";
@@ -334,14 +335,20 @@ export default function Chat() {
           </div>
         )}
         <div className="flex gap-2">
-          <input 
-            type="text" 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Ask for guidance..." 
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 text-sm focus:ring-2 outline-none transition-all"
-          />
+          <div className="flex-1 flex items-center bg-slate-50 border border-slate-200 rounded-full pl-2 pr-5 py-1 focus-within:ring-2 focus-within:ring-slate-300 transition-all">
+            <VoiceInput 
+              onTranscript={(text) => setInput(prev => (prev + " " + text).trim())} 
+              className="mr-1"
+            />
+            <input 
+              type="text" 
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Ask for guidance..." 
+              className="flex-1 bg-transparent py-2 text-sm outline-none w-full"
+            />
+          </div>
           <button 
             onClick={() => sendMessage()}
             disabled={!input.trim() || loading}

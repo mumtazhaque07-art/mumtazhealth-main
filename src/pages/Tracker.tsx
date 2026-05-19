@@ -175,6 +175,7 @@ export default function Tracker() {
   const [dueDate, setDueDate] = useState<string | null>(null);
   const [showCycleHelper, setShowCycleHelper] = useState(false);
   const [isMenarcheJourney, setIsMenarcheJourney] = useState(false);
+  const [savedPractices, setSavedPractices] = useState<DailyPractice[]>([]);
   
   // Red Day Protocol fields
   const [painLevel, setPainLevel] = useState('');
@@ -297,6 +298,12 @@ export default function Tracker() {
     let practicesList = [...DAILY_PRACTICES_BASE];
     const phasePractices = PHASE_SPECIFIC_PRACTICES[lifeStage as LifeStage] || [];
     practicesList = [...practicesList, ...phasePractices];
+    
+    // Inject Custom Support Plan Practices
+    if (savedPractices.length > 0) {
+      practicesList = [...practicesList, ...savedPractices];
+    }
+    
     if (islamicMode) {
       practicesList = [...practicesList, ...ISLAMIC_PRACTICES];
     }
@@ -307,7 +314,7 @@ export default function Tracker() {
 
   useEffect(() => {
     setDailyPractices(getDailyPractices());
-  }, [lifeStage, islamicMode]);
+  }, [lifeStage, islamicMode, savedPractices]);
 
 
   // Fiqh Status
@@ -339,6 +346,7 @@ export default function Tracker() {
     if (user) {
       checkAdminRole();
       checkOnboarding();
+      loadSavedPractices();
       loadData();
     }
   }, [user, selectedDate]);
@@ -442,6 +450,30 @@ export default function Tracker() {
       .maybeSingle();
     
     setIsAdmin(!!data);
+  };
+
+  const loadSavedPractices = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('saved_practices')
+        .select('*')
+        .eq('user_id', user.id);
+        
+      if (!error && data) {
+        const formatted = data.map(p => ({
+          id: `saved_${p.id || p.practice_title.replace(/\s+/g, '_')}`,
+          label: p.practice_title,
+          type: 'checkbox' as const,
+          subtext: 'From your Support Plan',
+          iconName: 'Sparkles',
+          colorClass: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+        }));
+        setSavedPractices(formatted);
+      }
+    } catch (e) {
+      console.error("Error loading saved practices:", e);
+    }
   };
 
   const loadData = async () => {
