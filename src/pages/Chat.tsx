@@ -20,9 +20,9 @@ interface UserProfile {
   lifePhases?: string[];
   primaryFocus?: string[];
   pregnancyTrimester?: number;
-  spiritualPreference?: string;
   isMenarcheJourney?: boolean;
   postpartumDeliveryType?: string;
+  effectivenessLogs?: any[];
 }
 
 const QUICK_ACTIONS = [
@@ -81,9 +81,10 @@ export default function Chat() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const [profileRes, wellnessRes] = await Promise.all([
+      const [profileRes, wellnessRes, effectivenessRes] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("user_wellness_profiles").select("*").eq("user_id", user.id).single()
+        supabase.from("user_wellness_profiles").select("*").eq("user_id", user.id).single(),
+        supabase.from("wellness_effectiveness").select("*").eq("user_id", user.id).order('created_at', { ascending: false }).limit(10)
       ]);
 
       if (profileRes.data) {
@@ -98,6 +99,7 @@ export default function Chat() {
           spiritualPreference: wellnessRes.data?.spiritual_preference,
           isMenarcheJourney: wellnessRes.data?.is_menarche_journey,
           postpartumDeliveryType: wellnessRes.data?.postpartum_delivery_type,
+          effectivenessLogs: effectivenessRes.data || [],
         });
 
         // Initialize greeting if empty
@@ -214,6 +216,7 @@ export default function Chat() {
           spiritualPreference: spiritualPath === 'islamic' ? 'islamic' : userProfile?.spiritualPreference,
           isMenarcheJourney: userProfile?.isMenarcheJourney,
           postpartumDeliveryType: userProfile?.postpartumDeliveryType,
+          effectivenessLogs: userProfile?.effectivenessLogs,
         },
       });
 

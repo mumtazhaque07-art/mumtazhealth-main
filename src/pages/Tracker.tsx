@@ -99,6 +99,7 @@ interface DailyPractice {
   status?: boolean;
   detail?: string;
   notes?: string;
+  sourceId?: string;
 }
 
 const DAILY_PRACTICES_BASE: DailyPractice[] = [
@@ -468,11 +469,25 @@ export default function Tracker() {
           subtext: 'From your Support Plan',
           iconName: 'Sparkles',
           colorClass: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+          sourceId: p.id,
         }));
         setSavedPractices(formatted);
       }
     } catch (e) {
       console.error("Error loading saved practices:", e);
+    }
+  };
+
+  const removeSavedPractice = async (sourceId: string) => {
+    try {
+      setSavedPractices(prev => prev.filter(p => p.sourceId !== sourceId));
+      const { error } = await supabase.from('saved_practices').delete().eq('id', sourceId);
+      if (error) throw error;
+      toast.success("Practice removed from your tracker");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to remove practice");
+      loadSavedPractices();
     }
   };
 
@@ -903,15 +918,32 @@ export default function Tracker() {
                             )}
                           </div>
                         </div>
-                        <Checkbox
-                          id={practice.id}
-                          checked={isChecked}
-                          onCheckedChange={(checked) => setPractices({
-                            ...practices,
-                            [practice.id]: { ...practices[practice.id], status: checked }
-                          })}
-                          className={`w-8 h-8 rounded-full flex-shrink-0 border-2 ml-4 ${isChecked ? `bg-wellness-sage text-white border-wellness-sage` : `border-slate-200 dark:border-slate-700 data-[state=checked]:bg-wellness-sage data-[state=checked]:text-white dark:bg-slate-800`}`}
-                        />
+                        <div className="flex items-center gap-1">
+                          {practice.sourceId && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-full shrink-0"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                removeSavedPractice(practice.sourceId!);
+                              }}
+                              title="Remove from my tracker"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Checkbox
+                            id={practice.id}
+                            checked={isChecked}
+                            onCheckedChange={(checked) => setPractices({
+                              ...practices,
+                              [practice.id]: { ...practices[practice.id], status: checked }
+                            })}
+                            className={`w-8 h-8 rounded-full flex-shrink-0 border-2 ml-2 ${isChecked ? `bg-wellness-sage text-white border-wellness-sage` : `border-slate-200 dark:border-slate-700 data-[state=checked]:bg-wellness-sage data-[state=checked]:text-white dark:bg-slate-800`}`}
+                          />
+                        </div>
                       </div>
                     );
                   })}

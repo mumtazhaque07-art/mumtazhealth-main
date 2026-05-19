@@ -28,13 +28,14 @@ function validateRequest(body: unknown): {
     spiritualPreference?: string;
     isMenarcheJourney?: boolean;
     healthConditions?: string[];
+    effectivenessLogs?: any[];
   }; 
 } | { valid: false; error: string } {
   if (!body || typeof body !== 'object') {
     return { valid: false, error: 'Invalid request body' };
   }
   
-  const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions } = body as Record<string, unknown>;
+  const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions, effectivenessLogs } = body as Record<string, unknown>;
   
   // Validate messages array
   if (!Array.isArray(messages)) {
@@ -92,6 +93,7 @@ function validateRequest(body: unknown): {
       spiritualPreference: typeof spiritualPreference === 'string' ? spiritualPreference.substring(0, 50) : undefined,
       isMenarcheJourney: typeof isMenarcheJourney === 'boolean' ? isMenarcheJourney : undefined,
       healthConditions: Array.isArray(healthConditions) ? healthConditions.filter(c => typeof c === 'string').slice(0, 10) : undefined,
+      effectivenessLogs: Array.isArray(effectivenessLogs) ? effectivenessLogs : undefined,
     }
   };
 }
@@ -141,7 +143,7 @@ serve(async (req) => {
       );
     }
 
-    const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions } = validation.data;
+    const { messages, userName, primaryDosha, secondaryDosha, lifeStage, lifePhases, primaryFocus, pregnancyTrimester, pregnancyConceptionType, pregnancyMultiples, isSurrogate, postpartumDeliveryType, spiritualPreference, isMenarcheJourney, healthConditions, effectivenessLogs } = validation.data;
     
     const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
     if (!ANTHROPIC_API_KEY) {
@@ -165,6 +167,7 @@ serve(async (req) => {
       spiritualPreference,
       isMenarcheJourney,
       healthConditions,
+      effectivenessLogs,
     });
 
     console.log("[CHATBOT_API] Making request to Anthropic API for user:", user.id.substring(0, 8) + "...");
@@ -243,6 +246,7 @@ interface ProfileContext {
   spiritualPreference?: string;
   isMenarcheJourney?: boolean;
   healthConditions?: string[];
+  effectivenessLogs?: any[];
 }
 
 function buildSystemPrompt(context: ProfileContext): string {
@@ -277,6 +281,11 @@ function buildSystemPrompt(context: ProfileContext): string {
   // Health conditions context
   if (context.healthConditions && context.healthConditions.length > 0) {
     userContextSection += "\n" + getHealthConditionsGuidance(context.healthConditions);
+  }
+
+  // Effectiveness logs context (Organic feedback loop)
+  if (context.effectivenessLogs && context.effectivenessLogs.length > 0) {
+    userContextSection += "\n" + getEffectivenessGuidance(context.effectivenessLogs);
   }
 
   // Menarche specific context
@@ -407,6 +416,28 @@ function getHealthConditionsGuidance(conditions: string[]): string {
   
   const details = conditions.map(c => conditionInfo[c.toLowerCase()] || c).join("\n- ");
   return `\n## HEALTH CONDITIONS CONTEXT\nThis user has shared the following conditions/concerns:\n- ${details}\nAlways be gentle and prioritize non-aggravating suggestions.`;
+}
+
+function getEffectivenessGuidance(logs: any[]): string {
+  if (!logs || logs.length === 0) return "";
+  
+  // Find practices that worked well (mood, sleep, pain, etc)
+  const helpedWith: string[] = [];
+  logs.forEach(log => {
+    if (log.mood_improvement) helpedWith.push("mood");
+    if (log.sleep_improvement) helpedWith.push("sleep");
+    if (log.pain_improvement) helpedWith.push("pain reduction");
+    if (log.energy_improvement) helpedWith.push("energy");
+    if (log.digestion_improvement) helpedWith.push("digestion");
+  });
+  
+  const uniqueHelped = [...new Set(helpedWith)];
+  
+  if (uniqueHelped.length === 0) return "";
+  
+  return `\n## WHAT IS WORKING FOR THEM (ORGANIC GROWTH)
+Based on their recent daily tracker logs, the holistic practices they have been doing recently have specifically helped them with: ${uniqueHelped.join(", ")}. 
+As their guide, you should naturally and organically suggest new practices or spiritual insights that build upon this success. Mention how wonderful it is that they are finding relief, and suggest gentle next steps that complement what is already working. Encourage them to keep tracking their journey.`;
 }
 
 function getLifePhasesGuidance(lifePhases: string[]): string {
