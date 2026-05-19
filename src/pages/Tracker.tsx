@@ -712,9 +712,9 @@ export default function Tracker() {
         toast.success(`Progress saved!`);
         setShowSupportPlan(true);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving data:', error);
-      if (showToast) toast.error('Error saving data.');
+      if (showToast) toast.error(`Error saving data: ${error?.message || 'Unknown database error.'}`);
     }
   };
 

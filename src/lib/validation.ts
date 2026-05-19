@@ -8,6 +8,7 @@ import { z } from "zod";
 const MAX_SHORT_TEXT = 100;
 const MAX_MEDIUM_TEXT = 500;
 const MAX_LONG_TEXT = 2000;
+const MAX_JOURNAL_TEXT = 10000;
 const MAX_MESSAGE = 2000;
 
 // Common schemas
@@ -59,7 +60,7 @@ export const wellnessEntrySchema = z.object({
     .optional()
     .nullable(),
   monthly_reflection: z.string()
-    .max(MAX_LONG_TEXT, { message: `Reflection must be less than ${MAX_LONG_TEXT} characters` })
+    .max(MAX_JOURNAL_TEXT, { message: `Reflection must be less than ${MAX_JOURNAL_TEXT} characters` })
     .optional()
     .nullable(),
   pain_level: z.number().int().min(0).max(10).optional().nullable(),
