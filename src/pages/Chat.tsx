@@ -220,7 +220,21 @@ export default function Chat() {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase function error:", error);
+        let extractedMessage = error.message;
+        if (error.context && typeof error.context.json === 'function') {
+          try {
+            const errorBody = await error.context.json();
+            if (errorBody && errorBody.error) {
+              extractedMessage = `Backend Error: ${errorBody.error}`;
+            }
+          } catch (e) {
+            console.error("Failed to parse error body", e);
+          }
+        }
+        throw new Error(extractedMessage);
+      }
       
       if (data?.error) {
         if (!isRetry && retryCount < 1) {

@@ -393,7 +393,21 @@ export function MumtazWisdomGuide() {
 
       if (error) {
         console.error("[CHATBOT_API_ERROR] Function invoke error:", error);
-        throw error;
+        let extractedMessage = error.message;
+        
+        // Attempt to extract the true error message from the Supabase edge function response
+        if (error.context && typeof error.context.json === 'function') {
+          try {
+            const errorBody = await error.context.json();
+            if (errorBody && errorBody.error) {
+              extractedMessage = `Backend Error: ${errorBody.error}`;
+            }
+          } catch (e) {
+            console.error("Failed to parse error body", e);
+          }
+        }
+        
+        throw new Error(extractedMessage);
       }
 
       if (data?.error) {
