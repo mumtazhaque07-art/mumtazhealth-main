@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { Calendar as CalendarUI } from "@/components/ui/calendar";
+import { format } from "date-fns";
 import { ArrowLeft, Calendar, Clock, Users, Check, Filter, X, Heart } from "lucide-react";
 import {
   AlertDialog,
@@ -38,6 +40,13 @@ interface Service {
   price: number;
   currency: string;
   max_capacity: number | null;
+  upcoming_dates?: UpcomingDate[];
+}
+
+interface UpcomingDate {
+  date: string;
+  capacity: number;
+  booked: number;
 }
 
 interface Booking {
@@ -56,7 +65,8 @@ export default function Bookings() {
   const [services, setServices] = useState<Service[]>([]);
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [bookingDate, setBookingDate] = useState('');
+  const [bookingDate, setBookingDate] = useState<Date | undefined>(undefined);
+  const [bookingTime, setBookingTime] = useState<string>('');
   const [bookingNotes, setBookingNotes] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -130,7 +140,8 @@ export default function Bookings() {
 
   const handleBookService = (service: Service) => {
     setSelectedService(service);
-    setBookingDate('');
+    setBookingDate(undefined);
+    setBookingTime('');
     setBookingNotes('');
     setIsDialogOpen(true);
   };
@@ -141,15 +152,37 @@ export default function Bookings() {
       return;
     }
 
-    if (!bookingDate) {
-      toast.error('Please select a preferred date and time for your session.');
-      return;
+    let finalBookingDate = "";
+    let finalStatus = "pending";
+
+    if (selectedService.category === 'workshop') {
+      const hasDates = selectedService.upcoming_dates && selectedService.upcoming_dates.length > 0;
+      if (hasDates) {
+        if (!bookingDate) {
+          toast.error('Please select a workshop date.');
+          return;
+        }
+        finalBookingDate = bookingDate.toISOString();
+      } else {
+        // Waitlist
+        finalBookingDate = new Date(Date.now() + 86400000).toISOString(); // Future mock date for validation
+        finalStatus = 'waitlisted';
+      }
+    } else {
+      if (!bookingDate || !bookingTime) {
+        toast.error('Please select a preferred date and time for your session.');
+        return;
+      }
+      const [hours, minutes] = bookingTime.split(':');
+      const dateObj = new Date(bookingDate);
+      dateObj.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      finalBookingDate = dateObj.toISOString();
     }
     
     // Make sure we have validated data to insert
     const validation = validateInput(bookingSchema, {
       service_id: selectedService.id,
-      booking_date: bookingDate,
+      booking_date: finalBookingDate,
       notes: bookingNotes || null,
     });
     
@@ -167,7 +200,7 @@ export default function Bookings() {
         service_id: validatedData.service_id,
         booking_date: new Date(validatedData.booking_date).toISOString(),
         notes: validatedData.notes,
-        status: 'pending',
+        status: finalStatus,
       })
       .select()
       .single();
@@ -178,7 +211,11 @@ export default function Bookings() {
       return;
     }
 
-    toast.success('Your healing space is requested. You will receive a Google Calendar invite shortly.');
+    if (finalStatus === 'waitlisted') {
+      toast.success('You have been added to the waitlist. You will be notified when dates open up!');
+    } else {
+      toast.success('Your healing space is requested. You will receive a Google Calendar invite shortly.');
+    }
     setIsDialogOpen(false);
     loadMyBookings();
   };
@@ -628,23 +665,105 @@ export default function Bookings() {
             <div className="space-y-4 p-8 -mt-6 bg-card rounded-t-3xl relative z-10">
               <div className="bg-muted p-4 rounded-xl border border-border mb-2">
                 <p className="text-sm text-foreground leading-relaxed">
-                  Select your preferred time below. Mumtaz will review your request and send a direct <strong>Google Calendar Invitation</strong> to your email.
+                  {selectedService?.category === 'workshop' 
+                    ? (!selectedService.upcoming_dates || selectedService.upcoming_dates.length === 0 
+                        ? "Currently, no dates are available. Join the waitlist and Mumtaz will notify you when new sessions open."
+                        : "Select an upcoming workshop date.")
+                    : "Select your preferred date and time below. Mumtaz will review your request and send a direct Google Calendar Invitation."
+                  }
                 </p>
               </div>
               
-              <div>
-                <Label htmlFor="booking-date" className="text-foreground text-sm">Preferred Time</Label>
-                <Input
-                  id="booking-date"
-                  type="datetime-local"
-                  value={bookingDate}
-                  onChange={(e) => setBookingDate(e.target.value)}
-                  className="mt-2 h-12 rounded-xl"
-                  min={new Date().toISOString().slice(0, 16)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="booking-notes" className="text-foreground text-sm">How can I support you today?</Label>
+              {selectedService?.category !== 'workshop' ? (
+                <div className="grid grid-cols-1 gap-6">
+                  <div>
+                    <Label className="text-foreground text-sm font-semibold mb-3 block">Select Date</Label>
+                    <div className="border rounded-2xl bg-white flex justify-center p-2">
+                      <CalendarUI
+                        mode="single"
+                        selected={bookingDate}
+                        onSelect={setBookingDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
+                        className="rounded-xl border-none shadow-none"
+                      />
+                    </div>
+                  </div>
+                  
+                  {bookingDate && (
+                    <div className="animate-in fade-in slide-in-from-top-2">
+                      <Label className="text-foreground text-sm font-semibold mb-3 block">Select Time (UK Time)</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {['09:00', '10:30', '13:00', '14:30', '16:00', '18:00'].map((time) => (
+                          <button
+                            key={time}
+                            onClick={() => setBookingTime(time)}
+                            className={`py-2 px-3 rounded-xl border text-sm font-medium transition-all ${
+                              bookingTime === time 
+                                ? 'bg-wellness-sage border-wellness-sage text-white shadow-md' 
+                                : 'bg-background hover:bg-muted border-border'
+                            }`}
+                          >
+                            {time}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedService.upcoming_dates && selectedService.upcoming_dates.length > 0 ? (
+                    <>
+                      <Label className="text-foreground text-sm font-semibold block mb-2">Available Sessions</Label>
+                      {selectedService.upcoming_dates.map((session, idx) => {
+                        const sessionDate = new Date(session.date);
+                        const isSelected = bookingDate && bookingDate.getTime() === sessionDate.getTime();
+                        return (
+                          <div 
+                            key={idx} 
+                            onClick={() => setBookingDate(sessionDate)}
+                            className={`p-4 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                              isSelected ? 'border-wellness-sage bg-wellness-sage/5 ring-2 ring-wellness-sage/20' : 'hover:border-wellness-taupe/40'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full ${isSelected ? 'bg-wellness-sage text-white' : 'bg-muted text-muted-foreground'}`}>
+                                <Calendar className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="font-semibold text-foreground">{format(sessionDate, 'EEEE, MMMM do, yyyy')}</p>
+                                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {format(sessionDate, 'h:mm a')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge variant={session.capacity - session.booked > 0 ? "outline" : "secondary"}>
+                                {session.capacity - session.booked > 0 ? `${session.capacity - session.booked} spots left` : 'Full'}
+                              </Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    <div className="py-6 flex flex-col items-center justify-center text-center border-2 border-dashed rounded-xl bg-muted/30">
+                      <div className="w-12 h-12 rounded-full bg-wellness-sage/10 flex items-center justify-center mb-3">
+                        <Users className="w-6 h-6 text-wellness-sage" />
+                      </div>
+                      <h4 className="font-semibold text-foreground">Next Cohort Forming</h4>
+                      <p className="text-sm text-muted-foreground max-w-[250px] mt-1">Join the waitlist to get priority access when new dates are announced.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-4">
+                <Label htmlFor="booking-notes" className="text-foreground text-sm font-semibold mb-2 block">
+                  {selectedService?.category === 'workshop' && (!selectedService.upcoming_dates || selectedService.upcoming_dates.length === 0) 
+                    ? "Why do you want to join this workshop?" 
+                    : "How can I support you today?"}
+                </Label>
                 <Textarea
                   id="booking-notes"
                   value={bookingNotes}
@@ -659,7 +778,9 @@ export default function Bookings() {
                 onClick={executeBooking}
                 className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold mt-4"
               >
-                Send Request
+                {selectedService?.category === 'workshop' && (!selectedService.upcoming_dates || selectedService.upcoming_dates.length === 0)
+                  ? "Join Waitlist"
+                  : "Send Request"}
               </Button>
               
               <div className="pt-2">

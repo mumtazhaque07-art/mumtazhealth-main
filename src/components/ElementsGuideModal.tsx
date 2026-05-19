@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, Wind, Flower2, Leaf, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export function ElementsGuideModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [quizMode, setQuizMode] = useState(false);
@@ -36,22 +38,59 @@ export function ElementsGuideModal({ isOpen, onClose }: { isOpen: boolean, onClo
     }
   ];
 
-  const handleAnswer = (doshaId: string) => {
-    setAnswers({ ...answers, [currentQuestion]: doshaId });
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
-    } else {
-      setShowResult(true);
+  const calculateDominant = (): string => {
+    const counts: Record<string, number> = { vata: 0, pitta: 0, kapha: 0 };
+    Object.values(answers).forEach((dosha) => {
+      counts[dosha as string]++;
+    });
+    
+    // Check for 3-way tie
+    if (counts.vata === 1 && counts.pitta === 1 && counts.kapha === 1) {
+      return "tri-dosha";
+    }
+    
+    // Sort descending by count
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    
+    return sorted[0][0];
+  };
+
+  const saveDoshaToProfile = async (dosha: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; // Silent return if not logged in
+      
+      const { error } = await supabase
+        .from('user_wellness_profiles')
+        .update({ primary_dosha: dosha })
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+      
+    } catch (error) {
+      console.error('Error saving dosha to profile:', error);
     }
   };
 
-  const calculateDominant = () => {
-    const counts = Object.values(answers).reduce((acc: any, dosha) => {
-      acc[dosha as string] = (acc[dosha as string] || 0) + 1;
-      return acc;
-    }, {});
+  const handleAnswer = (doshaId: string) => {
+    const newAnswers = { ...answers, [currentQuestion]: doshaId };
+    setAnswers(newAnswers);
     
-    return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      // Calculate and save before showing result
+      const counts: Record<string, number> = { vata: 0, pitta: 0, kapha: 0 };
+      Object.values(newAnswers).forEach((dosha) => {
+        counts[dosha as string]++;
+      });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const dominant = sorted[0][0];
+      
+      saveDoshaToProfile(dominant).then(() => {
+        setShowResult(true);
+      });
+    }
   };
 
   const resetQuiz = () => {
@@ -152,9 +191,10 @@ export function ElementsGuideModal({ isOpen, onClose }: { isOpen: boolean, onClo
               {dominantDosha === 'vata' && <Wind className="w-8 h-8 text-[#9B8BA7]" />}
               {dominantDosha === 'pitta' && <Flower2 className="w-8 h-8 text-[#E8B48F]" />}
               {dominantDosha === 'kapha' && <Leaf className="w-8 h-8 text-[#7A9684]" />}
+              {dominantDosha === 'tri-dosha' && <CheckCircle2 className="w-8 h-8 text-mumtaz-plum" />}
             </div>
             <h3 className="text-xl font-medium text-slate-800 mb-4">
-              Your dominant energy right now leans towards <span className="capitalize">{dominantDosha}</span>.
+              Your dominant energy right now leans towards <span className="capitalize">{dominantDosha.replace('-', ' ')}</span>.
             </h3>
             <p className="text-slate-600 mb-8 leading-relaxed text-[15px]">
               Remember, this isn't a permanent label—it's just an observation of what your body is currently experiencing.

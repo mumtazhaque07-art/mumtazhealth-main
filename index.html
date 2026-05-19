@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Mumtaz Health - Empowering Your Journey</title>
     <meta name="description" content="Holistic wellness for women through every stage of life. Ayurvedic wisdom, yoga, and compassionate support for menstrual health, pregnancy, menopause, and beyond." />
     <meta name="author" content="Mumtaz Health" />
@@ -11,15 +11,19 @@
     <meta name="theme-color" content="#6b3d8a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Mumtaz Health" />
     <link rel="apple-touch-icon" href="/mumtaz-icon.png" />
+    <link rel="mask-icon" href="/mumtaz-icon.png" color="#6b3d8a" />
+    <link rel="apple-touch-startup-image" href="/mumtaz-icon.png" />
 
     <meta property="og:title" content="Mumtaz Health - Empowering Your Journey" />
     <meta property="og:description" content="Holistic wellness for women through every stage of life" />
+    <meta property="og:image" content="/mumtaz-icon.png" />
     <meta property="og:type" content="website" />
 
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/mumtaz-icon.png" />
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,16 +34,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then((registration) => {
-            console.log('SW registered:', registration);
-          }).catch((error) => {
-            console.log('SW registration failed:', error);
-          });
-        });
-      }
-    </script>
   </body>
 </html>

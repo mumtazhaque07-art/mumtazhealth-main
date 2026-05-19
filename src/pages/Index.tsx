@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play } from "lucide-react";
+import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play, ArrowRight } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PERSONA_CONFIG } from "@/config/personas";
 import { ElementsGuideModal } from "@/components/ElementsGuideModal";
@@ -33,12 +33,12 @@ export default function Index() {
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.substring(1);
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col bg-white relative overflow-hidden">
+    <div className="w-full h-[100dvh] flex flex-col bg-[#FDFBF7] relative overflow-hidden">
       
       <div className="flex-1 overflow-y-auto pb-24">
         <header className="px-6 pt-12 pb-4">
-          <h1 className="text-3xl font-light tracking-tight text-slate-800">Welcome {username}, <br/>to your sanctuary.</h1>
-          <p className="text-sm text-slate-500 mt-2">A safe space with zero judgment.</p>
+          <h1 className="text-3xl font-light tracking-tight text-[#1D1C1C]">Welcome {username}, <br/>to your sanctuary.</h1>
+          <p className="text-sm text-[#1D1C1C]/60 mt-2">A safe space with zero judgment.</p>
         </header>
 
         <div className="px-6 pb-6">
@@ -51,7 +51,7 @@ export default function Index() {
                   key={p}
                   onClick={() => setPersona(p)}
                   className={`snap-center flex-shrink-0 w-28 h-32 rounded-3xl flex flex-col items-center justify-center transition-all duration-300 border ${
-                    isSelected ? `${pConfig.color} ${pConfig.border} shadow-sm scale-105` : 'bg-white border-slate-100 hover:bg-slate-50 opacity-60'
+                    isSelected ? `${pConfig.color} ${pConfig.border} shadow-sm scale-105 ring-4 ring-[#FDFBF7]` : 'bg-transparent border-slate-200 hover:bg-slate-50 opacity-70 grayscale-[30%]'
                   }`}
                 >
                   <div className={`mb-3 ${isSelected ? pConfig.accent : 'text-slate-400'}`}>
@@ -65,25 +65,34 @@ export default function Index() {
         </div>
 
         <main className="px-6">
-          {/* ONE-CLICK REMEDY HERO CARD */}
-          <section className="mb-6 group cursor-pointer" onClick={() => navigate(`/content-library?stage=${config.id === 'menarche' ? 'menstrual' : config.id}`)}>
-            <div className={`relative w-full h-52 rounded-[2rem] overflow-hidden ${config.color} border ${config.border} flex flex-col justify-between p-6 transition-transform duration-300 group-hover:scale-[1.02]`}>
-              <div className={`absolute -right-8 -top-8 w-40 h-40 rounded-full blur-3xl opacity-40 ${config.accentBg}`}></div>
-              <div className="relative z-10 flex justify-between items-start">
-                <div className={`p-3 rounded-2xl bg-white/60 backdrop-blur-md shadow-sm ${config.accent}`}>
-                  {React.cloneElement(config.icon as React.ReactElement, { className: 'w-6 h-6' })}
+          {/* SANCTUARY GUIDE (NEW FEATURED SECTION) */}
+          <section className="mb-6">
+            <div className={`relative w-full rounded-[2rem] overflow-hidden ${config.color} border ${config.border} p-6 transition-all duration-500 shadow-md`}>
+              <div className={`absolute -right-12 -top-12 w-48 h-48 rounded-full blur-[40px] opacity-40 ${config.accentBg}`}></div>
+              <div className={`absolute -left-8 -bottom-8 w-32 h-32 rounded-full blur-[30px] opacity-30 ${config.accentBg}`}></div>
+              
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex justify-between items-start mb-6">
+                  <div className={`p-3 rounded-2xl bg-white/70 backdrop-blur-md shadow-sm ${config.accent}`}>
+                    {React.cloneElement(config.icon as React.ReactElement, { className: 'w-6 h-6' })}
+                  </div>
+                  <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-slate-800 shadow-sm uppercase tracking-widest border border-white/20">
+                    Today's Wisdom
+                  </span>
                 </div>
-                <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-medium text-slate-700 shadow-sm uppercase tracking-wider">
-                  Today's Flow
-                </span>
-              </div>
-              <div className="relative z-10">
-                <h2 className="text-xl font-medium text-slate-800 mb-3 leading-tight pr-8">{config.remedy}</h2>
-                <div className="flex items-center gap-3">
-                  <button className={`w-11 h-11 rounded-full ${config.accentBg} text-white flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50`}>
-                    <Play className="w-4 h-4 ml-0.5 fill-current" />
-                  </button>
-                  <span className="text-xs font-medium text-slate-700">{config.action}</span>
+                
+                <div>
+                  <h2 className={`text-xl font-medium text-slate-900 mb-3 leading-tight pr-4`}>
+                    "{config.wisdom || config.remedy}"
+                  </h2>
+                  <div className="w-12 h-[2px] rounded-full bg-slate-900/20 mb-4"></div>
+                  
+                  <div className="flex items-center justify-between cursor-pointer group" onClick={() => navigate(`/content-library?stage=${config.id === 'menarche' ? 'menstrual' : config.id}`)}>
+                    <span className="text-sm font-semibold text-[#1D1C1C] group-hover:underline underline-offset-4 decoration-2">{config.action}</span>
+                    <button className={`w-12 h-12 rounded-full ${config.accentBg} text-white flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-black/10`}>
+                      <ArrowRight className="w-5 h-5 text-white" />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -111,11 +120,11 @@ export default function Index() {
 
           {/* Direct Connection to Practitioner / Q&A */}
           <section className="mb-6">
-            <div className="bg-slate-800 rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between">
+            <div className="bg-mumtaz-plum rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between shadow-xl">
               <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <div className="relative z-10 mb-4">
-                <h3 className="text-white font-medium text-lg">Connect with Mumtaz</h3>
-                <p className="text-slate-300 text-xs mt-1 leading-relaxed pr-6">
+                <h3 className="text-white font-medium text-xl tracking-tight">Connect with Mumtaz</h3>
+                <p className="text-wellness-lavender text-sm mt-2 leading-relaxed pr-6">
                   This sanctuary is just a companion. Join our live Q&A circles or book a private session for true practitioner guidance.
                 </p>
               </div>
@@ -142,6 +151,7 @@ export default function Index() {
             <button 
               key={item.id}
               onClick={() => navigate(item.path)}
+              aria-label={item.id}
               className={`transition-all duration-300 relative min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full ${
                 isActive ? `${config.accent} scale-110` : 'text-slate-300 hover:text-slate-400'
               }`}
