@@ -375,8 +375,15 @@ export function MumtazWisdomGuide() {
         }
       }
 
-      const { data, error } = await supabase.functions.invoke("mumtaz-wisdom-guide", {
-        body: {
+      const { data: { session } } = await supabase.auth.getSession();
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const response = await fetch(`${supabaseUrl}/functions/v1/mumtaz-wisdom-guide`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`
+        },
+        body: JSON.stringify({
           messages: payloadMessages,
           userName: userProfile?.username,
           primaryDosha: userProfile?.primaryDosha,
@@ -388,30 +395,20 @@ export function MumtazWisdomGuide() {
           spiritualPreference: userProfile?.spiritualPreference,
           isMenarcheJourney: userProfile?.isMenarcheJourney,
           postpartumDeliveryType: userProfile?.postpartumDeliveryType,
-        },
+        })
       });
 
-      if (error) {
-        console.error("[CHATBOT_API_ERROR] Function invoke error:", error);
-        let extractedMessage = error.message;
-        
-        // Attempt to extract the true error message from the Supabase edge function response
-        if (error.context && typeof error.context.json === 'function') {
-          try {
-            const errorBody = await error.context.json();
-            if (errorBody && errorBody.error) {
-              extractedMessage = `Backend Error: ${errorBody.error}`;
-            }
-          } catch (e) {
-            console.error("Failed to parse error body", e);
-          }
-        }
-        
-        throw new Error(extractedMessage);
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("[CHATBOT_API_ERROR] Failed to parse response JSON:", responseText);
+        throw new Error("Received an invalid response from the server.");
       }
 
-      if (data?.error) {
-        console.error("[CHATBOT_API_ERROR] API returned error:", data.error, data.errorCode);
+      if (!response.ok) {
+        console.error("[CHATBOT_API_ERROR] API returned error status:", response.status, data.error);
         
         // Check if we should auto-retry (once for transient errors)
         if (!isRetry && retryCount < 1) {
@@ -421,14 +418,8 @@ export function MumtazWisdomGuide() {
           return;
         }
         
-        // Show friendly error message
-        toast({
-          title: "Service Notice",
-          description: data.error,
-          variant: "destructive",
-        });
-        setLastFailedMessage(textToSend);
-        return;
+        // Throw the actual backend error so it gets caught below
+        throw new Error(data.error || `Backend Error (${response.status})`);
       }
 
       const assistantMessage: Message = {
