@@ -47,9 +47,9 @@ export function getContentPregnancySafety(
   },
   trimester: number | null
 ): SafetyResult {
-  const lowerTitle = content.title.toLowerCase();
+  const lowerTitle = (content.title || '').toLowerCase();
   const lowerDescription = (content.description || '').toLowerCase();
-  const tags = content.tags?.map(t => t.toLowerCase()) || [];
+  const tags = Array.isArray(content.tags) ? content.tags.filter(Boolean).map(t => t.toLowerCase()) : [];
   const combinedText = `${lowerTitle} ${lowerDescription} ${tags.join(' ')}`;
   
   // If content explicitly supports pregnancy

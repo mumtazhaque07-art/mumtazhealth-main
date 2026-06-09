@@ -562,10 +562,10 @@ const ContentLibrary = () => {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(item => {
-        const itemTags = item.tags || [];
-        const itemBenefits = item.benefits || [];
-        const itemCyclePhases = item.cycle_phases || [];
-        const itemDoshas = item.doshas || [];
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+        const itemBenefits = Array.isArray(item.benefits) ? item.benefits.filter(Boolean) : [];
+        const itemCyclePhases = Array.isArray(item.cycle_phases) ? item.cycle_phases.filter(Boolean) : [];
+        const itemDoshas = Array.isArray(item.doshas) ? item.doshas.filter(Boolean) : [];
         return (
           (item.title && item.title.toLowerCase().includes(query)) ||
           (item.description && item.description.toLowerCase().includes(query)) ||
@@ -594,7 +594,7 @@ const ContentLibrary = () => {
       const mapping = categoryMappings[selectedCategory];
       if (mapping) {
         filtered = filtered.filter(item => {
-          const itemTags = item.tags || [];
+          const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
           return (
             mapping.types.includes(item.content_type) ||
             itemTags.some(tag => mapping.tags.some(t => tag.toLowerCase().includes(t)))
@@ -604,16 +604,30 @@ const ContentLibrary = () => {
     }
 
     if (selectedDosha !== "all") {
-      filtered = filtered.filter(item => 
-        !item.doshas || item.doshas.length === 0 || item.doshas.includes(selectedDosha)
-      );
+      filtered = filtered.filter(item => {
+        const itemDoshas = Array.isArray(item.doshas) ? item.doshas.filter(Boolean) : [];
+        return itemDoshas.length === 0 || itemDoshas.includes(selectedDosha);
+      });
     }
 
     if (selectedLifePhase !== "all") {
-      filtered = filtered.filter(item => 
-        !item.cycle_phases || item.cycle_phases.length === 0 || item.cycle_phases.includes(selectedLifePhase) ||
-        item.pregnancy_statuses?.includes(selectedLifePhase)
-      );
+      filtered = filtered.filter(item => {
+        const itemCyclePhases = Array.isArray(item.cycle_phases) ? item.cycle_phases.filter(Boolean) : [];
+        const itemPregnancyStatuses = Array.isArray(item.pregnancy_statuses) ? item.pregnancy_statuses.filter(Boolean) : [];
+        
+        // If it explicitly supports the selected phase
+        if (itemCyclePhases.includes(selectedLifePhase) || itemPregnancyStatuses.includes(selectedLifePhase)) {
+          return true;
+        }
+        
+        // Include universal content (content with no specific cycle phases) ONLY if not looking for highly specific phases like postpartum
+        const isHighlySpecificPhase = ['pregnancy', 'pregnant', 'postpartum'].includes(selectedLifePhase.toLowerCase());
+        if (!isHighlySpecificPhase && itemCyclePhases.length === 0) {
+           return true;
+        }
+        
+        return false;
+      });
     }
 
     // Mobility level filter
@@ -626,7 +640,7 @@ const ContentLibrary = () => {
       };
       const mobilityTags = mobilityMappings[selectedMobility] || [];
       filtered = filtered.filter(item => {
-        const itemTags = item.tags || [];
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
         if (itemTags.length === 0) return selectedMobility === "gentle";
         return itemTags.some(tag => 
           mobilityTags.some(mTag => tag.toLowerCase().includes(mTag))
@@ -648,8 +662,8 @@ const ContentLibrary = () => {
       };
       const concernTags = concernMappings[selectedConcern] || [];
       filtered = filtered.filter(item => {
-        const itemTags = item.tags || [];
-        const itemBenefits = item.benefits || [];
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+        const itemBenefits = Array.isArray(item.benefits) ? item.benefits.filter(Boolean) : [];
         return (
           itemTags.some(tag => concernTags.some(cTag => tag.toLowerCase().includes(cTag))) ||
           itemBenefits.some(benefit => concernTags.some(cTag => benefit.toLowerCase().includes(cTag)))
@@ -679,7 +693,8 @@ const ContentLibrary = () => {
           
           // Tag-based filters
           if (chip.tags) {
-            return item.tags?.some(tag => 
+            const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+            return itemTags.some(tag => 
               chip.tags!.some(ct => tag.toLowerCase().includes(ct))
             ) || item.difficulty_level?.toLowerCase() === filterId;
           }
@@ -693,10 +708,13 @@ const ContentLibrary = () => {
     if (userMovementPreference && userMovementPreference !== "recommend") {
       const preferredTags = movementToTagsMap[userMovementPreference] || [];
       filtered.sort((a, b) => {
-        const aMatch = a.tags?.some(tag => 
+        const aTags = Array.isArray(a.tags) ? a.tags.filter(Boolean) : [];
+        const bTags = Array.isArray(b.tags) ? b.tags.filter(Boolean) : [];
+        
+        const aMatch = aTags.some(tag => 
           preferredTags.some(pTag => tag.toLowerCase().includes(pTag.toLowerCase()))
         ) ? 1 : 0;
-        const bMatch = b.tags?.some(tag => 
+        const bMatch = bTags.some(tag => 
           preferredTags.some(pTag => tag.toLowerCase().includes(pTag.toLowerCase()))
         ) ? 1 : 0;
         return bMatch - aMatch;
@@ -704,10 +722,13 @@ const ContentLibrary = () => {
     } else if (userMovementPreference === "recommend" && userPrimaryDosha) {
       const doshaMovementTags = getDoshaMovementTags(userPrimaryDosha);
       filtered.sort((a, b) => {
-        const aMatch = a.tags?.some(tag => 
+        const aTags = Array.isArray(a.tags) ? a.tags.filter(Boolean) : [];
+        const bTags = Array.isArray(b.tags) ? b.tags.filter(Boolean) : [];
+        
+        const aMatch = aTags.some(tag => 
           doshaMovementTags.some(dTag => tag.toLowerCase().includes(dTag.toLowerCase()))
         ) ? 1 : 0;
-        const bMatch = b.tags?.some(tag => 
+        const bMatch = bTags.some(tag => 
           doshaMovementTags.some(dTag => tag.toLowerCase().includes(dTag.toLowerCase()))
         ) ? 1 : 0;
         return bMatch - aMatch;
@@ -895,7 +916,7 @@ const ContentLibrary = () => {
         
         <CardContent className="pt-0">
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {item.doshas?.slice(0, 2).map((dosha) => (
+            {Array.isArray(item.doshas) && item.doshas.filter(Boolean).slice(0, 2).map((dosha) => (
               <Badge key={dosha} variant="outline" className="text-xs capitalize">{dosha}</Badge>
             ))}
             {item.duration_minutes && (
