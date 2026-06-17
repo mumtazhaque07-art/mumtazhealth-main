@@ -103,11 +103,11 @@ interface DailyPractice {
 }
 
 const DAILY_PRACTICES_BASE: DailyPractice[] = [
-  { id: 'sleep', label: 'Hours of Sleep', type: 'number', subtext: 'Deep cellular restoration', iconName: 'Moon', colorClass: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/20' },
-  { id: 'water', label: 'Drank Warm Water or Tea', type: 'checkbox', subtext: 'Flushes toxins & awakens digestion', iconName: 'Droplets', colorClass: 'bg-sky-50 text-sky-500 dark:bg-sky-500/20' },
-  { id: 'pause', label: 'Took a 5-Minute Pause', type: 'checkbox', subtext: 'Grounds your nervous system', iconName: 'Wind', colorClass: 'bg-amber-50 text-amber-500 dark:bg-amber-500/20' },
-  { id: 'movement', label: 'Moved Gently Today', type: 'checkbox', subtext: 'Encourages circulation & prana', iconName: 'Activity', colorClass: 'bg-rose-50 text-rose-500 dark:bg-rose-500/20' },
-  { id: 'curfew', label: 'Unplugged Before Bed', type: 'checkbox', subtext: 'Protects your natural melatonin', iconName: 'Sun', colorClass: 'bg-purple-50 text-purple-500 dark:bg-purple-500/20' },
+  { id: 'sleep', label: 'Hours of Sleep', type: 'number', iconName: 'Moon', colorClass: 'bg-indigo-50 text-indigo-500 dark:bg-indigo-500/20' },
+  { id: 'water', label: 'Warm Drink', type: 'checkbox', iconName: 'Droplets', colorClass: 'bg-sky-50 text-sky-500 dark:bg-sky-500/20' },
+  { id: 'pause', label: '5-Minute Rest', type: 'checkbox', iconName: 'Wind', colorClass: 'bg-amber-50 text-amber-500 dark:bg-amber-500/20' },
+  { id: 'movement', label: 'Gentle Movement', type: 'checkbox', iconName: 'Activity', colorClass: 'bg-rose-50 text-rose-500 dark:bg-rose-500/20' },
+  { id: 'curfew', label: 'Screen-Free Bedtime', type: 'checkbox', iconName: 'Sun', colorClass: 'bg-purple-50 text-purple-500 dark:bg-purple-500/20' },
 ];
 
 const MENSTRUAL_ADJUSTMENTS: Record<string, string> = {
@@ -944,7 +944,7 @@ export default function Tracker() {
                               ...practices,
                               [practice.id]: { ...practices[practice.id], status: checked }
                             })}
-                            className={`w-8 h-8 rounded-full flex-shrink-0 border-2 ml-2 ${isChecked ? `bg-wellness-sage text-white border-wellness-sage` : `border-slate-200 dark:border-slate-700 data-[state=checked]:bg-wellness-sage data-[state=checked]:text-white dark:bg-slate-800`}`}
+                            className={`w-10 h-10 rounded-2xl flex-shrink-0 border-2 ml-2 transition-transform active:scale-90 ${isChecked ? `bg-wellness-sage text-white border-wellness-sage` : `border-slate-300 dark:border-slate-600 data-[state=checked]:bg-wellness-sage data-[state=checked]:text-white dark:bg-slate-800`}`}
                           />
                         </div>
                       </div>
@@ -996,7 +996,7 @@ export default function Tracker() {
                             />
                           )}
                           {practice.type === 'number' && practice.id === 'sleep' ? (
-                            <div className="flex gap-1.5 overflow-x-auto hide-scrollbar py-1 pl-2">
+                            <div className="flex gap-2 overflow-x-auto hide-scrollbar py-2 pl-2">
                               {['<5', '5', '6', '7', '8', '9+'].map(hrs => {
                                 const isSelected = practices[practice.id]?.detail === hrs;
                                 return (
@@ -1006,9 +1006,9 @@ export default function Tracker() {
                                       ...practices,
                                       [practice.id]: { ...practices[practice.id], detail: isSelected ? '' : hrs }
                                     })}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${
+                                    className={`w-14 h-14 rounded-2xl flex items-center justify-center text-base font-bold transition-all flex-shrink-0 ${
                                       isSelected 
-                                        ? 'bg-indigo-500 text-white shadow-md ring-2 ring-indigo-500/20' 
+                                        ? 'bg-indigo-500 text-white shadow-md ring-2 ring-indigo-500/20 scale-105' 
                                         : 'bg-white dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                                     }`}
                                   >

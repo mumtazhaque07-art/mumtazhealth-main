@@ -414,8 +414,8 @@ export default function MyDailyPractice() {
               My Daily Practice
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground mt-2">
-            Your personalized wellness routine, organized by time of day
+          <p className="text-base text-muted-foreground mt-1">
+            Your daily rhythm
           </p>
         </div>
 
@@ -426,13 +426,12 @@ export default function MyDailyPractice() {
               <div className="p-4 rounded-full bg-muted mb-4">
                 <Sparkles className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">No practices scheduled yet</h3>
-              <p className="text-muted-foreground mb-6 max-w-md">
-                Browse our wellness content library and add practices to your daily routine. 
-                We'll remind you at your chosen times.
+              <h3 className="text-xl font-semibold mb-2">Your routine is empty</h3>
+              <p className="text-muted-foreground mb-6 max-w-md text-sm">
+                Add gentle practices from the library to build your schedule.
               </p>
               <Button onClick={() => navigate("/content-library")} size="lg">
-                Explore Content Library
+                Explore Library
               </Button>
             </CardContent>
           </Card>
