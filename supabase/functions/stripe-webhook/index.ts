@@ -8,20 +8,14 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 
 const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 
-// Map Stripe price IDs to subscription tiers
-// These must be configured once Stripe products are created
-const PRICE_TO_TIER: Record<string, string> = {
-  // Set these after creating Stripe products:
-  // "price_xxxxx_basic_monthly": "basic",
-  // "price_xxxxx_basic_annual": "basic",
-  // "price_xxxxx_standard_monthly": "standard",
-  // "price_xxxxx_standard_annual": "standard",
-  // "price_xxxxx_premium_monthly": "premium",
-  // "price_xxxxx_premium_annual": "premium",
-};
-
 function getTierFromPriceId(priceId: string): string {
-  return PRICE_TO_TIER[priceId] || "free";
+  const tiers = ["basic", "standard", "premium"];
+  for (const tier of tiers) {
+    if (Deno.env.get(`STRIPE_PRICE_${tier.toUpperCase()}`) === priceId) {
+      return tier;
+    }
+  }
+  return "free";
 }
 
 serve(async (req) => {

@@ -25,3 +25,9 @@ jobs:
 
       - name: Deploy mumtaz-wisdom-guide
         run: supabase functions deploy mumtaz-wisdom-guide --project-ref $SUPABASE_PROJECT_ID
+
+      - name: Deploy create-checkout-session
+        run: supabase functions deploy create-checkout-session --project-ref $SUPABASE_PROJECT_ID
+
+      - name: Deploy stripe-webhook
+        run: supabase functions deploy stripe-webhook --project-ref $SUPABASE_PROJECT_ID

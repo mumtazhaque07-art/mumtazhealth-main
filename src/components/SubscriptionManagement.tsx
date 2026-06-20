@@ -101,24 +101,22 @@ export function SubscriptionManagement() {
   };
 
   const handleUpgrade = async (tierId: string) => {
-    // Stripe price IDs will be configured once Stripe products are created
-    // For now, show a coming-soon message as a fallback
-    const priceId = undefined; // Replace with actual Stripe price ID mapping
-
-    if (!priceId) {
-      toast.info(
-        `Upgrade to ${tierId.charAt(0).toUpperCase() + tierId.slice(1)} coming soon! We're finalising our payment setup.`,
-        { duration: 5000 }
-      );
-      return;
-    }
-
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: { priceId },
+        body: { tierId },
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle custom error message from edge function if pricing isn't configured
+        if (error.message?.includes("not configured")) {
+          toast.info(
+            `Upgrade to ${tierId.charAt(0).toUpperCase() + tierId.slice(1)} coming soon! We're finalising our payment setup.`,
+            { duration: 5000 }
+          );
+          return;
+        }
+        throw error;
+      }
       if (data?.url) {
         window.location.href = data.url;
       }

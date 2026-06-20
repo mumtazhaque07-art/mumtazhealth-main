@@ -31,10 +31,15 @@ serve(async (req) => {
       throw new Error("Not authenticated");
     }
 
-    const { priceId, successUrl, cancelUrl } = await req.json();
+    const { tierId, successUrl, cancelUrl } = await req.json();
 
+    if (!tierId) {
+      throw new Error("tierId is required");
+    }
+
+    const priceId = Deno.env.get(`STRIPE_PRICE_${tierId.toUpperCase()}`);
     if (!priceId) {
-      throw new Error("priceId is required");
+      throw new Error(`Pricing for ${tierId} is not configured yet. Please configure STRIPE_PRICE_${tierId.toUpperCase()} in Supabase Secrets.`);
     }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
