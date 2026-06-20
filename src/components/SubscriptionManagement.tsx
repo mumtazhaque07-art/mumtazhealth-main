@@ -45,7 +45,7 @@ const subscriptionTiers: SubscriptionTier[] = [
     price: "£29.99/month",
     features: [
       "Everything in Premium",
-      "1 live session/month with founder",
+      "1 monthly group live session",
       "Priority messaging support",
       "Early access to new content"
     ]
