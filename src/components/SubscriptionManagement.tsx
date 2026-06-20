@@ -18,49 +18,36 @@ interface SubscriptionTier {
 const subscriptionTiers: SubscriptionTier[] = [
   {
     id: "free",
-    name: "Free",
+    name: "Free Sanctuary",
     price: "£0/month",
     features: [
       "Basic pose images & written guidance",
       "Essential wellness tracking",
-      "Limited meditation content",
+      "Starter meditation content",
       "Community support"
     ]
   },
   {
-    id: "basic",
-    name: "Basic",
-    price: "£4.99/month",
+    id: "premium",
+    name: "Sanctuary Premium",
+    price: "£7.99/month",
     features: [
       "Everything in Free",
-      "Full written content library",
-      "Beginner yoga videos",
-      "Audio meditations",
-      "Phase & dosha recommendations"
-    ]
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    price: "£9.99/month",
-    features: [
-      "Everything in Basic",
       "Full video library access",
       "Advanced Ayurveda insights",
       "All meditations & breathwork",
-      "Priority email support"
+      "Personalised wellness plans"
     ]
   },
   {
-    id: "premium",
-    name: "Premium",
-    price: "£22.99/month",
+    id: "vip",
+    name: "VIP Sisterhood",
+    price: "£29.99/month",
     features: [
-      "Everything in Standard",
+      "Everything in Premium",
       "1 live session/month with founder",
-      "Personalised wellness plans",
-      "Early access to new content",
-      "Priority support"
+      "Priority messaging support",
+      "Early access to new content"
     ]
   }
 ];

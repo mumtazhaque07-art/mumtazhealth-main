@@ -9,7 +9,7 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 
 function getTierFromPriceId(priceId: string): string {
-  const tiers = ["basic", "standard", "premium"];
+  const tiers = ["premium", "vip"];
   for (const tier of tiers) {
     if (Deno.env.get(`STRIPE_PRICE_${tier.toUpperCase()}`) === priceId) {
       return tier;
