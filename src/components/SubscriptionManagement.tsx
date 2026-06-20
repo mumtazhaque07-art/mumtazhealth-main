@@ -47,7 +47,7 @@ const subscriptionTiers: SubscriptionTier[] = [
       "Everything in Premium",
       "1 monthly group live session",
       "Priority messaging support",
-      "Early access to new content"
+      "Exclusive discounts on future courses"
     ]
   }
 ];
