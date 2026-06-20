@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { wellnessEntrySchema, validateInput, truncateText } from "@/lib/validation";
-import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings, Menu, Info, Baby, HelpCircle, Flower2, Activity, ArrowUp, ArrowDown, Sun, Moon, Check } from "lucide-react";
+import { LogOut, Save, Trash2, UserCog, BarChart3, Plus, X, Calendar, BookOpen, Sparkles, Settings, Menu, Info, Baby, HelpCircle, Flower2, Activity, ArrowUp, ArrowDown, Sun, Moon, Check, Droplets, Wind } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
