@@ -124,7 +124,9 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-body;
+    @apply text-foreground font-body;
+    background: linear-gradient(135deg, hsl(45, 30%, 97%), hsl(102, 12%, 94%), hsl(282, 17%, 94%));
+    background-attachment: fixed;
     font-size: 1.125rem; /* ~18px for better accessibility */
     line-height: 1.7; /* Extra relaxed line height for tired eyes */
     -webkit-font-smoothing: antialiased;

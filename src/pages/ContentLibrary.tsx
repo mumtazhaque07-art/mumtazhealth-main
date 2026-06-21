@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
 
@@ -1297,88 +1297,187 @@ const ContentLibrary = () => {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Pitta - Fire */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex flex-col items-center p-4 rounded-xl bg-card/60 backdrop-blur-sm border border-dosha-pitta/30 shadow-sm hover:shadow-md hover:border-dosha-pitta/60 transition-all cursor-help">
-                      <div className="p-3 bg-dosha-pitta/10 rounded-full mb-3 ring-1 ring-dosha-pitta/20">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-pitta/30 shadow-sm hover:shadow-xl hover:border-dosha-pitta/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-pitta/10 rounded-full mb-4 ring-1 ring-dosha-pitta/20 group-hover:bg-dosha-pitta/20 transition-colors">
                         <Flame className="h-8 w-8 text-dosha-pitta drop-shadow-sm" />
                       </div>
-                      <h3 className="font-semibold text-dosha-pitta mb-1 flex items-center gap-1 text-lg">
+                      <h3 className="font-semibold text-dosha-pitta mb-2 flex items-center gap-1 text-xl">
                         Pitta
-                        <HelpCircle className="h-3.5 w-3.5 opacity-50" />
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </h3>
                       <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
                         Fire & Transformation • Governs metabolism, digestion, and energy production
                       </p>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-4">
-                    <p className="font-semibold mb-2">Pitta Characteristics:</p>
-                    <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>Sharp intellect and focus</li>
-                      <li>Medium build, warm body temperature</li>
-                      <li>Strong digestion and appetite</li>
-                      <li>May experience heat-related issues</li>
-                      <li>Benefits from cooling practices</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-pitta/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-pitta/10 rounded-full mb-4">
+                        <Flame className="h-10 w-10 text-dosha-pitta" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-pitta font-accent">The Pitta Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of transformation, digestion, and metabolism.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-pitta/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-pitta" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Pitta types are typically fiery, passionate, and driven. They have a medium build, sharp intellect, strong digestion, and a warm body temperature.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Sharp & focused</li>
+                            <li>✨ Courageous</li>
+                            <li>✨ Strong digestion</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>🔥 Irritable or angry</li>
+                            <li>🔥 Acid reflux/heartburn</li>
+                            <li>🔥 Skin inflammation</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-pitta/10 p-4 rounded-xl border border-dosha-pitta/20">
+                        <h4 className="font-semibold text-dosha-pitta mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on cooling, soothing practices. Favor sweet, bitter, and astringent foods. Engage in moderate, non-competitive exercise like Yin Yoga, gentle swimming, or evening walks.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
                 {/* Vata - Air */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex flex-col items-center p-4 rounded-xl bg-card/60 backdrop-blur-sm border border-dosha-vata/30 shadow-sm hover:shadow-md hover:border-dosha-vata/60 transition-all cursor-help">
-                      <div className="p-3 bg-dosha-vata/10 rounded-full mb-3 ring-1 ring-dosha-vata/20">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-vata/30 shadow-sm hover:shadow-xl hover:border-dosha-vata/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-vata/10 rounded-full mb-4 ring-1 ring-dosha-vata/20 group-hover:bg-dosha-vata/20 transition-colors">
                         <Wind className="h-8 w-8 text-dosha-vata drop-shadow-sm" />
                       </div>
-                      <h3 className="font-semibold text-dosha-vata mb-1 flex items-center gap-1 text-lg">
+                      <h3 className="font-semibold text-dosha-vata mb-2 flex items-center gap-1 text-xl">
                         Vata
-                        <HelpCircle className="h-3.5 w-3.5 opacity-50" />
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </h3>
                       <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
                         Air & Movement • Governs circulation, breathing, and nervous system
                       </p>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-4">
-                    <p className="font-semibold mb-2">Vata Characteristics:</p>
-                    <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>Creative and quick-thinking</li>
-                      <li>Light, slender build</li>
-                      <li>Variable energy and appetite</li>
-                      <li>May experience anxiety or restlessness</li>
-                      <li>Benefits from grounding practices</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-vata/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-vata/10 rounded-full mb-4">
+                        <Wind className="h-10 w-10 text-dosha-vata" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-vata font-accent">The Vata Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of movement, creativity, and flow.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-vata/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-vata" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Vata types are often light, slender, and highly creative. They think quickly, move quickly, and have a variable appetite and energy levels.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Highly creative</li>
+                            <li>✨ Adaptable</li>
+                            <li>✨ Energetic & joyful</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>💨 Anxious or worried</li>
+                            <li>💨 Insomnia</li>
+                            <li>💨 Digestive bloating</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-vata/10 p-4 rounded-xl border border-dosha-vata/20">
+                        <h4 className="font-semibold text-dosha-vata mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on grounding, warming, and nourishing practices. Establish a strict daily routine. Favor warm, heavy foods (like soups). Practice slow, restorative yoga and meditation.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
                 {/* Kapha - Earth */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex flex-col items-center p-4 rounded-xl bg-card/60 backdrop-blur-sm border border-dosha-kapha/30 shadow-sm hover:shadow-md hover:border-dosha-kapha/60 transition-all cursor-help">
-                      <div className="p-3 bg-dosha-kapha/10 rounded-full mb-3 ring-1 ring-dosha-kapha/20">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-kapha/30 shadow-sm hover:shadow-xl hover:border-dosha-kapha/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-kapha/10 rounded-full mb-4 ring-1 ring-dosha-kapha/20 group-hover:bg-dosha-kapha/20 transition-colors">
                         <Mountain className="h-8 w-8 text-dosha-kapha drop-shadow-sm" />
                       </div>
-                      <h3 className="font-semibold text-dosha-kapha mb-1 flex items-center gap-1 text-lg">
+                      <h3 className="font-semibold text-dosha-kapha mb-2 flex items-center gap-1 text-xl">
                         Kapha
-                        <HelpCircle className="h-3.5 w-3.5 opacity-50" />
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </h3>
                       <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
                         Earth & Stability • Governs structure, immunity, and fluid balance
                       </p>
                     </div>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-4">
-                    <p className="font-semibold mb-2">Kapha Characteristics:</p>
-                    <ul className="text-sm space-y-1 list-disc list-inside">
-                      <li>Calm, steady, and nurturing</li>
-                      <li>Strong, sturdy build</li>
-                      <li>Good endurance and stamina</li>
-                      <li>May experience sluggishness</li>
-                      <li>Benefits from energizing practices</li>
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-kapha/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-kapha/10 rounded-full mb-4">
+                        <Mountain className="h-10 w-10 text-dosha-kapha" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-kapha font-accent">The Kapha Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of structure, stability, and deep nourishment.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-kapha/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-kapha" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Kapha types are grounded, loyal, and incredibly resilient. They often have a sturdy build, excellent endurance, slow digestion, and a calm, peaceful mind.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Loving & forgiving</li>
+                            <li>✨ Strong immunity</li>
+                            <li>✨ Deep, sound sleep</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>🏔️ Lethargic or stuck</li>
+                            <li>🏔️ Weight gain</li>
+                            <li>🏔️ Sinus congestion</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-kapha/10 p-4 rounded-xl border border-dosha-kapha/20">
+                        <h4 className="font-semibold text-dosha-kapha mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on stimulation, movement, and lightness. Favor warm, light, and spicy foods. Practice vigorous, warming yoga (like Vinyasa) and seek out new experiences to avoid stagnation.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>

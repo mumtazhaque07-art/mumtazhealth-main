@@ -470,14 +470,15 @@ export default function Bookings() {
                     <div className="flex flex-col mb-8">
                       <CardTitle className="text-3xl font-bold text-foreground mb-2 tracking-tight">1-to-1 Consultation</CardTitle>
                       {consultationService ? (
-                        <div className="inline-flex items-center text-accent font-bold text-xl">
-                          {consultationService.currency === 'GBP' ? '£' : ''}{consultationService.price.toFixed(2)}
-                          <span className="text-sm font-medium text-wellness-taupe/60 ml-1">
+                        <div className="inline-flex items-center text-wellness-taupe/70 font-medium text-base mb-2">
+                          <span className="opacity-70 mr-1">Exchange:</span>
+                          {consultationService.currency === 'GBP' ? '£' : ''}{consultationService.price.toFixed(0)}
+                          <span className="text-xs font-normal text-wellness-taupe/50 ml-1">
                             / {consultationService.duration_hours ? `${consultationService.duration_hours} hr` : 'session'}
                           </span>
                         </div>
                       ) : (
-                        <CardDescription className="text-accent font-semibold italic">Pricing Unavailable</CardDescription>
+                        <CardDescription className="text-wellness-taupe/50 font-medium italic mb-2">Exchange Details Unavailable</CardDescription>
                       )}
                     </div>
                     <CardDescription className="text-lg leading-relaxed text-wellness-taupe/80 mb-8">
@@ -521,14 +522,15 @@ export default function Bookings() {
                     <div className="flex flex-col mb-6">
                       <CardTitle className="text-2xl font-bold text-foreground mb-2">Workshops & Group</CardTitle>
                       {workshopService ? (
-                        <div className="inline-flex items-center text-wellness-sage font-bold text-xl">
-                          {workshopService.currency === 'GBP' ? '£' : ''}{workshopService.price.toFixed(2)}
-                          <span className="text-sm font-medium text-wellness-taupe/60 ml-1">
+                        <div className="inline-flex items-center text-wellness-taupe/70 font-medium text-base mb-2">
+                          <span className="opacity-70 mr-1">Exchange:</span>
+                          {workshopService.currency === 'GBP' ? '£' : ''}{workshopService.price.toFixed(0)}
+                          <span className="text-xs font-normal text-wellness-taupe/50 ml-1">
                             / {workshopService.duration_hours ? `${workshopService.duration_hours} hr` : 'session'}
                           </span>
                         </div>
                       ) : (
-                        <CardDescription className="text-wellness-sage font-semibold italic">Pricing Unavailable</CardDescription>
+                        <CardDescription className="text-wellness-taupe/50 font-medium italic mb-2">Exchange Details Unavailable</CardDescription>
                       )}
                     </div>
                     <CardDescription className="text-base leading-relaxed text-wellness-taupe/80 mb-6">
