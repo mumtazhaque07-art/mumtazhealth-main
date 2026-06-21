@@ -170,6 +170,7 @@ const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
 const ContentLibrary = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
   const [isCrossroadsOpen, setIsCrossroadsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userTier, setUserTier] = useState<string>("free");
@@ -2717,13 +2718,16 @@ const ContentLibrary = () => {
               </CardContent>
             </Card>
 
-            {/* Content Overview Cards */}
+            {/* Content Overview Cards (Now Interactive Sub-Filters) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'mobility' ? 'from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 border-green-400 shadow-md ring-2 ring-green-400/20' : 'from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'mobility' ? null : 'mobility')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-green-100 rounded-full">
-                      <Flower2 className="h-5 w-5 text-green-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'mobility' ? 'bg-green-200 text-green-700' : 'bg-green-100 text-green-600'}`}>
+                      <Flower2 className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-green-800 dark:text-green-300">Gentle Mobility</h4>
                   </div>
@@ -2733,11 +2737,14 @@ const ContentLibrary = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border-blue-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'breathing' ? 'from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 border-blue-400 shadow-md ring-2 ring-blue-400/20' : 'from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border-blue-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'breathing' ? null : 'breathing')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-blue-100 rounded-full">
-                      <Wind className="h-5 w-5 text-blue-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'breathing' ? 'bg-blue-200 text-blue-700' : 'bg-blue-100 text-blue-600'}`}>
+                      <Wind className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-blue-800 dark:text-blue-300">Breathing & Relaxation</h4>
                   </div>
@@ -2747,11 +2754,14 @@ const ContentLibrary = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'nutrition' ? 'from-orange-100 to-amber-100 dark:from-orange-900/50 dark:to-amber-900/50 border-orange-400 shadow-md ring-2 ring-orange-400/20' : 'from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'nutrition' ? null : 'nutrition')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-orange-100 rounded-full">
-                      <Leaf className="h-5 w-5 text-orange-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'nutrition' ? 'bg-orange-200 text-orange-700' : 'bg-orange-100 text-orange-600'}`}>
+                      <Leaf className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-orange-800 dark:text-orange-300">Mindful Nutrition</h4>
                   </div>
@@ -2761,11 +2771,14 @@ const ContentLibrary = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'grounding' ? 'from-purple-100 to-violet-100 dark:from-purple-900/50 dark:to-violet-900/50 border-purple-400 shadow-md ring-2 ring-purple-400/20' : 'from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'grounding' ? null : 'grounding')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-purple-100 rounded-full">
-                      <Mountain className="h-5 w-5 text-purple-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'grounding' ? 'bg-purple-200 text-purple-700' : 'bg-purple-100 text-purple-600'}`}>
+                      <Mountain className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-purple-800 dark:text-purple-300">Grounding Routines</h4>
                   </div>
@@ -2775,11 +2788,14 @@ const ContentLibrary = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-pink-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'spiritual' ? 'from-pink-100 to-rose-100 dark:from-pink-900/50 dark:to-rose-900/50 border-pink-400 shadow-md ring-2 ring-pink-400/20' : 'from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-pink-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'spiritual' ? null : 'spiritual')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-pink-100 rounded-full">
-                      <Sparkles className="h-5 w-5 text-pink-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'spiritual' ? 'bg-pink-200 text-pink-700' : 'bg-pink-100 text-pink-600'}`}>
+                      <Sparkles className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-pink-800 dark:text-pink-300">Spiritual Support</h4>
                   </div>
@@ -2789,11 +2805,14 @@ const ContentLibrary = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'lifestyle' ? 'from-teal-100 to-cyan-100 dark:from-teal-900/50 dark:to-cyan-900/50 border-teal-400 shadow-md ring-2 ring-teal-400/20' : 'from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'lifestyle' ? null : 'lifestyle')}
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-teal-100 rounded-full">
-                      <Lightbulb className="h-5 w-5 text-teal-600" />
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'lifestyle' ? 'bg-teal-200 text-teal-700' : 'bg-teal-100 text-teal-600'}`}>
+                      <Lightbulb className="h-5 w-5" />
                     </div>
                     <h4 className="font-semibold text-teal-800 dark:text-teal-300">Lifestyle Education</h4>
                   </div>
@@ -2828,13 +2847,25 @@ const ContentLibrary = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {content
-                  .filter(item => 
-                    item.tags?.some(tag => 
+                  .filter(item => {
+                    const hasBaseTags = item.tags?.some(tag => 
                       ['diabetes', 'blood-sugar', 'insulin-resistance', 'type-2-diabetes', 'diabetes-support', 'blood-sugar-balance', 'energy-support', 'balanced-energy', 'grounding', 'stress-relief', 'mindful-eating', 'gentle-movement', 'circulation', 'nervous-system', 'relaxation'].includes(tag)
                     ) ||
                     (item.tags?.includes('gentle') && item.tags?.includes('breathwork')) ||
-                    (item.content_type === 'nutrition' && item.tags?.some(tag => ['easy-digest', 'warming', 'nourishing', 'balancing', 'blood-sugar'].includes(tag)))
-                  )
+                    (item.content_type === 'nutrition' && item.tags?.some(tag => ['easy-digest', 'warming', 'nourishing', 'balancing', 'blood-sugar'].includes(tag)));
+                    
+                    if (!hasBaseTags) return false;
+                    if (!activeSubFilter) return true;
+                    
+                    if (activeSubFilter === 'mobility') return item.tags?.includes('gentle-movement') || item.content_type === 'video' || item.content_type === 'yoga';
+                    if (activeSubFilter === 'breathing') return item.tags?.some(t => ['breathwork', 'nervous-system', 'relaxation'].includes(t));
+                    if (activeSubFilter === 'nutrition') return item.content_type === 'nutrition' || item.tags?.includes('mindful-eating');
+                    if (activeSubFilter === 'grounding') return item.tags?.some(t => ['grounding', 'routine'].includes(t));
+                    if (activeSubFilter === 'spiritual') return item.tags?.some(t => ['spiritual', 'dhikr', 'islamic'].includes(t));
+                    if (activeSubFilter === 'lifestyle') return item.content_type === 'article' || item.tags?.includes('education');
+                    
+                    return true;
+                  })
                   .map((item) => {
                   const isLocked = !isContentUnlocked(item);
                   
