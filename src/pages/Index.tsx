@@ -124,7 +124,7 @@ export default function Index() {
               <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
               <div className="relative z-10 mb-4">
                 <h3 className="text-white font-medium text-xl tracking-tight">Connect with Mumtaz</h3>
-                <p className="text-wellness-lavender text-sm mt-2 leading-relaxed pr-6">
+                <p className="text-white/90 text-sm mt-2 leading-relaxed pr-6">
                   This sanctuary is just a companion. Join our live Q&A circles or book a private session for true practitioner guidance.
                 </p>
               </div>
