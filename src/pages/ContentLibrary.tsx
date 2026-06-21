@@ -511,7 +511,16 @@ const ContentLibrary = () => {
       return;
     }
 
-    setContent(data || []);
+    const sanitizedData = (data || []).map(item => ({
+      ...item,
+      doshas: Array.isArray(item.doshas) ? item.doshas : [],
+      benefits: Array.isArray(item.benefits) ? item.benefits : [],
+      cycle_phases: Array.isArray(item.cycle_phases) ? item.cycle_phases : [],
+      pregnancy_statuses: Array.isArray(item.pregnancy_statuses) ? item.pregnancy_statuses : [],
+      tags: Array.isArray(item.tags) ? item.tags : []
+    }));
+
+    setContent(sanitizedData);
     setLoading(false);
   };
 

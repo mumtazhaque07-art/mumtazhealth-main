@@ -139,27 +139,62 @@ export function ElementsGuideModal({ isOpen, onClose }: { isOpen: boolean, onClo
             </button>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-[#F4F0F8] border border-[#9B8BA7]/20 flex gap-4 items-start">
-                <Wind className="w-6 h-6 text-[#9B8BA7] shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-medium text-slate-800">Vata (Air & Ether)</h3>
-                  <p className="text-sm text-slate-600 mt-1">Energy of movement and creativity. When out of balance, it can feel like anxiety. <br/><em className="text-[#9B8BA7] font-medium text-xs">Balanced by grounding routines.</em></p>
+              <details className="group [&_summary::-webkit-details-marker]:hidden">
+                <summary className="p-4 rounded-2xl bg-[#F4F0F8] border border-[#9B8BA7]/20 flex gap-4 items-start cursor-pointer hover:bg-[#EBE4F2] transition-colors">
+                  <Wind className="w-6 h-6 text-[#9B8BA7] shrink-0 mt-1 group-open:text-[#80708C] transition-colors" />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-slate-800 flex justify-between items-center">
+                      Vata (Air & Ether)
+                      <span className="text-[#9B8BA7] text-xs font-normal group-open:hidden">Tap to learn more</span>
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">Energy of movement and creativity. When out of balance, it can feel like anxiety.</p>
+                  </div>
+                </summary>
+                <div className="px-4 pb-4 pt-2 -mt-4 bg-[#F4F0F8] rounded-b-2xl border-x border-b border-[#9B8BA7]/20 text-sm text-slate-700 leading-relaxed space-y-2 shadow-inner">
+                  <p><strong>When Balanced:</strong> You feel highly creative, energetic, adaptable, and joyful.</p>
+                  <p><strong>When Imbalanced:</strong> You may experience worry, insomnia, feeling ungrounded, or digestive bloating.</p>
+                  <p className="text-[#9B8BA7] font-medium text-xs uppercase tracking-widest pt-2">How to bring it back:</p>
+                  <p>Focus on grounding routines, warm and nourishing foods (like soups), and slow, restorative practices like Yin Yoga.</p>
                 </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-[#FFF6ED] border border-[#E8B48F]/20 flex gap-4 items-start">
-                <Flower2 className="w-6 h-6 text-[#E8B48F] shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-medium text-slate-800">Pitta (Fire & Water)</h3>
-                  <p className="text-sm text-slate-600 mt-1">Energy of metabolism and passion. When out of balance, it can feel like inflammation. <br/><em className="text-[#E8B48F] font-medium text-xs">Balanced by cooling practices.</em></p>
+              </details>
+
+              <details className="group [&_summary::-webkit-details-marker]:hidden">
+                <summary className="p-4 rounded-2xl bg-[#FFF6ED] border border-[#E8B48F]/20 flex gap-4 items-start cursor-pointer hover:bg-[#FFEFDF] transition-colors">
+                  <Flower2 className="w-6 h-6 text-[#E8B48F] shrink-0 mt-1 group-open:text-[#D19B74] transition-colors" />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-slate-800 flex justify-between items-center">
+                      Pitta (Fire & Water)
+                      <span className="text-[#E8B48F] text-xs font-normal group-open:hidden">Tap to learn more</span>
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">Energy of metabolism and passion. When out of balance, it can feel like inflammation.</p>
+                  </div>
+                </summary>
+                <div className="px-4 pb-4 pt-2 -mt-4 bg-[#FFF6ED] rounded-b-2xl border-x border-b border-[#E8B48F]/20 text-sm text-slate-700 leading-relaxed space-y-2 shadow-inner">
+                  <p><strong>When Balanced:</strong> You are sharp, focused, courageous, and have excellent digestion.</p>
+                  <p><strong>When Imbalanced:</strong> You may feel irritable, angry, experience heartburn, or skin inflammation.</p>
+                  <p className="text-[#E8B48F] font-medium text-xs uppercase tracking-widest pt-2">How to bring it back:</p>
+                  <p>Favor cooling and soothing practices. Engage in moderate, non-competitive exercise and seek environments that calm the fire.</p>
                 </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-[#EEF3ED] border border-[#7A9684]/20 flex gap-4 items-start">
-                <Leaf className="w-6 h-6 text-[#7A9684] shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-medium text-slate-800">Kapha (Earth & Water)</h3>
-                  <p className="text-sm text-slate-600 mt-1">Energy of structure and deep love. When out of balance, it can feel sluggish. <br/><em className="text-[#7A9684] font-medium text-xs">Balanced by gentle stimulation.</em></p>
+              </details>
+
+              <details className="group [&_summary::-webkit-details-marker]:hidden">
+                <summary className="p-4 rounded-2xl bg-[#E8F3ED] border border-[#7DB394]/20 flex gap-4 items-start cursor-pointer hover:bg-[#DDF0E5] transition-colors">
+                  <Leaf className="w-6 h-6 text-[#7DB394] shrink-0 mt-1 group-open:text-[#679E7E] transition-colors" />
+                  <div className="flex-1">
+                    <h3 className="font-medium text-slate-800 flex justify-between items-center">
+                      Kapha (Earth & Water)
+                      <span className="text-[#7DB394] text-xs font-normal group-open:hidden">Tap to learn more</span>
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-1">Energy of structure and deep love. When out of balance, it can feel sluggish.</p>
+                  </div>
+                </summary>
+                <div className="px-4 pb-4 pt-2 -mt-4 bg-[#E8F3ED] rounded-b-2xl border-x border-b border-[#7DB394]/20 text-sm text-slate-700 leading-relaxed space-y-2 shadow-inner">
+                  <p><strong>When Balanced:</strong> You feel grounded, deeply loving, resilient, and enjoy strong immunity and sleep.</p>
+                  <p><strong>When Imbalanced:</strong> You may feel stuck, lethargic, prone to weight gain, or sinus congestion.</p>
+                  <p className="text-[#7DB394] font-medium text-xs uppercase tracking-widest pt-2">How to bring it back:</p>
+                  <p>Focus on gentle stimulation and movement. Practice vigorous, warming yoga flows and seek out new, fresh experiences to avoid stagnation.</p>
                 </div>
-              </div>
+              </details>
             </div>
             
             <button onClick={onClose} className="w-full mt-8 bg-slate-800 text-white py-4 rounded-full font-medium active:scale-95 transition-transform">
