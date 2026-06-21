@@ -120,15 +120,15 @@ export default function Index() {
 
           {/* Direct Connection to Practitioner / Q&A */}
           <section className="mb-6">
-            <div className="bg-mumtaz-plum rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between shadow-xl">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+            <div className="bg-mumtaz-lilac/20 border border-mumtaz-lilac/40 rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between shadow-sm">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-white/40 rounded-full blur-2xl"></div>
               <div className="relative z-10 mb-4">
-                <h3 className="text-white font-medium text-xl tracking-tight">Connect with Mumtaz</h3>
-                <p className="text-white/90 text-sm mt-2 leading-relaxed pr-6">
+                <h3 className="text-mumtaz-plum font-medium text-xl tracking-tight">Connect with Mumtaz</h3>
+                <p className="text-slate-700 text-sm mt-2 leading-relaxed pr-6">
                   This sanctuary is just a companion. Join our live Q&A circles or book a private session for true practitioner guidance.
                 </p>
               </div>
-              <button onClick={() => navigate('/bookings')} className="relative z-10 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 w-full py-3 rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50">
+              <button onClick={() => navigate('/bookings')} className="relative z-10 bg-mumtaz-plum text-white hover:bg-mumtaz-plum/90 w-full py-3 rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mumtaz-plum/50 shadow-sm">
                 <Video className="w-4 h-4" /> Book a Consultation
               </button>
             </div>
