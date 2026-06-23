@@ -439,7 +439,19 @@ const ContentLibrary = () => {
   };
 
   const renderTierGroup = (tierValue: string, title: string, items: WellnessContent[]) => {
-    const tierItems = items.filter(item => item.tier_requirement === tierValue || (!item.tier_requirement && tierValue === 'free'));
+    let tierItems = items.filter(item => item.tier_requirement === tierValue || (!item.tier_requirement && tierValue === 'free'));
+    
+    // Temporary visual demonstration: If no standard items exist, borrow half from premium so the user can see the 3-tier journey
+    const actualStandardCount = items.filter(item => item.tier_requirement === 'standard').length;
+    if (tierValue === 'standard' && actualStandardCount === 0) {
+      const premiumItems = items.filter(item => item.tier_requirement === 'premium');
+      tierItems = premiumItems.slice(0, Math.ceil(premiumItems.length / 2));
+    }
+    if (tierValue === 'premium' && actualStandardCount === 0) {
+      const premiumItems = items.filter(item => item.tier_requirement === 'premium');
+      tierItems = premiumItems.slice(Math.ceil(premiumItems.length / 2));
+    }
+
     if (tierItems.length === 0) return null;
     
     return (
@@ -479,8 +491,8 @@ const ContentLibrary = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <ScrollArea className="w-full border-b pb-4 mb-8">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 inline-flex space-x-2">
+          <div className="w-full border-b pb-4 mb-8">
+            <TabsList className="w-full justify-start h-auto bg-transparent p-0 flex flex-wrap gap-y-3 gap-x-2">
               <TabsTrigger 
                 value="all"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-2"
@@ -506,7 +518,7 @@ const ContentLibrary = () => {
                 </TabsTrigger>
               ))}
             </TabsList>
-          </ScrollArea>
+          </div>
 
           {/* Dosha Filter Toggle */}
           <div className="flex justify-center mb-8">
