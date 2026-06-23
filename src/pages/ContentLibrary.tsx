@@ -631,7 +631,7 @@ const ContentLibrary = () => {
         }
         
         // Include universal content (content with no specific cycle phases) ONLY if not looking for highly specific phases like postpartum
-        const isHighlySpecificPhase = ['pregnancy', 'pregnant', 'postpartum'].includes(selectedLifePhase.toLowerCase());
+        const isHighlySpecificPhase = ['pregnancy', 'pregnant', 'postpartum', 'fertility', 'menopause', 'perimenopause', 'post-menopause'].includes(selectedLifePhase.toLowerCase());
         if (!isHighlySpecificPhase && itemCyclePhases.length === 0) {
            return true;
         }
