@@ -1032,7 +1032,7 @@ const ContentLibrary = () => {
   };
 
   const getContentImage = (type: string, tags?: string[], imageUrl?: string, title: string = '') => {
-    if (title.toLowerCase().includes('legs up')) return legsUpTheWall;
+    if (title && title.toLowerCase().includes('legs up')) return legsUpTheWall;
     // First check if there's a database image URL that maps to an import
     if (imageUrl) {
       const resolved = resolveImageUrl(imageUrl);
@@ -1220,6 +1220,7 @@ const ContentLibrary = () => {
   };
 
   const getDoshaIcon = (dosha: string) => {
+    if (!dosha) return null;
     switch (dosha.toLowerCase()) {
       case 'pitta':
         return (
@@ -2425,7 +2426,7 @@ const ContentLibrary = () => {
                                   variant="outline" 
                                   className="text-xs capitalize bg-wellness-lilac-light/30"
                                 >
-                                  {phase.replace(/-/g, ' ').replace(/_/g, ' ')}
+                                  {phase?.replace?.(/-/g, ' ')?.replace?.(/_/g, ' ')}
                                 </Badge>
                               ))}
                               {item.cycle_phases && item.cycle_phases.length > 2 && (
@@ -2439,7 +2440,7 @@ const ContentLibrary = () => {
                                   variant="outline" 
                                   className="text-xs capitalize bg-pink-50 dark:bg-pink-900/20"
                                 >
-                                  {status.replace(/-/g, ' ').replace(/_/g, ' ')}
+                                  {status?.replace?.(/-/g, ' ')?.replace?.(/_/g, ' ')}
                                 </Badge>
                               ))}
                             </div>
