@@ -7,7 +7,7 @@ export const PERSONA_CONFIG: Record<string, any> = {
     title: 'First Time & Cycle Health', 
     color: 'bg-[#F2EDF0]', accent: 'text-[#5B3E52]', accentBg: 'bg-[#5B3E52]', border: 'border-[#5B3E52]/30',
     icon: <Moon className="w-8 h-8" />, remedy: 'Cycle Education & Hormonal Rhythm', action: 'Explore Practices', metric: 'Energy Flow',
-    wisdom: 'General maintenance and cycle health. Understanding your body''s rhythm, hormones, and aligning yoga and foods to your cycle stages.'
+    wisdom: "General maintenance and cycle health. Understanding your body's rhythm, hormones, and aligning yoga and foods to your cycle stages."
   },
   fertility: {
     id: 'fertility',
