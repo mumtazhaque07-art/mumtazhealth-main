@@ -40,6 +40,7 @@ const Chat = lazy(() => import("./pages/Chat"));
 const HormonalTransitionTracker = lazy(() => import("./pages/HormonalTransitionTracker"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const SisterhoodSanctuary = lazy(() => import("./pages/SisterhoodSanctuary"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -145,6 +146,12 @@ const App = () => (
                 <Route path="/content-library" element={
                   <RouteErrorBoundary variant="content">
                     <PageTransition><ContentLibrary /></PageTransition>
+                  </RouteErrorBoundary>
+                } />
+
+                <Route path="/sanctuary" element={
+                  <RouteErrorBoundary variant="simple">
+                    <PageTransition><SisterhoodSanctuary /></PageTransition>
                   </RouteErrorBoundary>
                 } />
 

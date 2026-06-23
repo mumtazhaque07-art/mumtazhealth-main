@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'supabase/functions/**'
+      - 'supabase/migrations/**'
 
 jobs:
   deploy:
@@ -22,6 +23,11 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: latest
+
+      - name: Link project and push database migrations
+        run: |
+          supabase link --project-ref $SUPABASE_PROJECT_ID --password ${{ secrets.SUPABASE_DB_PASSWORD }} || true
+          supabase db push --project-ref $SUPABASE_PROJECT_ID || true
 
       - name: Deploy mumtaz-wisdom-guide
         run: supabase functions deploy mumtaz-wisdom-guide --project-ref $SUPABASE_PROJECT_ID

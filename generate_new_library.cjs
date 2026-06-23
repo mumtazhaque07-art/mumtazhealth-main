@@ -1,173 +1,19 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
+const fs = require('fs');
 
-import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
-import { shifaRecipes } from "@/data/recipes";
-import { ThemeOfTheMonth } from "@/components/ThemeOfTheMonth";
-import { InteractiveJournal } from "@/components/InteractiveJournal";
+const originalFile = fs.readFileSync('src/pages/ContentLibrary.bak.tsx', 'utf8');
+const lines = originalFile.split('\n');
 
-// Standardize Ayurvedic Terms
-const formatAyurvedic = (text?: string) => {
-  if (!text) return '';
-  const terms = ['dosha', 'vata', 'pitta', 'kapha', 'pranayama', 'yoga', 'ayurveda', 'ayurvedic'];
-  let formatted = text;
-  terms.forEach(term => {
-    const regex = new RegExp(`\\b${term}\\b`, 'gi');
-    formatted = formatted.replace(regex, (match) => {
-      // Don't modify if it's already properly capitalized
-      if (match.charAt(0) === match.charAt(0).toUpperCase()) return match;
-      return match.charAt(0).toUpperCase() + match.slice(1);
-    });
-  });
-  return formatted;
-};
+// Find the line where `const ContentLibrary = () => {` starts
+const startIndex = lines.findIndex(line => line.includes('const ContentLibrary = () => {'));
 
-import yogaImage from "@/assets/wellness-yoga.jpg";
-import { HerbalGate, containsHerbalContent } from "@/components/HerbalGate";
-import meditationImage from "@/assets/wellness-meditation.jpg";
-import nutritionImage from "@/assets/wellness-nutrition.jpg";
-import articleImage from "@/assets/wellness-article.jpg";
-import lockedImage from "@/assets/locked-content.jpg";
-import jointCareChairYoga from "@/assets/joint-care-chair-yoga.jpg";
-import jointCareWallYoga from "@/assets/joint-care-wall-yoga.jpg";
-import jointCareBedMobility from "@/assets/joint-care-bed-mobility.jpg";
-import jointCareAbhyanga from "@/assets/joint-care-abhyanga.jpg";
-import jointCareGoldenMilk from "@/assets/joint-care-golden-milk.jpg";
-import jointCareKitchari from "@/assets/joint-care-kitchari.jpg";
-import jointCareBoneSoup from "@/assets/joint-care-bone-soup.jpg";
-import jointCareBreathwork from "@/assets/joint-care-breathwork.jpg";
-import jointCareFunctional from "@/assets/joint-care-functional.jpg";
-import bloodSugarEnergySupport from "@/assets/blood-sugar-energy-support.jpg";
-// Mumtaz brand images
-import { 
-  brandImages, 
-  getBrandImage,
-  mumtazYoga1, 
-  mumtazYoga2, 
-  mumtazYoga3, 
-  mumtazYoga4, 
-  mumtazYoga5, 
-  mumtazYoga6, 
-  mumtazYoga7, 
-  mumtazYoga8, 
-  mumtazYoga9, 
-  mumtazYoga10 
-} from "@/assets/brandImages";
-// New pose images
-import seatedMeditation from "@/assets/poses/seated-meditation.jpeg";
-import seatedSideStretch from "@/assets/poses/seated-side-stretch.jpeg";
-import headToKnee from "@/assets/poses/head-to-knee.jpeg";
-import neckShoulderStretch from "@/assets/poses/neck-shoulder-stretch.jpeg";
-import prayerPose from "@/assets/poses/prayer-pose.jpeg";
-import pyramidPoseBlocks from "@/assets/poses/pyramid-pose-blocks.jpeg";
-import camelPose from "@/assets/poses/camel-pose.jpeg";
-import lowLungeBlock from "@/assets/poses/low-lunge-block.jpeg";
-import seatedWelcome from "@/assets/poses/seated-welcome.jpeg";
-import downwardDogBlocks from "@/assets/poses/downward-dog-blocks.jpeg";
-// Additional pose images
-import lizardPose from "@/assets/poses/lizard-pose.jpg";
-import highCobraBlocks from "@/assets/poses/high-cobra-blocks.jpeg";
-import trianglePose from "@/assets/poses/triangle-pose.jpeg";
-import bridgeLegLift from "@/assets/poses/bridge-leg-lift.jpeg";
-import lowLungeHip from "@/assets/poses/low-lunge-hip.jpeg";
-import modifiedChaturanga from "@/assets/poses/modified-chaturanga.jpeg";
-import threeLegPlank from "@/assets/poses/three-leg-plank.jpeg";
-import highLungeTwist from "@/assets/poses/high-lunge-twist.jpeg";
-import babyCobraBlocks from "@/assets/poses/baby-cobra-blocks.jpeg";
-import birdDogStretch from "@/assets/poses/bird-dog-stretch.jpeg";
-// Additional pose images (pregnancy, postpartum, menstrual, recovery phases)
-import eagleArmsSeated from "@/assets/poses/eagle-arms-seated.jpeg";
-import recliningFigureFour from "@/assets/poses/reclined-figure-four.jpeg";
-import supportedFishPose from "@/assets/poses/supported-fish-pose.jpeg";
-import halfMoonPose from "@/assets/poses/half-moon-pose.jpeg";
-import warriorThree from "@/assets/poses/warrior-three.jpeg";
-import locustPose from "@/assets/poses/locust-pose.jpeg";
-import fishPoseLegsUp from "@/assets/poses/fish-pose-legs-up.jpeg";
-// Additional poses for universal + restorative content
-import forearmReclinedHero from "@/assets/poses/forearm-reclined-hero.jpeg";
-import compassPose from "@/assets/poses/compass-pose.jpeg";
-import revolvedHeadToKnee from "@/assets/poses/revolved-head-to-knee.jpeg";
-import legsUpTheWall from "@/assets/poses/legs-up-the-wall.png";
-import { Navigation } from "@/components/Navigation";
-import { ContentGridSkeleton } from "@/components/ContentSkeleton";
-import { DailyReminderButton } from "@/components/DailyReminderButton";
-import { PoseSequenceGuide } from "@/components/PoseSequenceGuide";
-import { PoseImageSequence } from "@/components/PoseImageSequence";
-import { FavoritesQuickAccess } from "@/components/FavoritesQuickAccess";
-import { SessionCrossroads } from "@/components/SessionCrossroads";
-import { RecipeCard } from "@/components/RecipeCard";
-import { trackLastActivity } from "@/components/ReturningUserWelcome";
-import { trackRecentActivity } from "@/components/RecentlyViewed";
-import { usePregnancySafeMode } from "@/hooks/usePregnancySafeMode";
-import { PregnancySafetyIndicator, PregnancySafetyBadge, getContentPregnancySafety } from "@/components/PregnancySafetyIndicator";
-import { TrimesterPoseRecommendations } from "@/components/TrimesterPoseRecommendations";
-import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
-import { useGlobalLoading } from "@/hooks/useGlobalLoading";
-import { NutritionPhilosophyCard } from "@/components/NutritionPhilosophyCard";
-import { YogaPhilosophyCard } from "@/components/YogaPhilosophyCard";
-import { SpiritualPhilosophyCard } from "@/components/SpiritualPhilosophyCard";
-
-interface WellnessContent {
-  id: string;
-  title: string;
-  description: string;
-  detailed_guidance: string;
-  content_type: string;
-  doshas: string[];
-  cycle_phases: string[];
-  pregnancy_statuses: string[];
-  pregnancy_trimesters: number[];
-  benefits: string[];
-  tags: string[];
-  difficulty_level: string;
-  duration_minutes: number;
-  image_url: string;
-  video_url: string;
-  animation_url: string; // Animated instructional videos (available to all tiers)
-  audio_url: string;
-  tier_requirement: string;
-  is_premium: boolean;
-  preview_content: string;
-  unlock_after_completions: number;
-  recommendationReason?: string;
-  primary_dosha?: string; // For internal UI matching
+if (startIndex === -1) {
+  console.error("Could not find ContentLibrary function in the original file.");
+  process.exit(1);
 }
 
-// Map movement preferences to content tags
-const movementToTagsMap: Record<string, string[]> = {
-  gentle: ["gentle", "restorative", "relaxation", "calming", "grounding", "slow", "beginner"],
-  stretchy: ["stretchy", "fluid", "flow", "vinyasa", "flexibility", "opening", "yin"],
-  strong: ["strong", "energising", "dynamic", "power", "strength", "active", "challenging"],
-  seated: ["chair-yoga", "seated", "senior-friendly", "accessible", "bed-yoga", "mobility"],
-  confidence: ["beginner", "gentle", "grounding", "chair-yoga", "restorative", "accessible", "calming", "slow", "confidence", "rehabilitation", "recovery"],
-  recommend: [], // Will be handled based on dosha
-};
+const importsAndTypes = lines.slice(0, startIndex).join('\n');
 
-const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
-  switch (primaryDosha) {
-    case "vata":
-      return ["grounding", "slow", "stability", "gentle", "calming", "restorative"];
-    case "pitta":
-      return ["cooling", "fluid", "stretchy", "yin", "relaxation", "flow"];
-    case "kapha":
-      return ["energising", "uplifting", "dynamic", "strong", "active", "power"];
-    default:
-      return ["gentle", "beginner"];
-  }
-};
-
-
-
+const newComponent = `
 const libraryStages = [
   { id: 'stage1', label: '1. Cycle Health', icon: Flower2, match: ['menstrual', 'follicular', 'ovulatory', 'luteal', 'cycle-health'] },
   { id: 'stage2', label: '2. Fertility', icon: Heart, match: ['fertility', 'pre-conception'] },
@@ -186,13 +32,11 @@ const ContentLibrary = () => {
   const [content, setContent] = useState<WellnessContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
-  const [activeDosha, setActiveDosha] = useState<string>("all");
   const [savedContentIds, setSavedContentIds] = useState<Set<string>>(new Set());
   
   // Dialog state
   const [selectedContent, setSelectedContent] = useState<WellnessContent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isJournalOpen, setIsJournalOpen] = useState(false);
   const [isCrossroadsOpen, setIsCrossroadsOpen] = useState(false);
 
   const { isPregnancySafeMode, trimester } = usePregnancySafeMode();
@@ -298,33 +142,22 @@ const ContentLibrary = () => {
   };
 
   const getFilteredContent = () => {
-    let filtered = content;
+    if (activeTab === 'all') return content;
+    if (activeTab === 'favorites') return content.filter(c => savedContentIds.has(c.id));
     
-    if (activeTab === 'favorites') {
-      filtered = filtered.filter(c => savedContentIds.has(c.id));
-    } else if (activeTab !== 'all') {
-      const stage = libraryStages.find(s => s.id === activeTab);
-      if (stage) {
-        filtered = filtered.filter(item => {
-          const itemPhases = Array.isArray(item.cycle_phases) ? item.cycle_phases : [];
-          const itemTags = Array.isArray(item.tags) ? item.tags : [];
-          
-          const hasPhaseMatch = itemPhases.some(p => stage.match.includes(p.toLowerCase()));
-          const hasTagMatch = itemTags.some(t => stage.match.includes(t.toLowerCase()));
-          
-          return hasPhaseMatch || hasTagMatch;
-        });
-      }
-    }
+    const stage = libraryStages.find(s => s.id === activeTab);
+    if (!stage) return [];
     
-    if (activeDosha !== 'all') {
-      filtered = filtered.filter(item => {
-        const itemDoshas = Array.isArray(item.doshas) ? item.doshas : [];
-        return itemDoshas.length === 0 || itemDoshas.includes(activeDosha);
-      });
-    }
-    
-    return filtered;
+    return content.filter(item => {
+      // Check if item's cycle_phases or tags overlap with the stage's match array
+      const itemPhases = Array.isArray(item.cycle_phases) ? item.cycle_phases : [];
+      const itemTags = Array.isArray(item.tags) ? item.tags : [];
+      
+      const hasPhaseMatch = itemPhases.some(p => stage.match.includes(p.toLowerCase()));
+      const hasTagMatch = itemTags.some(t => stage.match.includes(t.toLowerCase()));
+      
+      return hasPhaseMatch || hasTagMatch;
+    });
   };
 
   // Maps database image URLs to imports (extracted from original file)
@@ -415,10 +248,10 @@ const ContentLibrary = () => {
             <Button
               variant={savedContentIds.has(item.id) ? "default" : "outline"}
               size="sm"
-              className={`flex-shrink-0 text-xs ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
+              className={\`flex-shrink-0 text-xs \${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}\`}
               onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
             >
-              <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
+              <Heart className={\`h-3.5 w-3.5 mr-1.5 \${savedContentIds.has(item.id) ? 'fill-white' : ''}\`} />
               {savedContentIds.has(item.id) ? 'Saved' : 'Save'}
             </Button>
           </div>
@@ -473,11 +306,6 @@ const ContentLibrary = () => {
           </p>
         </div>
 
-        {/* Display Theme of the Month for the selected stage (or skip if 'all'/'favorites') */}
-        {activeTab !== 'all' && activeTab !== 'favorites' && (
-          <ThemeOfTheMonth stageId={activeTab} />
-        )}
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <ScrollArea className="w-full border-b pb-4 mb-8">
             <TabsList className="w-full justify-start h-auto bg-transparent p-0 inline-flex space-x-2">
@@ -507,36 +335,6 @@ const ContentLibrary = () => {
               ))}
             </TabsList>
           </ScrollArea>
-
-          {/* Dosha Filter Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-white/50 backdrop-blur-sm p-1 rounded-full border border-wellness-sage/20 shadow-sm">
-              <button 
-                onClick={() => setActiveDosha('all')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'all' ? 'bg-gray-800 text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}
-              >
-                All Doshas
-              </button>
-              <button 
-                onClick={() => setActiveDosha('vata')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'vata' ? 'bg-blue-500 text-white shadow' : 'text-gray-600 hover:text-blue-600'}`}
-              >
-                Vata
-              </button>
-              <button 
-                onClick={() => setActiveDosha('pitta')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'pitta' ? 'bg-red-500 text-white shadow' : 'text-gray-600 hover:text-red-600'}`}
-              >
-                Pitta
-              </button>
-              <button 
-                onClick={() => setActiveDosha('kapha')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'kapha' ? 'bg-green-600 text-white shadow' : 'text-gray-600 hover:text-green-700'}`}
-              >
-                Kapha
-              </button>
-            </div>
-          </div>
 
           {loading ? (
             <ContentGridSkeleton count={6} />
@@ -584,33 +382,18 @@ const ContentLibrary = () => {
                       {selectedContent.detailed_guidance || "Please follow along with the video/audio."}
                     </div>
                   </div>
-                  
-                  <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center justify-center text-center">
-                    <h4 className="font-serif text-xl text-gray-900 mb-2">How did this practice feel?</h4>
-                    <p className="text-sm text-gray-500 mb-4 max-w-md">Your journey is unique. Take a moment to log your reflections and track your healing over time.</p>
-                    <Button 
-                      onClick={() => setIsJournalOpen(true)}
-                      className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-8 py-6 text-lg shadow-md"
-                    >
-                      <BookOpen className="w-5 h-5 mr-2" /> Log My Journey
-                    </Button>
-                  </div>
                 </div>
               </ScrollArea>
             </>
           )}
         </DialogContent>
       </Dialog>
-      
-      {selectedContent && (
-        <InteractiveJournal 
-          contentTitle={selectedContent.title}
-          isOpen={isJournalOpen}
-          onClose={() => setIsJournalOpen(false)}
-        />
-      )}
     </div>
   );
 };
 
 export default ContentLibrary;
+`;
+
+fs.writeFileSync('src/pages/ContentLibrary.tsx', importsAndTypes + newComponent);
+console.log("Successfully generated simplified ContentLibrary.tsx");

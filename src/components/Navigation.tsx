@@ -21,6 +21,7 @@ import {
   Home,
   Moon,
   Sun,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -41,6 +42,7 @@ export function Navigation({ className }: NavigationProps) {
     { label: "Home", icon: Home, href: "/", description: "Your dashboard" },
     { label: "Journal", icon: Heart, href: "/tracker", description: "How are you feeling?" },
     { label: "Library", icon: BookOpen, href: "/content-library", description: "Explore practices" },
+    { label: "Sanctuary", icon: Users, href: "/sanctuary", description: "Sisterhood community" },
     { label: "Bookings", icon: Clock, href: "/bookings", description: "Consult with Mumtaz" },
     { label: "Insights", icon: BarChart3, href: "/insights", description: "Your patterns" },
   ];

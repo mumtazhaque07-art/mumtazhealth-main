@@ -1,0 +1,3505 @@
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { shifaRecipes } from "@/data/recipes";
+
+// Standardize Ayurvedic Terms
+const formatAyurvedic = (text?: string) => {
+  if (!text) return '';
+  const terms = ['dosha', 'vata', 'pitta', 'kapha', 'pranayama', 'yoga', 'ayurveda', 'ayurvedic'];
+  let formatted = text;
+  terms.forEach(term => {
+    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+    formatted = formatted.replace(regex, (match) => {
+      // Don't modify if it's already properly capitalized
+      if (match.charAt(0) === match.charAt(0).toUpperCase()) return match;
+      return match.charAt(0).toUpperCase() + match.slice(1);
+    });
+  });
+  return formatted;
+};
+
+import yogaImage from "@/assets/wellness-yoga.jpg";
+import { HerbalGate, containsHerbalContent } from "@/components/HerbalGate";
+import meditationImage from "@/assets/wellness-meditation.jpg";
+import nutritionImage from "@/assets/wellness-nutrition.jpg";
+import articleImage from "@/assets/wellness-article.jpg";
+import lockedImage from "@/assets/locked-content.jpg";
+import jointCareChairYoga from "@/assets/joint-care-chair-yoga.jpg";
+import jointCareWallYoga from "@/assets/joint-care-wall-yoga.jpg";
+import jointCareBedMobility from "@/assets/joint-care-bed-mobility.jpg";
+import jointCareAbhyanga from "@/assets/joint-care-abhyanga.jpg";
+import jointCareGoldenMilk from "@/assets/joint-care-golden-milk.jpg";
+import jointCareKitchari from "@/assets/joint-care-kitchari.jpg";
+import jointCareBoneSoup from "@/assets/joint-care-bone-soup.jpg";
+import jointCareBreathwork from "@/assets/joint-care-breathwork.jpg";
+import jointCareFunctional from "@/assets/joint-care-functional.jpg";
+import bloodSugarEnergySupport from "@/assets/blood-sugar-energy-support.jpg";
+// Mumtaz brand images
+import { 
+  brandImages, 
+  getBrandImage,
+  mumtazYoga1, 
+  mumtazYoga2, 
+  mumtazYoga3, 
+  mumtazYoga4, 
+  mumtazYoga5, 
+  mumtazYoga6, 
+  mumtazYoga7, 
+  mumtazYoga8, 
+  mumtazYoga9, 
+  mumtazYoga10 
+} from "@/assets/brandImages";
+// New pose images
+import seatedMeditation from "@/assets/poses/seated-meditation.jpeg";
+import seatedSideStretch from "@/assets/poses/seated-side-stretch.jpeg";
+import headToKnee from "@/assets/poses/head-to-knee.jpeg";
+import neckShoulderStretch from "@/assets/poses/neck-shoulder-stretch.jpeg";
+import prayerPose from "@/assets/poses/prayer-pose.jpeg";
+import pyramidPoseBlocks from "@/assets/poses/pyramid-pose-blocks.jpeg";
+import camelPose from "@/assets/poses/camel-pose.jpeg";
+import lowLungeBlock from "@/assets/poses/low-lunge-block.jpeg";
+import seatedWelcome from "@/assets/poses/seated-welcome.jpeg";
+import downwardDogBlocks from "@/assets/poses/downward-dog-blocks.jpeg";
+// Additional pose images
+import lizardPose from "@/assets/poses/lizard-pose.jpg";
+import highCobraBlocks from "@/assets/poses/high-cobra-blocks.jpeg";
+import trianglePose from "@/assets/poses/triangle-pose.jpeg";
+import bridgeLegLift from "@/assets/poses/bridge-leg-lift.jpeg";
+import lowLungeHip from "@/assets/poses/low-lunge-hip.jpeg";
+import modifiedChaturanga from "@/assets/poses/modified-chaturanga.jpeg";
+import threeLegPlank from "@/assets/poses/three-leg-plank.jpeg";
+import highLungeTwist from "@/assets/poses/high-lunge-twist.jpeg";
+import babyCobraBlocks from "@/assets/poses/baby-cobra-blocks.jpeg";
+import birdDogStretch from "@/assets/poses/bird-dog-stretch.jpeg";
+// Additional pose images (pregnancy, postpartum, menstrual, recovery phases)
+import eagleArmsSeated from "@/assets/poses/eagle-arms-seated.jpeg";
+import recliningFigureFour from "@/assets/poses/reclined-figure-four.jpeg";
+import supportedFishPose from "@/assets/poses/supported-fish-pose.jpeg";
+import halfMoonPose from "@/assets/poses/half-moon-pose.jpeg";
+import warriorThree from "@/assets/poses/warrior-three.jpeg";
+import locustPose from "@/assets/poses/locust-pose.jpeg";
+import fishPoseLegsUp from "@/assets/poses/fish-pose-legs-up.jpeg";
+// Additional poses for universal + restorative content
+import forearmReclinedHero from "@/assets/poses/forearm-reclined-hero.jpeg";
+import compassPose from "@/assets/poses/compass-pose.jpeg";
+import revolvedHeadToKnee from "@/assets/poses/revolved-head-to-knee.jpeg";
+import legsUpTheWall from "@/assets/poses/legs-up-the-wall.png";
+import { Navigation } from "@/components/Navigation";
+import { ContentGridSkeleton } from "@/components/ContentSkeleton";
+import { DailyReminderButton } from "@/components/DailyReminderButton";
+import { PoseSequenceGuide } from "@/components/PoseSequenceGuide";
+import { PoseImageSequence } from "@/components/PoseImageSequence";
+import { FavoritesQuickAccess } from "@/components/FavoritesQuickAccess";
+import { SessionCrossroads } from "@/components/SessionCrossroads";
+import { RecipeCard } from "@/components/RecipeCard";
+import { trackLastActivity } from "@/components/ReturningUserWelcome";
+import { trackRecentActivity } from "@/components/RecentlyViewed";
+import { usePregnancySafeMode } from "@/hooks/usePregnancySafeMode";
+import { PregnancySafetyIndicator, PregnancySafetyBadge, getContentPregnancySafety } from "@/components/PregnancySafetyIndicator";
+import { TrimesterPoseRecommendations } from "@/components/TrimesterPoseRecommendations";
+import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
+import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { NutritionPhilosophyCard } from "@/components/NutritionPhilosophyCard";
+import { YogaPhilosophyCard } from "@/components/YogaPhilosophyCard";
+import { SpiritualPhilosophyCard } from "@/components/SpiritualPhilosophyCard";
+
+interface WellnessContent {
+  id: string;
+  title: string;
+  description: string;
+  detailed_guidance: string;
+  content_type: string;
+  doshas: string[];
+  cycle_phases: string[];
+  pregnancy_statuses: string[];
+  pregnancy_trimesters: number[];
+  benefits: string[];
+  tags: string[];
+  difficulty_level: string;
+  duration_minutes: number;
+  image_url: string;
+  video_url: string;
+  animation_url: string; // Animated instructional videos (available to all tiers)
+  audio_url: string;
+  tier_requirement: string;
+  is_premium: boolean;
+  preview_content: string;
+  unlock_after_completions: number;
+  recommendationReason?: string;
+  primary_dosha?: string; // For internal UI matching
+}
+
+// Map movement preferences to content tags
+const movementToTagsMap: Record<string, string[]> = {
+  gentle: ["gentle", "restorative", "relaxation", "calming", "grounding", "slow", "beginner"],
+  stretchy: ["stretchy", "fluid", "flow", "vinyasa", "flexibility", "opening", "yin"],
+  strong: ["strong", "energising", "dynamic", "power", "strength", "active", "challenging"],
+  seated: ["chair-yoga", "seated", "senior-friendly", "accessible", "bed-yoga", "mobility"],
+  confidence: ["beginner", "gentle", "grounding", "chair-yoga", "restorative", "accessible", "calming", "slow", "confidence", "rehabilitation", "recovery"],
+  recommend: [], // Will be handled based on dosha
+};
+
+const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
+  switch (primaryDosha) {
+    case "vata":
+      return ["grounding", "slow", "stability", "gentle", "calming", "restorative"];
+    case "pitta":
+      return ["cooling", "fluid", "stretchy", "yin", "relaxation", "flow"];
+    case "kapha":
+      return ["energising", "uplifting", "dynamic", "strong", "active", "power"];
+    default:
+      return ["gentle", "beginner"];
+  }
+};
+
+
+
+const ContentLibrary = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeSubFilter, setActiveSubFilter] = useState<string | null>(null);
+  const [isCrossroadsOpen, setIsCrossroadsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userTier, setUserTier] = useState<string>("free");
+  const [userMovementPreference, setUserMovementPreference] = useState<string | null>(null);
+  const [userPrimaryDosha, setUserPrimaryDosha] = useState<string | null>(null);
+  const [content, setContent] = useState<WellnessContent[]>([]);
+  const [filteredContent, setFilteredContent] = useState<WellnessContent[]>([]);
+  const [selectedContent, setSelectedContent] = useState<WellnessContent | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [savedContentIds, setSavedContentIds] = useState<Set<string>>(new Set());
+  const [completedContentIds, setCompletedContentIds] = useState<Set<string>>(new Set());
+  const [progressStats, setProgressStats] = useState({ total: 0, completed: 0 });
+  
+  // Pregnancy safe mode
+  const { isPregnancySafeMode, trimester } = usePregnancySafeMode();
+  
+  // Integrate with global loading indicator
+  useGlobalLoading(loading);
+  
+  // Filters
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedDosha, setSelectedDosha] = useState<string>("all");
+  const [selectedLifePhase, setSelectedLifePhase] = useState<string>("all");
+  const [selectedMobility, setSelectedMobility] = useState<string>("all");
+  const [selectedConcern, setSelectedConcern] = useState<string>("all");
+  const [selectedCompletion, setSelectedCompletion] = useState<string>("all");
+  const [filtersExpanded, setFiltersExpanded] = useState<boolean>(false);
+  const [activeQuickFilters, setActiveQuickFilters] = useState<Set<string>>(new Set());
+  const [activeTab, setActiveTab] = useState<string>("for-you");
+
+  // Sanctuary Mode Effect
+  useEffect(() => {
+    if (isPregnancySafeMode || searchParams.get('tag') === 'restorative') {
+      setActiveQuickFilters(new Set(['relaxing', 'beginner', 'chair']));
+      setSelectedCategory('all');
+      setFiltersExpanded(false);
+    }
+  }, [isPregnancySafeMode, searchParams.get('tag')]);
+
+  // Quick filter chip definitions
+  const quickFilterChips = [
+    { id: "beginner", label: "Beginner", tags: ["beginner", "gentle", "easy"], icon: "🌱" },
+    { id: "quick", label: "Quick (5-10 min)", durationMax: 10, icon: "⚡" },
+    { id: "chair", label: "Chair-based", tags: ["chair-yoga", "seated", "accessible"], icon: "🪑" },
+    { id: "relaxing", label: "Relaxing", tags: ["restorative", "calming", "relaxation"], icon: "🧘" },
+    { id: "energising", label: "Energising", tags: ["energising", "dynamic", "active"], icon: "✨" },
+    { id: "confidence", label: "Confidence-building", tags: ["beginner", "gentle", "grounding", "confidence", "rehabilitation", "recovery"], icon: "💪" },
+  ];
+
+  const toggleQuickFilter = (filterId: string) => {
+    setActiveQuickFilters(prev => {
+      const newFilters = new Set(prev);
+      if (newFilters.has(filterId)) {
+        newFilters.delete(filterId);
+      } else {
+        newFilters.add(filterId);
+      }
+      return newFilters;
+    });
+  };
+
+  // Get recommended content based on user's dosha, preferences, saved content, and life phase
+  const getRecommendedContent = (): Array<WellnessContent & { recommendationReason: string }> => {
+    if (!userPrimaryDosha && !userMovementPreference && savedContentIds.size === 0) return [];
+    
+    let recommended: Array<WellnessContent & { matchScore: number; recommendationReason: string }> = [];
+    
+    // Get user's life stage for life phase recommendations
+    const userLifeStage = localStorage.getItem('mumtaz_user_life_stage') || '';
+    
+    // Score and label content based on multiple factors
+    content.forEach(item => {
+      let matchScore = 0;
+      let reasons: string[] = [];
+      
+      const itemTags = item.tags || [];
+      const itemDoshas = item.doshas || [];
+      const itemCyclePhases = item.cycle_phases || [];
+      
+      // STRICT EXCLUSION: Do not recommend highly phase-specific content (like postpartum) to the wrong life stage (like perimenopause)
+      if (userLifeStage && itemCyclePhases.length > 0) {
+        if (!itemCyclePhases.includes(userLifeStage) && !itemCyclePhases.includes('all')) {
+          return; // Skip this item entirely
+        }
+      }
+      
+      // Check if content matches user's saved content tags (prioritize favorites-based recommendations)
+      const savedItems = content.filter(c => savedContentIds.has(c.id));
+      const savedTags = savedItems.flatMap(c => c.tags || []);
+      const savedTypes = savedItems.map(c => c.content_type);
+      
+      if (savedTags.length > 0) {
+        const tagMatches = itemTags.filter(tag => savedTags.includes(tag)).length;
+        if (tagMatches > 0 && !savedContentIds.has(item.id)) {
+          matchScore += tagMatches * 3;
+          const matchedType = savedTypes.find(t => t === item.content_type);
+          if (matchedType) {
+            reasons.push(`Because you saved ${matchedType}`);
+          }
+        }
+      }
+      
+      // Check dosha match
+      if (userPrimaryDosha && itemDoshas.includes(userPrimaryDosha)) {
+        matchScore += 5;
+        const doshaName = userPrimaryDosha.charAt(0).toUpperCase() + userPrimaryDosha.slice(1);
+        reasons.push(`${doshaName} support`);
+      }
+      
+      // Check life phase match
+      if (userLifeStage && itemCyclePhases.includes(userLifeStage)) {
+        matchScore += 4;
+        const phaseName = userLifeStage.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        reasons.push(`${phaseName}`);
+      }
+      
+      // Check movement preference match
+      const preferredTags = userMovementPreference 
+        ? movementToTagsMap[userMovementPreference] || []
+        : getDoshaMovementTags(userPrimaryDosha);
+      
+      const movementMatches = itemTags.filter(tag => 
+        preferredTags.some(pt => tag.toLowerCase().includes(pt))
+      ).length;
+      
+      if (movementMatches > 0) {
+        matchScore += movementMatches * 2;
+        if (userMovementPreference === 'gentle') {
+          reasons.push('Gentle & calming');
+        } else if (userMovementPreference === 'strong') {
+          reasons.push('Energising');
+        } else if (userMovementPreference === 'seated') {
+          reasons.push('Accessible & seated');
+        } else if (userMovementPreference === 'confidence') {
+          reasons.push('Confidence-building');
+        }
+      }
+      
+      // Extra boost for confidence preference: prioritize short sessions and beginner content
+      if (userMovementPreference === 'confidence') {
+        if (item.difficulty_level === 'beginner' || item.difficulty_level === 'gentle') {
+          matchScore += 3;
+        }
+        if (item.duration_minutes && item.duration_minutes <= 15) {
+          matchScore += 2; // Prefer short, achievable sessions
+        }
+        if (itemTags.some(tag => ['grounding', 'confidence', 'calming', 'rehabilitation', 'recovery'].includes(tag.toLowerCase()))) {
+          matchScore += 2;
+        }
+      }
+      
+      if (matchScore > 0) {
+        const recommendationReason = reasons.slice(0, 2).join(' • ');
+        recommended.push({ ...item, matchScore, recommendationReason });
+      }
+    });
+    
+    // Sort by match score and return top 8
+    recommended.sort((a, b) => b.matchScore - a.matchScore);
+    return recommended.slice(0, 8);
+  };
+
+  // Category definitions for better organization
+  const categories = [
+    { value: "all", label: "All Content", icon: BookOpen },
+    { value: "yoga", label: "Yoga", icon: Flower2 },
+    { value: "mobility", label: "Mobility & Arthritis", icon: Activity },
+    { value: "ayurveda", label: "Ayurveda Lifestyle", icon: Leaf },
+    { value: "nutrition", label: "Nutrition & Recipes", icon: Salad },
+    { value: "pregnancy", label: "Pregnancy & Postpartum", icon: Baby },
+    { value: "menopause", label: "Menopause & Beyond", icon: Sparkles },
+    { value: "emotional", label: "Emotional & Spiritual", icon: Brain },
+    { value: "digestive", label: "Digestive Wellness", icon: Apple },
+    { value: "energy", label: "Diabetes Support", icon: Droplet },
+  ];
+
+  // Wellness concerns for filtering
+  const wellnessConcerns = [
+    { value: "all", label: "All Concerns" },
+    { value: "bloating", label: "Bloating" },
+    { value: "fatigue", label: "Fatigue" },
+    { value: "stiffness", label: "Stiffness" },
+    { value: "mood", label: "Mood Support" },
+    { value: "stress", label: "Stress Relief" },
+    { value: "sleep", label: "Sleep Support" },
+    { value: "pain", label: "Pain & Discomfort" },
+    { value: "hormonal", label: "Hormonal Balance" },
+  ];
+
+  // Mobility levels for accessibility
+  const mobilityLevels = [
+    { value: "all", label: "All Levels" },
+    { value: "chair", label: "Chair-based" },
+    { value: "gentle", label: "Gentle & Slow" },
+    { value: "moderate", label: "Moderate" },
+    { value: "active", label: "Active & Energising" },
+  ];
+
+  // Handle URL params for filtering
+  useEffect(() => {
+    const doshaParam = searchParams.get('dosha');
+    const typeParam = searchParams.get('type');
+    const filterParam = searchParams.get('filter');
+    const pregnancyParam = searchParams.get('pregnancy');
+    const stageParam = searchParams.get('stage');
+    const phaseParam = searchParams.get('phase');
+    
+    if (doshaParam) {
+      setSelectedDosha(doshaParam);
+    }
+    if (typeParam) {
+      // Map type to category
+      const typeToCategory: Record<string, string> = {
+        yoga: 'yoga',
+        meditation: 'emotional',
+        nutrition: 'nutrition'
+      };
+      setSelectedCategory(typeToCategory[typeParam] || 'all');
+    }
+    if (filterParam === 'favorites') {
+      setSelectedCompletion('saved');
+    }
+    if (pregnancyParam || stageParam) {
+      setSelectedLifePhase(pregnancyParam || stageParam || 'all');
+    }
+    // Handle cycle phase param (from CyclePhaseEducation link)
+    if (phaseParam) {
+      // Map phase names to life phase filter values
+      const phaseToLifePhase: Record<string, string> = {
+        'menstrual': 'menstrual',
+        'follicular': 'follicular',
+        'ovulatory': 'ovulatory',
+        'luteal': 'luteal',
+      };
+      const mappedPhase = phaseToLifePhase[phaseParam.toLowerCase()];
+      if (mappedPhase) {
+        setSelectedLifePhase(mappedPhase);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    loadContent();
+    if (user) {
+      loadUserProfile();
+      loadSavedContent();
+      loadProgress();
+    }
+  }, [user]);
+
+  const loadUserProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('user_wellness_profiles')
+      .select('subscription_tier, preferred_yoga_style, primary_dosha, life_stage, pregnancy_status')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error loading user profile:', error);
+      return;
+    }
+
+    setUserTier(data?.subscription_tier || 'free');
+    setUserMovementPreference(data?.preferred_yoga_style || null);
+    setUserPrimaryDosha(data?.primary_dosha || null);
+
+    // Store life stage for personalization
+    const lifeStage = data?.life_stage || '';
+    const pregnancyStatus = data?.pregnancy_status || '';
+    localStorage.setItem('mumtaz_user_life_stage', lifeStage);
+    localStorage.setItem('mumtaz_user_pregnancy_status', pregnancyStatus);
+
+    // Auto-apply life stage filter for first-time visitors
+    if (lifeStage && selectedLifePhase === 'all' && !searchParams.get('phase') && !searchParams.get('stage')) {
+      // Map life stages to filter values
+      const stageToFilter: Record<string, string> = {
+        'menopause': 'menopause',
+        'perimenopause': 'perimenopause',
+        'post_menopause': 'post-menopause',
+        'menstrual_cycle': 'menstrual',
+        'pregnancy': 'pregnant',
+        'postpartum': 'postpartum',
+      };
+      const autoFilter = stageToFilter[lifeStage];
+      if (autoFilter) {
+        setSelectedLifePhase(autoFilter);
+      }
+    }
+  };
+
+  // Handle 'highlight' parameter to automatically open content
+  useEffect(() => {
+    const highlightId = searchParams.get('highlight');
+    if (highlightId && content.length > 0) {
+      const item = content.find(c => c.id === highlightId);
+      if (item) {
+        openContentDetail(item);
+      }
+    }
+  }, [searchParams, content]);
+
+  useEffect(() => {
+    // Update total count when content changes
+    setProgressStats(prev => ({ ...prev, total: content.length }));
+  }, [content]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [content, searchQuery, selectedCategory, selectedDosha, selectedLifePhase, selectedMobility, selectedConcern, selectedCompletion, completedContentIds, userMovementPreference, userPrimaryDosha, activeQuickFilters]);
+
+  const loadContent = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('wellness_content')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading content:', error);
+      toast.error('Failed to load content');
+      setLoading(false);
+      return;
+    }
+
+    const sanitizedData = (data || []).map(item => ({
+      ...item,
+      doshas: Array.isArray(item.doshas) ? item.doshas : [],
+      benefits: Array.isArray(item.benefits) ? item.benefits : [],
+      cycle_phases: Array.isArray(item.cycle_phases) ? item.cycle_phases : [],
+      pregnancy_statuses: Array.isArray(item.pregnancy_statuses) ? item.pregnancy_statuses : [],
+      tags: Array.isArray(item.tags) ? item.tags : []
+    }));
+
+    setContent(sanitizedData);
+    setLoading(false);
+  };
+
+  const loadSavedContent = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('user_saved_content')
+      .select('content_id')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error loading saved content:', error);
+      return;
+    }
+
+    setSavedContentIds(new Set(data?.map(item => item.content_id) || []));
+  };
+
+  const loadProgress = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('user_content_progress')
+      .select('content_id, completed')
+      .eq('user_id', user.id)
+      .eq('completed', true);
+
+    if (error) {
+      console.error('Error loading progress:', error);
+      return;
+    }
+
+    const completedIds = new Set(data?.map(item => item.content_id) || []);
+    setCompletedContentIds(completedIds);
+    
+    // Update stats
+    setProgressStats({
+      total: content.length,
+      completed: completedIds.size
+    });
+  };
+
+  const applyFilters = () => {
+    let filtered = [...content];
+
+    // Search query filter - search across titles, descriptions, and tags
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => {
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+        const itemBenefits = Array.isArray(item.benefits) ? item.benefits.filter(Boolean) : [];
+        const itemCyclePhases = Array.isArray(item.cycle_phases) ? item.cycle_phases.filter(Boolean) : [];
+        const itemDoshas = Array.isArray(item.doshas) ? item.doshas.filter(Boolean) : [];
+        return (
+          (item.title && item.title.toLowerCase().includes(query)) ||
+          (item.description && item.description.toLowerCase().includes(query)) ||
+          itemTags.some(tag => tag.toLowerCase().includes(query)) ||
+          itemBenefits.some(benefit => benefit.toLowerCase().includes(query)) ||
+          itemCyclePhases.some(phase => phase.toLowerCase().includes(query)) ||
+          itemDoshas.some(dosha => dosha.toLowerCase().includes(query))
+        );
+      });
+    }
+
+    // Category filter - maps to content types and tags
+    if (selectedCategory !== "all") {
+      const categoryMappings: Record<string, { types: string[], tags: string[] }> = {
+        yoga: { types: ["yoga"], tags: ["yoga", "asana", "flow", "stretch"] },
+        mobility: { types: ["yoga"], tags: ["arthritis", "joint-care", "mobility", "chair-yoga", "wall-yoga", "bed-yoga", "senior-friendly", "accessible"] },
+        ayurveda: { types: ["article", "learning"], tags: ["ayurveda", "dosha", "lifestyle", "routine", "ritual"] },
+        nutrition: { types: ["nutrition"], tags: ["nutrition", "recipe", "food", "meal", "diet", "eating"] },
+        pregnancy: { types: ["yoga", "nutrition", "article"], tags: ["pregnancy", "prenatal", "postpartum", "fertility", "trimester"] },
+        menopause: { types: ["yoga", "nutrition", "article"], tags: ["menopause", "perimenopause", "post-menopause", "hormonal", "hot-flush"] },
+        emotional: { types: ["meditation", "article"], tags: ["emotional", "spiritual", "mindfulness", "meditation", "breathwork", "grounding", "dhikr", "prayer"] },
+        digestive: { types: ["nutrition", "article"], tags: ["digestive", "bloating", "gut", "ibs", "digestion", "easy-digest"] },
+        energy: { types: ["yoga", "nutrition", "meditation"], tags: ["diabetes", "blood-sugar", "insulin-resistance", "type-2-diabetes", "balanced-energy", "energy-support", "blood-sugar-balance", "diabetes-support"] },
+      };
+
+      const mapping = categoryMappings[selectedCategory];
+      if (mapping) {
+        filtered = filtered.filter(item => {
+          const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+          return (
+            mapping.types.includes(item.content_type) ||
+            itemTags.some(tag => mapping.tags.some(t => tag.toLowerCase().includes(t)))
+          );
+        });
+      }
+    }
+
+    if (selectedDosha !== "all") {
+      filtered = filtered.filter(item => {
+        const itemDoshas = Array.isArray(item.doshas) ? item.doshas.filter(Boolean) : [];
+        return itemDoshas.length === 0 || itemDoshas.includes(selectedDosha);
+      });
+    }
+
+    if (selectedLifePhase !== "all") {
+      filtered = filtered.filter(item => {
+        const itemCyclePhases = Array.isArray(item.cycle_phases) ? item.cycle_phases.filter(Boolean) : [];
+        const itemPregnancyStatuses = Array.isArray(item.pregnancy_statuses) ? item.pregnancy_statuses.filter(Boolean) : [];
+        
+        // If it explicitly supports the selected phase
+        if (itemCyclePhases.includes(selectedLifePhase) || itemPregnancyStatuses.includes(selectedLifePhase)) {
+          return true;
+        }
+        
+        // Include universal content (content with no specific cycle phases) ONLY if not looking for highly specific phases like postpartum
+        const isHighlySpecificPhase = ['pregnancy', 'pregnant', 'postpartum', 'fertility', 'menopause', 'perimenopause', 'post-menopause'].includes(selectedLifePhase.toLowerCase());
+        if (!isHighlySpecificPhase && itemCyclePhases.length === 0) {
+           return true;
+        }
+        
+        return false;
+      });
+    }
+
+    // Mobility level filter
+    if (selectedMobility !== "all") {
+      const mobilityMappings: Record<string, string[]> = {
+        chair: ["chair-yoga", "seated", "bed-yoga", "accessible"],
+        gentle: ["gentle", "restorative", "slow", "beginner", "relaxation"],
+        moderate: ["moderate", "intermediate", "flow"],
+        active: ["strong", "energising", "dynamic", "power", "active"],
+      };
+      const mobilityTags = mobilityMappings[selectedMobility] || [];
+      filtered = filtered.filter(item => {
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+        if (itemTags.length === 0) return selectedMobility === "gentle";
+        return itemTags.some(tag => 
+          mobilityTags.some(mTag => tag.toLowerCase().includes(mTag))
+        ) || item.difficulty_level?.toLowerCase() === selectedMobility;
+      });
+    }
+
+    // Wellness concern filter
+    if (selectedConcern !== "all") {
+      const concernMappings: Record<string, string[]> = {
+        bloating: ["bloating", "digestive", "gut", "ibs"],
+        fatigue: ["fatigue", "energy", "tiredness", "exhaustion", "vitality"],
+        stiffness: ["stiffness", "mobility", "joint", "arthritis", "flexibility"],
+        mood: ["mood", "emotional", "anxiety", "stress", "calm", "peace"],
+        stress: ["stress", "relaxation", "calming", "grounding", "anxiety"],
+        sleep: ["sleep", "insomnia", "rest", "relaxation", "evening"],
+        pain: ["pain", "discomfort", "relief", "soothing"],
+        hormonal: ["hormonal", "hormone", "menopause", "perimenopause", "menstrual", "pms"],
+      };
+      const concernTags = concernMappings[selectedConcern] || [];
+      filtered = filtered.filter(item => {
+        const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+        const itemBenefits = Array.isArray(item.benefits) ? item.benefits.filter(Boolean) : [];
+        return (
+          itemTags.some(tag => concernTags.some(cTag => tag.toLowerCase().includes(cTag))) ||
+          itemBenefits.some(benefit => concernTags.some(cTag => benefit.toLowerCase().includes(cTag)))
+        );
+      });
+    }
+
+    if (selectedCompletion !== "all") {
+      if (selectedCompletion === "completed") {
+        filtered = filtered.filter(item => completedContentIds.has(item.id));
+      } else if (selectedCompletion === "not-completed") {
+        filtered = filtered.filter(item => !completedContentIds.has(item.id));
+      }
+    }
+
+    // Quick filter chips
+    if (activeQuickFilters.size > 0) {
+      filtered = filtered.filter(item => {
+        return Array.from(activeQuickFilters).every(filterId => {
+          const chip = quickFilterChips.find(c => c.id === filterId);
+          if (!chip) return true;
+          
+          // Duration filter
+          if (chip.durationMax) {
+            return item.duration_minutes && item.duration_minutes <= chip.durationMax;
+          }
+          
+          // Tag-based filters
+          if (chip.tags) {
+            const itemTags = Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+            return itemTags.some(tag => 
+              chip.tags!.some(ct => tag.toLowerCase().includes(ct))
+            ) || item.difficulty_level?.toLowerCase() === filterId;
+          }
+          
+          return true;
+        });
+      });
+    }
+
+    // Sort content to prioritize user's movement preference matches
+    if (userMovementPreference && userMovementPreference !== "recommend") {
+      const preferredTags = movementToTagsMap[userMovementPreference] || [];
+      filtered.sort((a, b) => {
+        const aTags = Array.isArray(a.tags) ? a.tags.filter(Boolean) : [];
+        const bTags = Array.isArray(b.tags) ? b.tags.filter(Boolean) : [];
+        
+        const aMatch = aTags.some(tag => 
+          preferredTags.some(pTag => tag.toLowerCase().includes(pTag.toLowerCase()))
+        ) ? 1 : 0;
+        const bMatch = bTags.some(tag => 
+          preferredTags.some(pTag => tag.toLowerCase().includes(pTag.toLowerCase()))
+        ) ? 1 : 0;
+        return bMatch - aMatch;
+      });
+    } else if (userMovementPreference === "recommend" && userPrimaryDosha) {
+      const doshaMovementTags = getDoshaMovementTags(userPrimaryDosha);
+      filtered.sort((a, b) => {
+        const aTags = Array.isArray(a.tags) ? a.tags.filter(Boolean) : [];
+        const bTags = Array.isArray(b.tags) ? b.tags.filter(Boolean) : [];
+        
+        const aMatch = aTags.some(tag => 
+          doshaMovementTags.some(dTag => tag.toLowerCase().includes(dTag.toLowerCase()))
+        ) ? 1 : 0;
+        const bMatch = bTags.some(tag => 
+          doshaMovementTags.some(dTag => tag.toLowerCase().includes(dTag.toLowerCase()))
+        ) ? 1 : 0;
+        return bMatch - aMatch;
+      });
+    }
+
+    setFilteredContent(filtered);
+  };
+
+  const toggleSaveContent = async (contentId: string) => {
+    if (!user) {
+      toast.error('Please log in to save content');
+      return;
+    }
+
+    const isSaved = savedContentIds.has(contentId);
+
+    if (isSaved) {
+      const { error } = await supabase
+        .from('user_saved_content')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('content_id', contentId);
+
+      if (error) {
+        console.error('Error removing saved content:', error);
+        toast.error('Failed to remove from saved');
+        return;
+      }
+
+      const newSaved = new Set(savedContentIds);
+      newSaved.delete(contentId);
+      setSavedContentIds(newSaved);
+      toast.success('Removed from saved');
+    } else {
+      const { error } = await supabase
+        .from('user_saved_content')
+        .insert({
+          user_id: user.id,
+          content_id: contentId,
+        });
+
+      if (error) {
+        console.error('Error saving content:', error);
+        toast.error('Failed to save content');
+        return;
+      }
+
+      const newSaved = new Set(savedContentIds);
+      newSaved.add(contentId);
+      setSavedContentIds(newSaved);
+      toast.success('Saved to your library');
+    }
+  };
+
+  const openContentDetail = (item: WellnessContent) => {
+    setSelectedContent(item);
+    setIsDialogOpen(true);
+    
+    // Track this activity for returning user experience
+    trackLastActivity({
+      type: 'content',
+      title: item.title,
+      path: `/content-library?highlight=${item.id}`,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Track for recently viewed section on dashboard
+    trackRecentActivity({
+      type: item.content_type,
+      title: item.title,
+      path: `/content-library?highlight=${item.id}`
+    });
+  };
+
+  const toggleCompletion = async (contentId: string) => {
+    if (!user) {
+      toast.error('Please log in to track progress');
+      return;
+    }
+
+    const isCompleted = completedContentIds.has(contentId);
+
+    if (isCompleted) {
+      // Mark as not completed
+      const { error } = await supabase
+        .from('user_content_progress')
+        .update({ completed: false, completed_at: null })
+        .eq('user_id', user.id)
+        .eq('content_id', contentId);
+
+      if (error) {
+        console.error('Error updating progress:', error);
+        toast.error('Failed to update progress');
+        return;
+      }
+
+      const newCompleted = new Set(completedContentIds);
+      newCompleted.delete(contentId);
+      setCompletedContentIds(newCompleted);
+      setProgressStats(prev => ({ ...prev, completed: prev.completed - 1 }));
+      toast.success('Marked as not completed');
+    } else {
+      // Mark as completed
+      const { error } = await supabase
+        .from('user_content_progress')
+        .upsert({
+          user_id: user.id,
+          content_id: contentId,
+          completed: true,
+          completed_at: new Date().toISOString(),
+        });
+
+      if (error) {
+        console.error('Error updating progress:', error);
+        toast.error('Failed to update progress');
+        return;
+      }
+
+      const newCompleted = new Set(completedContentIds);
+      newCompleted.add(contentId);
+      setCompletedContentIds(newCompleted);
+      setProgressStats(prev => ({ ...prev, completed: prev.completed + 1 }));
+      toast.success('Marked as completed! 🎉');
+    }
+  };
+
+  // Reusable content card renderer
+  const renderContentCard = (item: WellnessContent) => {
+    const isLocked = !isContentUnlocked(item);
+    const pregnancySafety = isPregnancySafeMode ? getContentPregnancySafety(item, trimester) : null;
+    const isExcludedForPregnancy = pregnancySafety?.status === 'excluded';
+    
+    return (
+      <Card 
+        key={item.id} 
+        className={`overflow-hidden hover:shadow-lg transition-shadow relative ${
+          isExcludedForPregnancy ? 'opacity-60 ring-2 ring-red-200 dark:ring-red-800' : ''
+        }`}
+      >
+        <div className="h-40 overflow-hidden bg-muted relative">
+          <img 
+            src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+            alt={item.title}
+            loading="lazy"
+            className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
+          />
+          {isLocked && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+              <div className="text-center text-white p-4">
+                <Lock className="h-10 w-10 mx-auto mb-2" />
+                <p className="text-sm font-semibold">Upgrade to unlock</p>
+              </div>
+            </div>
+          )}
+          {/* Category badge */}
+          <Badge className="absolute top-2 left-2 capitalize text-xs">
+            {item.content_type}
+          </Badge>
+          {/* Pregnancy safety badge on image */}
+          <PregnancySafetyBadge 
+            content={item}
+            trimester={trimester}
+            isPregnancySafeMode={isPregnancySafeMode}
+          />
+        </div>
+        
+        <CardHeader className="pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <CardTitle className="text-base line-clamp-2">{item.title}</CardTitle>
+            <Button
+              variant={savedContentIds.has(item.id) ? "default" : "outline"}
+              size="sm"
+              className={`flex-shrink-0 text-xs ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
+            >
+              <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
+              {savedContentIds.has(item.id) ? 'Saved ✓' : 'Save'}
+            </Button>
+          </div>
+          <CardDescription className="line-clamp-2 text-sm">
+            {item.description}
+          </CardDescription>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {Array.isArray(item.doshas) && item.doshas.filter(Boolean).slice(0, 2).map((dosha) => (
+              <Badge key={dosha} variant="outline" className="text-xs capitalize">{dosha}</Badge>
+            ))}
+            {item.duration_minutes && (
+              <Badge variant="outline" className="text-xs">{item.duration_minutes} min</Badge>
+            )}
+            {/* Pregnancy safety indicator with tooltip */}
+            {isPregnancySafeMode && item.content_type === 'yoga' && (
+              <PregnancySafetyIndicator
+                content={item}
+                trimester={trimester}
+                isPregnancySafeMode={isPregnancySafeMode}
+              />
+            )}
+          </div>
+          
+          <Button 
+            className="w-full" 
+            size="sm"
+            onClick={() => openContentDetail(item)}
+            disabled={isLocked}
+          >
+            {isLocked ? 'View Preview' : 'View Details'}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setSelectedDosha("all");
+    setSelectedLifePhase("all");
+    setSelectedMobility("all");
+    setSelectedConcern("all");
+    setSelectedCompletion("all");
+    setActiveQuickFilters(new Set());
+  };
+
+  const getContentIcon = (type: string) => {
+    switch (type) {
+      case 'yoga': return <Flower2 className="h-5 w-5 text-dosha-pitta" />;
+      case 'meditation': return <Sparkles className="h-5 w-5 text-dosha-vata" />;
+      case 'nutrition': return <Leaf className="h-5 w-5 text-dosha-kapha" />;
+      case 'article': return <BookOpen className="h-5 w-5 text-primary" />;
+      case 'learning': return <Lightbulb className="h-5 w-5 text-primary" />;
+      case 'community': return <Users className="h-5 w-5 text-secondary" />;
+      case 'life-phase': return <Calendar className="h-5 w-5 text-accent" />;
+      default: return <BookOpen className="h-5 w-5" />;
+    }
+  };
+
+  // Map database image URLs to imported images
+  const imageUrlMap: Record<string, string> = {
+    '/src/assets/poses/seated-meditation.jpeg': seatedMeditation,
+    '/src/assets/poses/seated-side-stretch.jpeg': seatedSideStretch,
+    '/src/assets/poses/head-to-knee.jpeg': headToKnee,
+    '/src/assets/poses/neck-shoulder-stretch.jpeg': neckShoulderStretch,
+    '/src/assets/poses/prayer-pose.jpeg': prayerPose,
+    '/src/assets/poses/pyramid-pose-blocks.jpeg': pyramidPoseBlocks,
+    '/src/assets/poses/camel-pose.jpeg': camelPose,
+    '/src/assets/poses/low-lunge-block.jpeg': lowLungeBlock,
+    '/src/assets/poses/seated-welcome.jpeg': seatedWelcome,
+    '/src/assets/poses/downward-dog-blocks.jpeg': downwardDogBlocks,
+    '/src/assets/poses/lizard-pose.jpg': lizardPose,
+    '/src/assets/poses/high-cobra-blocks.jpeg': highCobraBlocks,
+    '/src/assets/poses/triangle-pose.jpeg': trianglePose,
+    '/src/assets/poses/bridge-leg-lift.jpeg': bridgeLegLift,
+    '/src/assets/poses/low-lunge-hip.jpeg': lowLungeHip,
+    '/src/assets/poses/modified-chaturanga.jpeg': modifiedChaturanga,
+    '/src/assets/poses/three-leg-plank.jpeg': threeLegPlank,
+    '/src/assets/poses/high-lunge-twist.jpeg': highLungeTwist,
+    '/src/assets/poses/baby-cobra-blocks.jpeg': babyCobraBlocks,
+    '/src/assets/poses/bird-dog-stretch.jpeg': birdDogStretch,
+    '/src/assets/joint-care-chair-yoga.jpg': jointCareChairYoga,
+    '/src/assets/joint-care-wall-yoga.jpg': jointCareWallYoga,
+    '/src/assets/joint-care-bed-mobility.jpg': jointCareBedMobility,
+    '/src/assets/joint-care-abhyanga.jpg': jointCareAbhyanga,
+    '/src/assets/joint-care-golden-milk.jpg': jointCareGoldenMilk,
+    '/src/assets/joint-care-kitchari.jpg': jointCareKitchari,
+    '/src/assets/joint-care-bone-soup.jpg': jointCareBoneSoup,
+    '/src/assets/joint-care-breathwork.jpg': jointCareBreathwork,
+    '/src/assets/joint-care-functional.jpg': jointCareFunctional,
+    '/src/assets/blood-sugar-energy-support.jpg': bloodSugarEnergySupport,
+    // Additional poses for pregnancy, menstrual, postpartum & recovery phases
+    '/src/assets/poses/eagle-arms-seated.jpeg': eagleArmsSeated,
+    '/src/assets/poses/reclined-figure-four.jpeg': recliningFigureFour,
+    '/src/assets/poses/supported-fish-pose.jpeg': supportedFishPose,
+    '/src/assets/poses/half-moon-pose.jpeg': halfMoonPose,
+    '/src/assets/poses/warrior-three.jpeg': warriorThree,
+    '/src/assets/poses/locust-pose.jpeg': locustPose,
+    '/src/assets/poses/fish-pose-legs-up.jpeg': fishPoseLegsUp,
+    // Universal + restorative poses
+    '/src/assets/poses/forearm-reclined-hero.jpeg': forearmReclinedHero,
+    '/src/assets/poses/compass-pose.jpeg': compassPose,
+    '/src/assets/poses/revolved-head-to-knee.jpeg': revolvedHeadToKnee,
+    '/src/assets/poses/legs-up-the-wall.png': legsUpTheWall,
+  };
+
+  const resolveImageUrl = (imageUrl: string | null | undefined): string | null => {
+    if (!imageUrl) return null;
+    return imageUrlMap[imageUrl] || null;
+  };
+
+  const getContentImage = (type: string, tags?: string[], imageUrl?: string, title: string = '') => {
+    if (title && title.toLowerCase().includes('legs up')) return legsUpTheWall;
+    // First check if there's a database image URL that maps to an import
+    if (imageUrl) {
+      const resolved = resolveImageUrl(imageUrl);
+      if (resolved) return resolved;
+    }
+
+    // Check for specific tag-based images (new pose images first)
+    if (tags?.some(tag => ['meditation', 'breathwork', 'relaxation', 'calming'].includes(tag))) {
+      return seatedMeditation;
+    }
+    if (tags?.some(tag => ['flexibility', 'side-stretch', 'stretch'].includes(tag))) {
+      return seatedSideStretch;
+    }
+    if (tags?.some(tag => ['forward-fold', 'hamstring'].includes(tag))) {
+      return headToKnee;
+    }
+    if (tags?.some(tag => ['neck', 'shoulder', 'upper-body'].includes(tag))) {
+      return neckShoulderStretch;
+    }
+    if (tags?.some(tag => ['prayer', 'spiritual', 'mantra', 'affirmation', 'dosha'].includes(tag))) {
+      return prayerPose;
+    }
+    if (tags?.some(tag => ['standing', 'strength', 'pyramid'].includes(tag))) {
+      return pyramidPoseBlocks;
+    }
+    // Title-specific overrides for known mismatches
+    // "Legs Up the Wall" should show a restorative wall pose, not bridge
+    if (tags?.some(tag => ['legs-up-wall', 'viparita-karani'].includes(tag))) {
+      return legsUpTheWall;
+    }
+    if (tags?.some(tag => ['backbend', 'spine', 'camel'].includes(tag))) {
+      return camelPose;
+    }
+    if (tags?.some(tag => ['hip', 'lunge', 'hip-flexor'].includes(tag))) {
+      return lowLungeBlock;
+    }
+    if (tags?.some(tag => ['downward-dog', 'foundation', 'inversion'].includes(tag))) {
+      return downwardDogBlocks;
+    }
+    // Additional pose images
+    if (tags?.some(tag => ['lizard', 'deep-lunge', 'hip-opener'].includes(tag))) {
+      return lizardPose;
+    }
+    if (tags?.some(tag => ['cobra', 'upward-dog', 'chest-opener'].includes(tag))) {
+      return highCobraBlocks;
+    }
+    if (tags?.some(tag => ['revolved-forward-fold', 'parivrtta-uttanasana', 'standing-twist'].includes(tag))) {
+      return trianglePose;
+    }
+    if (tags?.some(tag => ['bridge', 'glutes', 'pelvic-floor', 'postpartum'].includes(tag))) {
+      return bridgeLegLift;
+    }
+    if (tags?.some(tag => ['crescent-lunge', 'balance', 'leg-strength'].includes(tag))) {
+      return lowLungeHip;
+    }
+    if (tags?.some(tag => ['chaturanga', 'plank', 'arm-strength', 'modified'].includes(tag))) {
+      return modifiedChaturanga;
+    }
+    if (tags?.some(tag => ['core', 'plank-variation', 'advanced'].includes(tag))) {
+      return threeLegPlank;
+    }
+    if (tags?.some(tag => ['twist', 'detox', 'digestion', 'revolved'].includes(tag))) {
+      return highLungeTwist;
+    }
+    if (tags?.some(tag => ['baby-cobra', 'gentle-backbend', 'beginner'].includes(tag))) {
+      return babyCobraBlocks;
+    }
+    if (tags?.some(tag => ['bird-dog', 'balance', 'core-stability', 'all-fours'].includes(tag))) {
+      return birdDogStretch;
+    }
+    if (tags?.some(tag => ['eagle-arms', 'shoulder-tension', 'prenatal-arms', 'neck-relief'].includes(tag))) {
+      return eagleArmsSeated;
+    }
+    if (tags?.some(tag => ['reclined-figure-four', 'figure-four', 'sciatica', 'piriformis', 'hip-release'].includes(tag))) {
+      return recliningFigureFour;
+    }
+    if (tags?.some(tag => ['supported-fish', 'restorative-backbend', 'chest-opening', 'heart-opener'].includes(tag))) {
+      return supportedFishPose;
+    }
+    if (tags?.some(tag => ['half-moon', 'ardha-chandrasana', 'side-balance', 'ovulation-flow'].includes(tag))) {
+      return halfMoonPose;
+    }
+    if (tags?.some(tag => ['warrior-three', 'virabhadrasana-iii', 'single-leg-balance', 'follicular-energy'].includes(tag))) {
+      return warriorThree;
+    }
+    if (tags?.some(tag => ['locust', 'salabhasana', 'back-strengthening', 'bone-density-pose'].includes(tag))) {
+      return locustPose;
+    }
+    if (tags?.some(tag => ['fish-pose', 'matsyasana', 'thyroid-support', 'chest-lift'].includes(tag))) {
+      return fishPoseLegsUp;
+    }
+
+    // Check for joint care specific images based on tags
+    if (tags?.some(tag => ['chair-yoga', 'senior-friendly'].includes(tag))) {
+      return jointCareChairYoga;
+    }
+    if (tags?.includes('wall-yoga')) {
+      return jointCareWallYoga;
+    }
+    if (tags?.includes('bed-yoga')) {
+      return jointCareBedMobility;
+    }
+    if (tags?.includes('abhyanga') || tags?.includes('self-massage')) {
+      return jointCareAbhyanga;
+    }
+    if (tags?.includes('golden-milk') || tags?.includes('turmeric')) {
+      return jointCareGoldenMilk;
+    }
+    if (tags?.includes('kitchari')) {
+      return jointCareKitchari;
+    }
+    if (tags?.includes('soup') || tags?.includes('bone-health')) {
+      return jointCareBoneSoup;
+    }
+    if (tags?.includes('breathwork') || tags?.includes('grounding') || tags?.includes('gratitude')) {
+      return jointCareBreathwork;
+    }
+    if (tags?.includes('functional-movement')) {
+      return jointCareFunctional;
+    }
+    
+    // Default by content type - use Mumtaz brand images as primary
+    switch (type) {
+      case 'yoga': return mumtazYoga6; // Reverse warrior pose
+      case 'meditation': return mumtazYoga8; // Pigeon pose variation
+      case 'breathwork': return mumtazYoga7; // Thread the needle
+      case 'affirmation': return mumtazYoga9; // King pigeon
+      case 'nutrition': return nutritionImage; // Keep food images
+      case 'article': return mumtazYoga10; // Extended side angle outdoor
+      case 'learning': return mumtazYoga10;
+      case 'recipe': return nutritionImage; // Keep food images
+      default: return mumtazYoga6;
+    }
+  };
+
+  const isContentUnlocked = (item: WellnessContent) => {
+    // For now, allow all content to be visible for the preview/discovery phase
+    // This allows you to review the full flow and content architecture
+    return true;
+    
+    /* 
+    if (!user) return false;
+    
+    // Check tier requirement
+    const tierHierarchy: Record<string, number> = { free: 0, basic: 1, standard: 2, premium: 3 };
+    const userTierLevel = tierHierarchy[userTier] || 0;
+    const requiredTierLevel = tierHierarchy[item.tier_requirement] || 0;
+    
+    if (userTierLevel < requiredTierLevel) {
+      return false;
+    }
+
+    // Check completion requirement
+    if (item.unlock_after_completions > 0 && progressStats.completed < item.unlock_after_completions) {
+      return false;
+    }
+
+    return true;
+    */
+  };
+
+  // Check if animated instructional video is available (all tiers can view animations)
+  const isAnimationAvailable = (item: WellnessContent) => {
+    return !!item.animation_url;
+  };
+
+  // Check if live video is unlocked (Premium only for live recorded sessions)
+  const isLiveVideoUnlocked = (item: WellnessContent) => {
+    if (!user) return false;
+    
+    const tierHierarchy: Record<string, number> = { free: 0, basic: 1, standard: 2, premium: 3 };
+    const userTierLevel = tierHierarchy[userTier] || 0;
+    
+    // Only Premium (3) gets access to live recorded video sessions
+    return userTierLevel >= 3;
+  };
+
+  // Legacy function for backward compatibility
+  const isVideoUnlocked = (item: WellnessContent) => {
+    // Animations are available to all authenticated users
+    if (item.animation_url && user) return true;
+    
+    // Live videos require Premium
+    return isLiveVideoUnlocked(item);
+  };
+
+  const getDoshaIcon = (dosha: string) => {
+    if (!dosha) return null;
+    switch (dosha.toLowerCase()) {
+      case 'pitta':
+        return (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-dosha-pitta/10 border border-dosha-pitta/30" title="Pitta - Fire/Transformation">
+            <Flame className="h-4 w-4 text-dosha-pitta" />
+            <span className="text-xs font-medium text-dosha-pitta">Pitta</span>
+          </div>
+        );
+      case 'vata':
+        return (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-dosha-vata/10 border border-dosha-vata/30" title="Vata - Air/Movement">
+            <Wind className="h-4 w-4 text-dosha-vata" />
+            <span className="text-xs font-medium text-dosha-vata">Vata</span>
+          </div>
+        );
+      case 'kapha':
+        return (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-dosha-kapha/10 border border-dosha-kapha/30" title="Kapha - Earth/Stability">
+            <Mountain className="h-4 w-4 text-dosha-kapha" />
+            <span className="text-xs font-medium text-dosha-kapha">Kapha</span>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Wellness Library</h1>
+              <p className="text-muted-foreground italic">Personalised advice & holistic recommendations</p>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            className="hidden md:flex items-center gap-2 border-primary/40 hover:bg-primary/5"
+            onClick={() => navigate('/bookings')}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Book a Consultation
+          </Button>
+        </div>
+
+        {/* Global Medical Disclaimer */}
+        <Card className="mb-8 border-wellness-sage/30 bg-wellness-sage/5">
+          <CardContent className="py-4 flex items-center gap-3">
+            <Info className="h-5 w-5 text-wellness-sage shrink-0" />
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              This library provides <strong>general wellbeing and lifestyle advice only</strong>. It is not medical advice and does not replace the guidance of a healthcare professional. Always consult your doctor for medical concerns. You can also book a 1-to-1 session for personalised support.
+            </p>
+            <Button 
+              variant="link" 
+              className="text-wellness-sage p-0 h-auto font-semibold ml-auto hidden sm:block"
+              onClick={() => navigate('/bookings')}
+            >
+              Book Now
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Dosha Legend Guide */}
+        <TooltipProvider>
+          <Card className="mb-6 bg-gradient-to-br from-wellness-sage-light via-background to-wellness-lilac-light border-wellness-sage/30">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Info className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Understanding Your Dosha</CardTitle>
+              </div>
+              <CardDescription>
+                Content is personalized based on Ayurvedic elements - hover for details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Pitta - Fire */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-pitta/30 shadow-sm hover:shadow-xl hover:border-dosha-pitta/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-pitta/10 rounded-full mb-4 ring-1 ring-dosha-pitta/20 group-hover:bg-dosha-pitta/20 transition-colors">
+                        <Flame className="h-8 w-8 text-dosha-pitta drop-shadow-sm" />
+                      </div>
+                      <h3 className="font-semibold text-dosha-pitta mb-2 flex items-center gap-1 text-xl">
+                        Pitta
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
+                        Fire & Transformation • Governs metabolism, digestion, and energy production
+                      </p>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-pitta/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-pitta/10 rounded-full mb-4">
+                        <Flame className="h-10 w-10 text-dosha-pitta" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-pitta font-accent">The Pitta Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of transformation, digestion, and metabolism.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-pitta/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-pitta" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Pitta types are typically fiery, passionate, and driven. They have a medium build, sharp intellect, strong digestion, and a warm body temperature.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Sharp & focused</li>
+                            <li>✨ Courageous</li>
+                            <li>✨ Strong digestion</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>🔥 Irritable or angry</li>
+                            <li>🔥 Acid reflux/heartburn</li>
+                            <li>🔥 Skin inflammation</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-pitta/10 p-4 rounded-xl border border-dosha-pitta/20">
+                        <h4 className="font-semibold text-dosha-pitta mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on cooling, soothing practices. Favor sweet, bitter, and astringent foods. Engage in moderate, non-competitive exercise like Yin Yoga, gentle swimming, or evening walks.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Vata - Air */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-vata/30 shadow-sm hover:shadow-xl hover:border-dosha-vata/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-vata/10 rounded-full mb-4 ring-1 ring-dosha-vata/20 group-hover:bg-dosha-vata/20 transition-colors">
+                        <Wind className="h-8 w-8 text-dosha-vata drop-shadow-sm" />
+                      </div>
+                      <h3 className="font-semibold text-dosha-vata mb-2 flex items-center gap-1 text-xl">
+                        Vata
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
+                        Air & Movement • Governs circulation, breathing, and nervous system
+                      </p>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-vata/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-vata/10 rounded-full mb-4">
+                        <Wind className="h-10 w-10 text-dosha-vata" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-vata font-accent">The Vata Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of movement, creativity, and flow.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-vata/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-vata" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Vata types are often light, slender, and highly creative. They think quickly, move quickly, and have a variable appetite and energy levels.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Highly creative</li>
+                            <li>✨ Adaptable</li>
+                            <li>✨ Energetic & joyful</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>💨 Anxious or worried</li>
+                            <li>💨 Insomnia</li>
+                            <li>💨 Digestive bloating</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-vata/10 p-4 rounded-xl border border-dosha-vata/20">
+                        <h4 className="font-semibold text-dosha-vata mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on grounding, warming, and nourishing practices. Establish a strict daily routine. Favor warm, heavy foods (like soups). Practice slow, restorative yoga and meditation.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Kapha - Earth */}
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <div className="flex flex-col items-center p-6 rounded-2xl bg-card/60 backdrop-blur-sm border border-dosha-kapha/30 shadow-sm hover:shadow-xl hover:border-dosha-kapha/60 hover:-translate-y-1 transition-all cursor-pointer group">
+                      <div className="p-4 bg-dosha-kapha/10 rounded-full mb-4 ring-1 ring-dosha-kapha/20 group-hover:bg-dosha-kapha/20 transition-colors">
+                        <Mountain className="h-8 w-8 text-dosha-kapha drop-shadow-sm" />
+                      </div>
+                      <h3 className="font-semibold text-dosha-kapha mb-2 flex items-center gap-1 text-xl">
+                        Kapha
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </h3>
+                      <p className="text-sm text-center text-foreground/80 leading-relaxed max-w-[200px]">
+                        Earth & Stability • Governs structure, immunity, and fluid balance
+                      </p>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md rounded-[2rem] border-dosha-kapha/20 shadow-2xl">
+                    <DialogHeader className="mb-4">
+                      <div className="mx-auto p-4 bg-dosha-kapha/10 rounded-full mb-4">
+                        <Mountain className="h-10 w-10 text-dosha-kapha" />
+                      </div>
+                      <DialogTitle className="text-2xl text-center text-dosha-kapha font-accent">The Kapha Dosha</DialogTitle>
+                      <DialogDescription className="text-center text-base">
+                        The energy of structure, stability, and deep nourishment.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                      <div className="bg-dosha-kapha/5 p-4 rounded-xl">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4 text-dosha-kapha" /> Characteristics</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Kapha types are grounded, loyal, and incredibly resilient. They often have a sturdy build, excellent endurance, slow digestion, and a calm, peaceful mind.
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Balanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>✨ Loving & forgiving</li>
+                            <li>✨ Strong immunity</li>
+                            <li>✨ Deep, sound sleep</li>
+                          </ul>
+                        </div>
+                        <div className="border border-border/50 p-4 rounded-xl">
+                          <h4 className="font-semibold text-xs uppercase tracking-widest text-muted-foreground mb-2">When Imbalanced</h4>
+                          <ul className="text-sm space-y-1">
+                            <li>🏔️ Lethargic or stuck</li>
+                            <li>🏔️ Weight gain</li>
+                            <li>🏔️ Sinus congestion</li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="bg-dosha-kapha/10 p-4 rounded-xl border border-dosha-kapha/20">
+                        <h4 className="font-semibold text-dosha-kapha mb-2 text-sm uppercase tracking-widest">How to Balance</h4>
+                        <p className="text-sm text-foreground/80">
+                          Focus on stimulation, movement, and lightness. Favor warm, light, and spicy foods. Practice vigorous, warming yoga (like Vinyasa) and seek out new experiences to avoid stagnation.
+                        </p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardContent>
+          </Card>
+        </TooltipProvider>
+
+        {/* Your Personal Wellness Space */}
+        {user && (
+          <Card className="mb-6 bg-gradient-to-br from-wellness-sage-light/50 via-background to-wellness-lilac-light/50 border-wellness-sage/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-wellness-sage/20 rounded-full">
+                  <Heart className="h-6 w-6 text-wellness-sage" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Your Personal Wellness Space</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Here's what feels supportive today
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Continue where you left off */}
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col items-center gap-2 bg-background/60 hover:bg-background border-wellness-sage/30"
+                  onClick={() => {
+                    const lastActivity = localStorage.getItem('mumtaz_last_activity');
+                    const recentlyViewed = localStorage.getItem('mumtaz_recently_viewed');
+                    
+                    if (lastActivity) {
+                      try {
+                        const activity = JSON.parse(lastActivity);
+                        if (activity.path) {
+                          navigate(activity.path);
+                          return;
+                        }
+                      } catch (e) {
+                        // Fall through to recent items
+                      }
+                    }
+                    
+                    // Try recently viewed as fallback
+                    if (recentlyViewed) {
+                      try {
+                        const recent = JSON.parse(recentlyViewed);
+                        if (Array.isArray(recent) && recent.length > 0 && recent[0].id) {
+                          navigate(`/content-library?highlight=${recent[0].id}`);
+                          return;
+                        }
+                      } catch (e) {
+                        // Fall through to library
+                      }
+                    }
+                    
+                    // Default: scroll to content section
+                    const contentSection = document.querySelector('[data-content-grid]');
+                    if (contentSection) {
+                      contentSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Continue exploring</span>
+                </Button>
+                
+                {/* Go to favorites */}
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col items-center gap-2 bg-background/60 hover:bg-background border-wellness-lilac/30"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setSelectedDosha("all");
+                    setSelectedLifePhase("all");
+                    setSelectedMobility("all");
+                    setSelectedConcern("all");
+                    setSelectedCompletion("all");
+                    setActiveQuickFilters(new Set());
+                    
+                    setActiveTab("saved");
+                    setTimeout(() => {
+                      document.getElementById('library-tabs-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                >
+                  <Heart className="h-5 w-5 text-wellness-lilac" />
+                  <span className="text-sm font-medium">Your saved practices</span>
+                </Button>
+                
+                {/* Browse the library */}
+                <Button 
+                  variant="outline" 
+                  className="h-auto py-4 flex flex-col items-center gap-2 bg-background/60 hover:bg-background border-primary/30"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("all");
+                    setSelectedDosha("all");
+                    setSelectedLifePhase("all");
+                    setSelectedMobility("all");
+                    setSelectedConcern("all");
+                    setSelectedCompletion("all");
+                    setActiveQuickFilters(new Set());
+                    
+                    setActiveTab("all");
+                    setTimeout(() => {
+                      document.getElementById('library-tabs-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
+                >
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Browse the library</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Category Tabs */}
+        <div id="library-tabs-container">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="mb-6 relative">
+            {/* Scroll hint gradient on right */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 md:hidden" />
+            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 pb-2">
+              <TabsList className="inline-flex w-max h-auto gap-1 p-1.5 bg-muted/50 rounded-lg">
+                <TabsTrigger value="for-you" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Sparkles className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  For You
+                </TabsTrigger>
+                <TabsTrigger value="all" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <BookOpen className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  All
+                </TabsTrigger>
+                <TabsTrigger value="saved" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Heart className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Favorites
+                </TabsTrigger>
+                <TabsTrigger value="yoga" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Flower2 className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Yoga
+                </TabsTrigger>
+                <TabsTrigger value="joint-care" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Activity className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Mobility
+                </TabsTrigger>
+                <TabsTrigger value="nutrition" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Salad className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Nutrition
+                </TabsTrigger>
+                <TabsTrigger value="pregnancy" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Baby className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Pregnancy
+                </TabsTrigger>
+                <TabsTrigger value="menopause" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Sparkles className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Menopause
+                </TabsTrigger>
+                <TabsTrigger value="emotional" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Brain className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Spiritual
+                </TabsTrigger>
+                <TabsTrigger value="energy-support" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Droplet className="h-4 w-4 mr-1.5 flex-shrink-0" />
+                  Diabetes Support
+                </TabsTrigger>
+                <TabsTrigger value="shifa-kitchen" className="text-sm py-2 px-3 whitespace-nowrap rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <Apple className="h-4 w-4 mr-1.5 flex-shrink-0 text-wellness-sage" />
+                  Shifa Kitchen
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+
+          <TabsContent value="shifa-kitchen" className="space-y-8 mt-6">
+            <div className="max-w-4xl mx-auto space-y-4 text-center mb-8">
+              <h2 className="text-3xl font-bold text-wellness-taupe">Shifa Kitchen</h2>
+              <p className="text-muted-foreground italic max-w-2xl mx-auto">
+                Discover actionable nutritional remedies rooted in Prophetic Medicine (Tibb an-Nabawi) 
+                and Ayurvedic wisdom, designed for modern biological transitions.
+              </p>
+            </div>
+            <NutritionPhilosophyCard />
+            <div className="grid grid-cols-1 gap-12">
+              {shifaRecipes.map(recipe => (
+                <RecipeCard key={recipe.id} {...recipe} />
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="for-you" className="space-y-6">
+            <Card className="bg-gradient-to-br from-wellness-lilac-light/40 via-background to-wellness-sage-light/40 border-wellness-lilac/20">
+              <CardHeader className="pb-3 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <Sparkles className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl">Specially for you</CardTitle>
+                    <CardDescription className="text-sm">
+                      Based on your {userPrimaryDosha ? userPrimaryDosha.toUpperCase() : ''} nature and preferences
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {(getRecommendedContent().length > 0 ? getRecommendedContent() : content.slice(0, 3)).map((item) => {
+                      const isLocked = !isContentUnlocked(item);
+                      return (
+                        <Card 
+                          key={item.id} 
+                          className="flex flex-row overflow-hidden hover:shadow-lg transition-shadow cursor-pointer border-none shadow-sm md:flex-col"
+                          onClick={() => openContentDetail(item)}
+                        >
+                          <div className="w-1/3 aspect-[4/5] sm:aspect-video flex-shrink-0 md:w-full md:aspect-video relative overflow-hidden bg-muted">
+                            <img 
+                              src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                              alt={item.title}
+                              className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : 'group-hover:scale-110 duration-500'}`}
+                            />
+                          </div>
+                          <div className="flex-1 p-3 md:p-4 flex flex-col justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline" className="text-[10px] sm:text-xs py-0 h-5 border-primary/30 text-primary uppercase font-bold tracking-tighter">
+                                        {item.recommendationReason}
+                                    </Badge>
+                                </div>
+                              <h3 className="font-bold text-sm sm:text-base line-clamp-1 text-foreground leading-tight">
+                                {item.title}
+                              </h3>
+                              <p className="text-xs text-muted-foreground line-clamp-2 mt-1 sm:hidden">
+                                {item.description}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between mt-2">
+                                <div className="flex items-center gap-1.5">
+                                    {getContentIcon(item.content_type)}
+                                    <span className="text-[10px] text-muted-foreground font-medium uppercase">{item.duration_minutes} min</span>
+                                </div>
+                                <Button size="sm" variant="ghost" className="h-7 px-2 text-primary text-xs">View</Button>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="all" className="space-y-6">
+            {/* Recommended for You Section */}
+            {user && (userPrimaryDosha || userMovementPreference || savedContentIds.size > 0) && getRecommendedContent().length > 0 && (
+              <Card className="bg-gradient-to-br from-wellness-lilac-light/40 via-background to-wellness-sage-light/40 border-wellness-lilac/20">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-full">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">Recommended for You</CardTitle>
+                      <CardDescription className="text-sm">
+                        You might like to explore these practices
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {getRecommendedContent().map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => openContentDetail(item)}
+                        className="group relative bg-background rounded-lg overflow-hidden border border-border/50 hover:border-primary/50 transition-all hover:shadow-md text-left"
+                      >
+                        <div className="aspect-video relative overflow-hidden">
+                          <img
+                            src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                            alt={item.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          {item.duration_minutes && (
+                            <Badge variant="secondary" className="absolute bottom-1 right-1 text-xs px-1.5 py-0.5">
+                              {item.duration_minutes}m
+                            </Badge>
+                          )}
+                          {/* Favorite button on recommendation card */}
+                          <Button
+                            variant={savedContentIds.has(item.id) ? "default" : "outline"}
+                            size="sm"
+                            className={`absolute top-1 right-1 h-7 text-xs px-2 bg-background/90 hover:bg-background border-border/50 ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary text-white border-0' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSaveContent(item.id);
+                            }}
+                          >
+                            <Heart 
+                              className={`h-3 w-3 mr-1 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`}
+                            />
+                            {savedContentIds.has(item.id) ? '✓' : 'Save'}
+                          </Button>
+                        </div>
+                        <div className="p-2.5 space-y-1">
+                          <h4 className="text-sm font-medium line-clamp-2 leading-tight">{item.title}</h4>
+                          {/* Personalized recommendation reason */}
+                          {item.recommendationReason && (
+                            <p className="text-xs text-wellness-sage font-medium line-clamp-1">
+                              {item.recommendationReason}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Search Bar */}
+            <Card className="bg-gradient-to-r from-primary/5 to-secondary/5">
+              <CardContent className="pt-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search for yoga, nutrition, breathwork, life phases, conditions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-10 h-12 text-base"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Try: "yoga for arthritis", "perimenopause support", "breathwork", "nutrition for bloating"
+                </p>
+
+                {/* Quick Filter Chips */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {quickFilterChips.map((chip) => (
+                    <button
+                      key={chip.id}
+                      onClick={() => toggleQuickFilter(chip.id)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                        activeQuickFilters.has(chip.id)
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      }`}
+                    >
+                      <span>{chip.icon}</span>
+                      <span>{chip.label}</span>
+                      {activeQuickFilters.has(chip.id) && (
+                        <X className="h-3 w-3 ml-0.5" />
+                      )}
+                    </button>
+                  ))}
+                  {activeQuickFilters.size > 0 && (
+                    <button
+                      onClick={() => setActiveQuickFilters(new Set())}
+                      className="text-xs text-muted-foreground hover:text-foreground underline ml-2"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Disclaimer Banner */}
+            <div className="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/50 rounded-lg">
+              <p className="text-xs text-amber-700 dark:text-amber-300 text-center">
+                <AlertTriangle className="h-3 w-3 inline mr-1" />
+                This content provides general wellbeing and lifestyle guidance only. It is not medical advice. Always consult your doctor for medical concerns.
+              </p>
+            </div>
+
+            {/* Filters */}
+            <Card>
+              <CardHeader className="pb-3 px-4">
+                <div className="flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide">
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      onClick={() => setFiltersExpanded(!filtersExpanded)}
+                      variant="outline"
+                      size="sm"
+                      className="gap-2 border-primary/20 hover:bg-primary/10 whitespace-nowrap"
+                    >
+                      <Filter className="h-4 w-4" />
+                      Filter
+                      {activeQuickFilters.size > 0 && (
+                        <Badge variant="secondary" className="ml-1 px-1 h-5 min-w-[20px] bg-primary/20">
+                          {activeQuickFilters.size}
+                        </Badge>
+                      )}
+                    </Button>
+                    
+                    {(searchQuery || selectedCategory !== "all" || selectedDosha !== "all" || selectedLifePhase !== "all" || selectedMobility !== "all" || selectedConcern !== "all" || selectedCompletion !== "all" || activeQuickFilters.size > 0) && (
+                      <Button 
+                        onClick={clearFilters}
+                        variant="ghost" 
+                        size="sm"
+                        className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Clear All
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 md:hidden">
+                    <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${filtersExpanded ? 'rotate-180' : ''}`} />
+                  </div>
+                </div>
+              </CardHeader>
+              
+              {/* Mobile: Collapsible, Desktop: Always visible */}
+              <div className={`overflow-hidden transition-all duration-300 ease-in-out md:!max-h-none md:!opacity-100 ${filtersExpanded ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 md:max-h-none md:opacity-100'}`}>
+                <CardContent className="pt-0">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Category</label>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map(cat => (
+                            <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Mobility Level</label>
+                      <Select value={selectedMobility} onValueChange={setSelectedMobility}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {mobilityLevels.map(level => (
+                            <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Life Phase</label>
+                      <Select value={selectedLifePhase} onValueChange={setSelectedLifePhase}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Phases</SelectItem>
+                          <SelectItem value="menstrual">Menstrual Cycle</SelectItem>
+                          <SelectItem value="cycle_changes">Cycle Changes</SelectItem>
+                          <SelectItem value="perimenopause">Perimenopause</SelectItem>
+                          <SelectItem value="peri_menopause_transition">Peri → Menopause</SelectItem>
+                          <SelectItem value="menopause">Menopause</SelectItem>
+                          <SelectItem value="post-menopause">Post-menopause</SelectItem>
+                          <SelectItem value="pregnancy">Pregnancy</SelectItem>
+                          <SelectItem value="postpartum">Postpartum</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Dosha</label>
+                      <Select value={selectedDosha} onValueChange={setSelectedDosha}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Doshas</SelectItem>
+                          <SelectItem value="vata">Vata</SelectItem>
+                          <SelectItem value="pitta">Pitta</SelectItem>
+                          <SelectItem value="kapha">Kapha</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Wellness Concern</label>
+                      <Select value={selectedConcern} onValueChange={setSelectedConcern}>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="All" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {wellnessConcerns.map(concern => (
+                            <SelectItem key={concern.value} value={concern.value}>{concern.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {user && (
+                      <div>
+                        <label className="text-xs font-medium mb-1.5 block text-muted-foreground">Progress</label>
+                        <Select value={selectedCompletion} onValueChange={setSelectedCompletion}>
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="All" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Content</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                            <SelectItem value="not-completed">Not Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </div>
+
+              {/* Active filters - always visible */}
+              <CardContent className="pt-0">
+                {/* Active filters indicator */}
+                {(searchQuery || selectedCategory !== "all" || selectedMobility !== "all" || selectedLifePhase !== "all" || selectedDosha !== "all" || selectedConcern !== "all") && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {searchQuery && (
+                      <Badge variant="secondary" className="gap-1">
+                        Search: "{searchQuery}"
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSearchQuery("")} />
+                      </Badge>
+                    )}
+                    {selectedCategory !== "all" && (
+                      <Badge variant="secondary" className="gap-1">
+                        {categories.find(c => c.value === selectedCategory)?.label}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedCategory("all")} />
+                      </Badge>
+                    )}
+                    {selectedMobility !== "all" && (
+                      <Badge variant="secondary" className="gap-1">
+                        {mobilityLevels.find(m => m.value === selectedMobility)?.label}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedMobility("all")} />
+                      </Badge>
+                    )}
+                    {selectedLifePhase !== "all" && (
+                      <Badge variant="secondary" className="gap-1 capitalize">
+                        {selectedLifePhase}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedLifePhase("all")} />
+                      </Badge>
+                    )}
+                    {selectedDosha !== "all" && (
+                      <Badge variant="secondary" className="gap-1 capitalize">
+                        {selectedDosha}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedDosha("all")} />
+                      </Badge>
+                    )}
+                    {selectedConcern !== "all" && (
+                      <Badge variant="secondary" className="gap-1">
+                        {wellnessConcerns.find(c => c.value === selectedConcern)?.label}
+                        <X className="h-3 w-3 cursor-pointer" onClick={() => setSelectedConcern("all")} />
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* Results count */}
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredContent.length} of {content.length} items
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Content Grid */}
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-content-grid>
+            {filteredContent.map((item) => {
+            const isLocked = !isContentUnlocked(item);
+            
+            return (
+              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative flex flex-row h-32 sm:h-auto sm:flex-col">
+                {/* Content Image with Lock Overlay */}
+                <div className="w-32 sm:w-full sm:h-48 shrink-0 overflow-hidden bg-muted relative">
+                  <img 
+                    src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                    alt={item.title}
+                    loading="lazy"
+                    className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
+                  />
+                  {isLocked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                      <div className="text-center text-white p-4">
+                        <Lock className="h-12 w-12 mx-auto mb-2" />
+                        <p className="text-sm font-semibold mb-1">Locked Content</p>
+                        {item.tier_requirement !== 'free' && (
+                          <Badge className="bg-primary/90 text-primary-foreground">
+                            <Crown className="h-3 w-3 mr-1" />
+                            {item.tier_requirement === 'basic' ? 'Basic' : 
+                             item.tier_requirement === 'standard' ? 'Standard' : 'Premium'} Required
+                          </Badge>
+                        )}
+                        {item.unlock_after_completions > 0 && (
+                          <p className="text-xs mt-2">
+                            Complete {item.unlock_after_completions} items to unlock
+                            <br />
+                            ({progressStats.completed}/{item.unlock_after_completions})
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {item.is_premium && (
+                    <Badge className="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600">
+                      <Crown className="h-3 w-3 mr-1" />
+                      Premium
+                    </Badge>
+                  )}
+                </div>
+                
+                <CardHeader className="p-3 sm:pb-3 flex-1 min-w-0 flex flex-col justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2 flex-1 min-w-0">
+                        <div className="shrink-0 mt-0.5">{getContentIcon(item.content_type)}</div>
+                        <CardTitle className="text-sm sm:text-lg font-bold leading-tight line-clamp-2">
+                          {item.title}
+                        </CardTitle>
+                      </div>
+                    </div>
+                    <CardDescription className="text-[10px] sm:text-sm line-clamp-1 sm:line-clamp-2">
+                      {isLocked && item.preview_content ? item.preview_content : item.description}
+                    </CardDescription>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mt-auto">
+                    <Badge variant="secondary" className="text-[9px] sm:text-xs px-1.5 py-0 capitalize">
+                      {item.content_type}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">{item.duration_minutes} min</span>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="hidden sm:block">
+                  <div className="space-y-3 mb-4">
+                    {/* Dosha Icons */}
+                    {item.doshas && item.doshas.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {item.doshas.map((dosha) => (
+                          <div key={dosha}>
+                            {getDoshaIcon(dosha)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Content Type, Duration, Difficulty */}
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="capitalize">
+                        {item.content_type}
+                      </Badge>
+                      {item.difficulty_level && (
+                        <Badge variant="outline">{item.difficulty_level}</Badge>
+                      )}
+                      {item.duration_minutes && (
+                        <Badge variant="outline">{item.duration_minutes} min</Badge>
+                      )}
+                    </div>
+                    
+                    {/* Life Phases & Pregnancy Statuses */}
+                    {((item.cycle_phases && item.cycle_phases.length > 0) || 
+                      (item.pregnancy_statuses && item.pregnancy_statuses.length > 0)) && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.cycle_phases?.slice(0, 2).map((phase) => (
+                          <Badge 
+                            key={phase} 
+                            variant="outline" 
+                            className="text-xs capitalize bg-wellness-lilac-light/30"
+                          >
+                            {phase.replace(/-/g, ' ').replace(/_/g, ' ')}
+                          </Badge>
+                        ))}
+                        {item.cycle_phases && item.cycle_phases.length > 2 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{item.cycle_phases.length - 2}
+                          </Badge>
+                        )}
+                        {item.pregnancy_statuses?.slice(0, 2).map((status) => (
+                          <Badge 
+                            key={status} 
+                            variant="outline" 
+                            className="text-xs capitalize bg-pink-50 dark:bg-pink-900/20"
+                          >
+                            {status.replace(/-/g, ' ').replace(/_/g, ' ')}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      className="flex-1" 
+                      onClick={() => openContentDetail(item)}
+                      disabled={isLocked}
+                    >
+                      {isLocked ? (
+                        <>
+                          <Lock className="h-4 w-4 mr-2" />
+                          View Preview
+                        </>
+                      ) : (
+                        'View Details'
+                      )}
+                    </Button>
+                    {user && !isLocked && (
+                      <Button
+                        variant={completedContentIds.has(item.id) ? "default" : "outline"}
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCompletion(item.id);
+                        }}
+                        title={completedContentIds.has(item.id) ? "Mark as not completed" : "Mark as completed"}
+                      >
+                        {completedContentIds.has(item.id) ? (
+                          <CheckCircle2 className="h-4 w-4" />
+                        ) : (
+                          <Circle className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+            })}
+          </div>
+        )}
+
+        {!loading && filteredContent.length === 0 && (
+          <Card className="p-12 text-center">
+            <p className="text-muted-foreground">
+              No content matches your filters. Try adjusting your selection.
+            </p>
+          </Card>
+        )}
+          </TabsContent>
+
+          <TabsContent value="saved" className="space-y-6">
+            {/* Favorites Category Filter */}
+            {savedContentIds.size > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <Badge 
+                  variant={selectedCategory === "all" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("all")}
+                >
+                  All Favorites
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "yoga" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("yoga")}
+                >
+                  <Flower2 className="h-3 w-3 mr-1" />
+                  Yoga
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "mobility" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("mobility")}
+                >
+                  <Activity className="h-3 w-3 mr-1" />
+                  Mobility
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "emotional" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("emotional")}
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Meditation
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "nutrition" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("nutrition")}
+                >
+                  <Salad className="h-3 w-3 mr-1" />
+                  Nutrition
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "pregnancy" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("pregnancy")}
+                >
+                  <Baby className="h-3 w-3 mr-1" />
+                  Pregnancy
+                </Badge>
+                <Badge 
+                  variant={selectedCategory === "menopause" ? "default" : "outline"}
+                  className="cursor-pointer hover:bg-primary/80 transition-colors px-3 py-1.5"
+                  onClick={() => setSelectedCategory("menopause")}
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  Menopause
+                </Badge>
+              </div>
+            )}
+            
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : savedContentIds.size === 0 ? (
+              <Card className="p-12 text-center bg-gradient-to-br from-wellness-lilac-light/30 to-background border-wellness-lilac/20">
+                <Heart className="h-16 w-16 mx-auto mb-4 text-wellness-lilac" />
+                <h3 className="text-xl font-semibold mb-2">No Favorites Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Save practices you love by tapping the heart icon. They'll appear here for easy access.
+                </p>
+                <Button variant="outline" onClick={() => navigate('/content-library')}>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Browse the Library
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => {
+                    if (!savedContentIds.has(item.id)) return false;
+                    
+                    // Apply category filter within favorites
+                    if (selectedCategory === "all") return true;
+                    
+                    const categoryMappings: Record<string, { types: string[], tags: string[] }> = {
+                      yoga: { types: ["yoga"], tags: ["yoga", "asana", "flow", "stretch"] },
+                      mobility: { types: ["yoga"], tags: ["arthritis", "joint-care", "mobility", "chair-yoga", "wall-yoga", "bed-yoga"] },
+                      nutrition: { types: ["nutrition"], tags: ["nutrition", "recipe", "food", "meal"] },
+                      pregnancy: { types: ["yoga", "nutrition"], tags: ["pregnancy", "prenatal", "postpartum"] },
+                      menopause: { types: ["yoga", "nutrition"], tags: ["menopause", "perimenopause", "post-menopause"] },
+                      emotional: { types: ["meditation"], tags: ["emotional", "spiritual", "mindfulness", "meditation", "breathwork"] },
+                    };
+                    
+                    const mapping = categoryMappings[selectedCategory];
+                    if (!mapping) return true;
+                    
+                    return mapping.types.includes(item.content_type) ||
+                      item.tags?.some(tag => mapping.tags.some(t => tag.toLowerCase().includes(t)));
+                  })
+                  .map((item) => {
+                  const isLocked = !isContentUnlocked(item);
+                  
+                  return (
+                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
+                      <div className="h-48 overflow-hidden bg-muted relative">
+                        <img 
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                          alt={item.title}
+                          loading="lazy"
+                          className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
+                        />
+                        {isLocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                            <div className="text-center text-white p-4">
+                              <Lock className="h-12 w-12 mx-auto mb-2" />
+                              <p className="text-sm font-semibold">Locked Content</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            {getContentIcon(item.content_type)}
+                            <CardTitle className="text-lg line-clamp-1">{item.title}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {user && completedContentIds.has(item.id) && (
+                              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                                <CheckCircle2 className="h-3 w-3" />
+                              </Badge>
+                            )}
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="bg-primary/90 hover:bg-primary text-xs"
+                              onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
+                            >
+                              <Heart className="h-3.5 w-3.5 mr-1.5 fill-white" />
+                              Saved ✓
+                            </Button>
+                          </div>
+                        </div>
+                        <CardDescription className="line-clamp-2">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="space-y-3 mb-4">
+                          {/* Dosha Icons */}
+                          {item.doshas && item.doshas.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {item.doshas.map((dosha) => (
+                                <div key={dosha}>{getDoshaIcon(dosha)}</div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {/* Content Type, Duration, Difficulty */}
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="capitalize">
+                              {item.content_type}
+                            </Badge>
+                            {item.difficulty_level && (
+                              <Badge variant="outline">{item.difficulty_level}</Badge>
+                            )}
+                            {item.duration_minutes && (
+                              <Badge variant="outline">{item.duration_minutes} min</Badge>
+                            )}
+                          </div>
+                          
+                          {/* Life Phases & Pregnancy Statuses */}
+                          {((item.cycle_phases && item.cycle_phases.length > 0) || 
+                            (item.pregnancy_statuses && item.pregnancy_statuses.length > 0)) && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.cycle_phases?.slice(0, 2).map((phase) => (
+                                <Badge 
+                                  key={phase} 
+                                  variant="outline" 
+                                  className="text-xs capitalize bg-wellness-lilac-light/30"
+                                >
+                                  {phase?.replace?.(/-/g, ' ')?.replace?.(/_/g, ' ')}
+                                </Badge>
+                              ))}
+                              {item.cycle_phases && item.cycle_phases.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{item.cycle_phases.length - 2}
+                                </Badge>
+                              )}
+                              {item.pregnancy_statuses?.slice(0, 2).map((status) => (
+                                <Badge 
+                                  key={status} 
+                                  variant="outline" 
+                                  className="text-xs capitalize bg-pink-50 dark:bg-pink-900/20"
+                                >
+                                  {status?.replace?.(/-/g, ' ')?.replace?.(/_/g, ' ')}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1" 
+                            onClick={() => openContentDetail(item)}
+                            disabled={isLocked}
+                          >
+                            {isLocked ? (
+                              <>
+                                <Lock className="h-4 w-4 mr-2" />
+                                View Preview
+                              </>
+                            ) : (
+                              'View Details'
+                            )}
+                          </Button>
+                          {user && !isLocked && (
+                            <Button
+                              variant={completedContentIds.has(item.id) ? "default" : "outline"}
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCompletion(item.id);
+                              }}
+                              title={completedContentIds.has(item.id) ? "Mark as not completed" : "Mark as completed"}
+                            >
+                              {completedContentIds.has(item.id) ? (
+                                <CheckCircle2 className="h-4 w-4" />
+                              ) : (
+                                <Circle className="h-4 w-4" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Joint Care Tab - Arthritis, Mobility & Joint Health Section */}
+          <TabsContent value="joint-care" className="space-y-6">
+            {/* Joint Care Hero Banner */}
+            <Card className="bg-gradient-to-br from-wellness-sage-light via-background to-wellness-lilac-light border-wellness-sage/30 overflow-hidden">
+              <CardContent className="p-8">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="p-4 bg-primary/20 rounded-full">
+                    <Flower2 className="h-12 w-12 text-primary" />
+                  </div>
+                  <div className="text-center md:text-left flex-1">
+                    <h2 className="text-2xl md:text-3xl font-semibold mb-2">Arthritis, Mobility & Joint Care</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl">
+                      Gentle practices designed for post-menopause and beyond. Calming, inclusive, and accessible for all ages.
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                      <Badge variant="secondary" className="text-sm py-1 px-3">Chair Yoga</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3">Wall-Supported</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3">Bed Exercises</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3">Joint Nutrition</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3">Emotional Support</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => 
+                    item.tags?.some(tag => 
+                      ['arthritis', 'joint-care', 'mobility', 'chair-yoga', 'wall-yoga', 'bed-yoga', 'senior-friendly', 'accessible'].includes(tag)
+                    ) || 
+                    item.cycle_phases?.includes('post-menopause') ||
+                    item.cycle_phases?.includes('menopause')
+                  )
+                  .map((item) => {
+                  const isLocked = !isContentUnlocked(item);
+                  
+                  return (
+                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
+                      <div className="h-48 overflow-hidden bg-muted relative">
+                        <img 
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                          alt={item.title}
+                          loading="lazy"
+                          className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
+                        />
+                        {isLocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                            <div className="text-center text-white p-4">
+                              <Lock className="h-12 w-12 mx-auto mb-2" />
+                              <p className="text-base font-semibold">Locked Content</p>
+                              <p className="text-sm mt-1">Upgrade to access</p>
+                            </div>
+                          </div>
+                        )}
+                        {/* Accessibility-friendly tags */}
+                        {item.tags?.some(tag => ['chair-yoga', 'wall-yoga', 'bed-yoga', 'accessible'].includes(tag)) && (
+                          <Badge className="absolute top-2 left-2 bg-wellness-sage text-white text-sm">
+                            Accessible
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            {getContentIcon(item.content_type)}
+                            <CardTitle className="text-lg md:text-xl line-clamp-2">{item.title}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {user && completedContentIds.has(item.id) && (
+                              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                                <CheckCircle2 className="h-4 w-4" />
+                              </Badge>
+                            )}
+                            <Button
+                              variant={savedContentIds.has(item.id) ? "default" : "outline"}
+                              size="sm"
+                              className={`text-xs ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
+                              onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
+                            >
+                              <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
+                              {savedContentIds.has(item.id) ? 'Saved ✓' : 'Save'}
+                            </Button>
+                          </div>
+                        </div>
+                        <CardDescription className="line-clamp-2 text-base">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="space-y-3 mb-4">
+                          {item.doshas && item.doshas.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {item.doshas.map((dosha) => (
+                                <div key={dosha}>{getDoshaIcon(dosha)}</div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="capitalize text-sm">
+                              {item.content_type}
+                            </Badge>
+                            {item.difficulty_level && (
+                              <Badge variant="outline" className="text-sm">{item.difficulty_level}</Badge>
+                            )}
+                            {item.duration_minutes && (
+                              <Badge variant="outline" className="text-sm">{item.duration_minutes} min</Badge>
+                            )}
+                          </div>
+
+                          {/* Benefits preview */}
+                          {item.benefits && item.benefits.length > 0 && (
+                            <div className="text-sm text-muted-foreground">
+                              <span className="font-medium">Benefits: </span>
+                              {item.benefits.slice(0, 2).join(', ')}
+                              {item.benefits.length > 2 && '...'}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1 text-base py-5" 
+                            size="lg"
+                            onClick={() => openContentDetail(item)}
+                            disabled={isLocked}
+                          >
+                            {isLocked ? (
+                              <>
+                                <Lock className="h-4 w-4 mr-2" />
+                                View Preview
+                              </>
+                            ) : (
+                              'View Details'
+                            )}
+                          </Button>
+                          {user && !isLocked && (
+                            <Button
+                              variant={completedContentIds.has(item.id) ? "default" : "outline"}
+                              size="lg"
+                              className="px-4"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCompletion(item.id);
+                              }}
+                              title={completedContentIds.has(item.id) ? "Mark as not completed" : "Mark as completed"}
+                            >
+                              {completedContentIds.has(item.id) ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : (
+                                <Circle className="h-5 w-5" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {!loading && content.filter(item => 
+              item.tags?.some(tag => 
+                ['arthritis', 'joint-care', 'mobility', 'chair-yoga', 'wall-yoga', 'bed-yoga', 'senior-friendly', 'accessible'].includes(tag)
+              )
+            ).length === 0 && (
+              <Card className="p-12 text-center">
+                <Flower2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2">Joint Care Content Coming Soon</h3>
+                <p className="text-muted-foreground text-lg">
+                  Gentle practices for arthritis and mobility are being prepared with care.
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Holistic Blood Sugar & Energy Support Section */}
+          <TabsContent value="energy-support" className="space-y-6">
+            {/* Medical Disclaimer */}
+            <Card className="border-amber-300 bg-amber-50/50 dark:bg-amber-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <AlertTriangle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-amber-800 dark:text-amber-400">Important Disclaimer</h4>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      This content is for <strong>general wellbeing and educational purposes only</strong>. It does not diagnose, treat, reverse, or cure any medical condition including diabetes. 
+                      Always consult your doctor or healthcare provider before making changes to your treatment, medication, or lifestyle. 
+                      This section does not replace professional medical care.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Section Header */}
+            <Card className="bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-950/40 dark:to-cyan-950/40 border-teal-200">
+              <CardContent className="pt-6">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-teal-200 flex-shrink-0 flex items-center justify-center bg-teal-50">
+                    <Droplet className="h-16 w-16 text-teal-600" />
+                  </div>
+                  <div className="text-center md:text-left flex-1">
+                    <h2 className="text-2xl md:text-3xl font-semibold mb-2 text-teal-900 dark:text-teal-100">Blood Sugar & Diabetes Support</h2>
+                    <p className="text-lg text-teal-700 dark:text-teal-300 max-w-2xl">
+                      This space offers gentle yoga, lifestyle, nutrition and spiritual tools to support women living with or at risk of type 2 diabetes. 
+                      It is for education and wellbeing only and does not replace medical care.
+                    </p>
+                    <p className="text-sm text-teal-600 dark:text-teal-400 mt-2 italic">
+                      Please always check with your doctor before making changes to medication, diet or exercise.
+                    </p>
+                    <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                      <Badge variant="secondary" className="text-sm py-1 px-3 bg-teal-200/80 text-teal-800">Gentle Yoga</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3 bg-teal-200/80 text-teal-800">Blood Sugar Balance</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3 bg-teal-200/80 text-teal-800">Stress & Sleep Support</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3 bg-teal-200/80 text-teal-800">Simple Nutrition</Badge>
+                      <Badge variant="secondary" className="text-sm py-1 px-3 bg-teal-200/80 text-teal-800">Spiritual Wellbeing</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Content Overview Cards (Now Interactive Sub-Filters) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'mobility' ? 'from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 border-green-400 shadow-md ring-2 ring-green-400/20' : 'from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border-green-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'mobility' ? null : 'mobility')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'mobility' ? 'bg-green-200 text-green-700' : 'bg-green-100 text-green-600'}`}>
+                      <Flower2 className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-green-800 dark:text-green-300">Gentle Mobility</h4>
+                  </div>
+                  <p className="text-sm text-green-700 dark:text-green-400">
+                    Chair yoga, gentle stretches, and movement routines to improve circulation and reduce stiffness.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'breathing' ? 'from-blue-100 to-sky-100 dark:from-blue-900/50 dark:to-sky-900/50 border-blue-400 shadow-md ring-2 ring-blue-400/20' : 'from-blue-50 to-sky-50 dark:from-blue-950/30 dark:to-sky-950/30 border-blue-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'breathing' ? null : 'breathing')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'breathing' ? 'bg-blue-200 text-blue-700' : 'bg-blue-100 text-blue-600'}`}>
+                      <Wind className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-blue-800 dark:text-blue-300">Breathing & Relaxation</h4>
+                  </div>
+                  <p className="text-sm text-blue-700 dark:text-blue-400">
+                    Simple breathwork and stress-reducing techniques to calm the nervous system and support wellbeing.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'nutrition' ? 'from-orange-100 to-amber-100 dark:from-orange-900/50 dark:to-amber-900/50 border-orange-400 shadow-md ring-2 ring-orange-400/20' : 'from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border-orange-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'nutrition' ? null : 'nutrition')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'nutrition' ? 'bg-orange-200 text-orange-700' : 'bg-orange-100 text-orange-600'}`}>
+                      <Leaf className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-orange-800 dark:text-orange-300">Mindful Nutrition</h4>
+                  </div>
+                  <p className="text-sm text-orange-700 dark:text-orange-400">
+                    Warm, easy-to-digest meal ideas and mindful eating guidance for balanced, sustained energy.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'grounding' ? 'from-purple-100 to-violet-100 dark:from-purple-900/50 dark:to-violet-900/50 border-purple-400 shadow-md ring-2 ring-purple-400/20' : 'from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'grounding' ? null : 'grounding')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'grounding' ? 'bg-purple-200 text-purple-700' : 'bg-purple-100 text-purple-600'}`}>
+                      <Mountain className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-purple-800 dark:text-purple-300">Grounding Routines</h4>
+                  </div>
+                  <p className="text-sm text-purple-700 dark:text-purple-400">
+                    Daily grounding practices and healthy routine suggestions inspired by Ayurvedic wisdom.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'spiritual' ? 'from-pink-100 to-rose-100 dark:from-pink-900/50 dark:to-rose-900/50 border-pink-400 shadow-md ring-2 ring-pink-400/20' : 'from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-pink-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'spiritual' ? null : 'spiritual')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'spiritual' ? 'bg-pink-200 text-pink-700' : 'bg-pink-100 text-pink-600'}`}>
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-pink-800 dark:text-pink-300">Spiritual Support</h4>
+                  </div>
+                  <p className="text-sm text-pink-700 dark:text-pink-400">
+                    Islamic spiritual tools (dhikr, du'a) and universal mindfulness options for emotional balance.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card 
+                className={`bg-gradient-to-br border cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] ${activeSubFilter === 'lifestyle' ? 'from-teal-100 to-cyan-100 dark:from-teal-900/50 dark:to-cyan-900/50 border-teal-400 shadow-md ring-2 ring-teal-400/20' : 'from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 border-teal-200 opacity-90 hover:opacity-100'}`}
+                onClick={() => setActiveSubFilter(activeSubFilter === 'lifestyle' ? null : 'lifestyle')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-2 rounded-full ${activeSubFilter === 'lifestyle' ? 'bg-teal-200 text-teal-700' : 'bg-teal-100 text-teal-600'}`}>
+                      <Lightbulb className="h-5 w-5" />
+                    </div>
+                    <h4 className="font-semibold text-teal-800 dark:text-teal-300">Lifestyle Education</h4>
+                  </div>
+                  <p className="text-sm text-teal-700 dark:text-teal-400">
+                    Educational content on how lifestyle choices can support balanced energy and overall health.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Premium Tier Information */}
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-4">
+                  <Crown className="h-6 w-6 text-primary flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold mb-2">Premium Content Available</h4>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Upgrade to access deeper education and personalised guidance from our practitioner. 
+                      Premium members receive tailored recommendations based on their unique constitution.
+                    </p>
+                    <p className="text-xs text-muted-foreground italic">
+                      Note: Premium content provides educational lifestyle guidance only and does not replace working with a qualified healthcare practitioner.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => {
+                    const hasBaseTags = item.tags?.some(tag => 
+                      ['diabetes', 'blood-sugar', 'insulin-resistance', 'type-2-diabetes', 'diabetes-support', 'blood-sugar-balance', 'energy-support', 'balanced-energy', 'grounding', 'stress-relief', 'mindful-eating', 'gentle-movement', 'circulation', 'nervous-system', 'relaxation'].includes(tag)
+                    ) ||
+                    (item.tags?.includes('gentle') && item.tags?.includes('breathwork')) ||
+                    (item.content_type === 'nutrition' && item.tags?.some(tag => ['easy-digest', 'warming', 'nourishing', 'balancing', 'blood-sugar'].includes(tag)));
+                    
+                    if (!hasBaseTags) return false;
+                    if (!activeSubFilter) return true;
+                    
+                    if (activeSubFilter === 'mobility') return item.tags?.includes('gentle-movement') || item.content_type === 'video' || item.content_type === 'yoga';
+                    if (activeSubFilter === 'breathing') return item.tags?.some(t => ['breathwork', 'nervous-system', 'relaxation'].includes(t));
+                    if (activeSubFilter === 'nutrition') return item.content_type === 'nutrition' || item.tags?.includes('mindful-eating');
+                    if (activeSubFilter === 'grounding') return item.tags?.some(t => ['grounding', 'routine'].includes(t));
+                    if (activeSubFilter === 'spiritual') return item.tags?.some(t => ['spiritual', 'dhikr', 'islamic'].includes(t));
+                    if (activeSubFilter === 'lifestyle') return item.content_type === 'article' || item.tags?.includes('education');
+                    
+                    return true;
+                  })
+                  .map((item) => {
+                  const isLocked = !isContentUnlocked(item);
+                  
+                  return (
+                    <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
+                      <div className="h-48 overflow-hidden bg-muted relative">
+                        <img 
+                          src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+                          alt={item.title}
+                          loading="lazy"
+                          className={`w-full h-full object-cover transition-all ${isLocked ? 'blur-sm opacity-60' : ''}`}
+                        />
+                        {isLocked && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                            <div className="text-center text-white p-4">
+                              <Lock className="h-12 w-12 mx-auto mb-2" />
+                              <p className="text-base font-semibold">Locked Content</p>
+                              <p className="text-sm mt-1">Upgrade to access</p>
+                            </div>
+                          </div>
+                        )}
+                        {/* Energy Support tag */}
+                        <Badge className="absolute top-2 left-2 bg-teal-500 text-white text-sm">
+                          <Droplet className="h-3 w-3 mr-1" />
+                          Diabetes Support
+                        </Badge>
+                      </div>
+                      
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-1">
+                            {getContentIcon(item.content_type)}
+                            <CardTitle className="text-lg md:text-xl line-clamp-2">{item.title}</CardTitle>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {user && completedContentIds.has(item.id) && (
+                              <Badge variant="default" className="bg-green-600 hover:bg-green-700">
+                                <CheckCircle2 className="h-4 w-4" />
+                              </Badge>
+                            )}
+                            <Button
+                              variant={savedContentIds.has(item.id) ? "default" : "outline"}
+                              size="sm"
+                              className={`text-xs ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
+                              onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
+                            >
+                              <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
+                              {savedContentIds.has(item.id) ? 'Saved ✓' : 'Save'}
+                            </Button>
+                          </div>
+                        </div>
+                        <CardDescription className="line-clamp-2 text-base">
+                          {item.description}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <div className="space-y-3 mb-4">
+                          {item.doshas && item.doshas.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {item.doshas.map((dosha) => (
+                                <div key={dosha}>{getDoshaIcon(dosha)}</div>
+                              ))}
+                            </div>
+                          )}
+                          
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="capitalize text-sm">
+                              {item.content_type}
+                            </Badge>
+                            {item.difficulty_level && (
+                              <Badge variant="outline" className="text-sm">{item.difficulty_level}</Badge>
+                            )}
+                            {item.duration_minutes && (
+                              <Badge variant="outline" className="text-sm">{item.duration_minutes} min</Badge>
+                            )}
+                          </div>
+
+                          {/* Benefits preview */}
+                          {item.benefits && item.benefits.length > 0 && (
+                            <div className="text-sm text-muted-foreground">
+                              <span className="font-medium">Benefits: </span>
+                              {item.benefits.slice(0, 2).join(', ')}
+                              {item.benefits.length > 2 && '...'}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1 text-base py-5" 
+                            size="lg"
+                            onClick={() => openContentDetail(item)}
+                            disabled={isLocked}
+                          >
+                            {isLocked ? (
+                              <>
+                                <Lock className="h-4 w-4 mr-2" />
+                                View Preview
+                              </>
+                            ) : (
+                              'View Details'
+                            )}
+                          </Button>
+                          {user && !isLocked && (
+                            <Button
+                              variant={completedContentIds.has(item.id) ? "default" : "outline"}
+                              size="lg"
+                              className="px-4"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCompletion(item.id);
+                              }}
+                              title={completedContentIds.has(item.id) ? "Mark as not completed" : "Mark as completed"}
+                            >
+                              {completedContentIds.has(item.id) ? (
+                                <CheckCircle2 className="h-5 w-5" />
+                              ) : (
+                                <Circle className="h-5 w-5" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {!loading && content.filter(item => 
+              item.tags?.some(tag => 
+                ['energy-support', 'blood-sugar', 'balanced-energy', 'grounding', 'stress-relief', 'mindful-eating', 'gentle-movement'].includes(tag)
+              )
+            ).length === 0 && (
+              <Card className="p-12 text-center">
+                <Droplet className="h-16 w-16 mx-auto mb-4 text-teal-500" />
+                <h3 className="text-xl font-semibold mb-2">Diabetes Support Content Coming Soon</h3>
+                <p className="text-muted-foreground text-lg mb-4">
+                  Gentle yoga, lifestyle, nutrition and spiritual tools to support women living with or at risk of type 2 diabetes are being prepared with care.
+                </p>
+                <p className="text-sm text-muted-foreground italic">
+                  Remember: Always consult your healthcare provider for medical advice.
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Yoga Tab */}
+          <TabsContent value="yoga" className="space-y-6">
+            <YogaPhilosophyCard />
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => item.content_type === 'yoga')
+                  .map((item) => renderContentCard(item))}
+              </div>
+            )}
+            {!loading && content.filter(item => item.content_type === 'yoga').length === 0 && (
+              <Card className="p-12 text-center">
+                <Flower2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2">Yoga Content Coming Soon</h3>
+                <p className="text-muted-foreground">Supportive yoga practices are being prepared with care.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Nutrition Tab */}
+          <TabsContent value="nutrition" className="space-y-6">
+            <NutritionPhilosophyCard />
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => item.content_type === 'nutrition' || item.tags?.some(tag => ['recipe', 'food', 'meal', 'eating'].includes(tag)))
+                  .map((item) => renderContentCard(item))}
+              </div>
+            )}
+            {!loading && content.filter(item => item.content_type === 'nutrition').length === 0 && (
+              <Card className="p-12 text-center">
+                <Salad className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-xl font-semibold mb-2">Nutrition Content Coming Soon</h3>
+                <p className="text-muted-foreground">Ayurveda-inspired nutrition guidance is being prepared with care.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Pregnancy & Postpartum Tab */}
+          <TabsContent value="pregnancy" className="space-y-6">
+            <Card className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-pink-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Baby className="h-10 w-10 text-pink-600" />
+                  <div>
+                    <h2 className="text-xl font-semibold text-pink-800 dark:text-pink-300">Pregnancy & Postpartum Support</h2>
+                    <p className="text-pink-600 dark:text-pink-400 text-sm">Gentle practices and Ayurveda-inspired suggestions for your journey</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Trimester-specific recommendations */}
+            {isPregnancySafeMode && (
+              <TrimesterPoseRecommendations 
+                onSelectPractice={(practiceId) => {
+                  // Could navigate to specific content or filter
+                  console.log('Selected practice:', practiceId);
+                }}
+              />
+            )}
+            
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => 
+                    item.cycle_phases?.some(phase => ['pregnancy', 'postpartum', 'fertility'].includes(phase)) ||
+                    item.pregnancy_statuses?.some(status => ['pregnant', 'postpartum'].includes(status)) ||
+                    item.tags?.some(tag => ['pregnancy', 'prenatal', 'postpartum', 'fertility', 'trimester'].includes(tag))
+                  )
+                  .map((item) => renderContentCard(item))}
+              </div>
+            )}
+            {!loading && content.filter(item => 
+              item.cycle_phases?.some(phase => ['pregnancy', 'postpartum'].includes(phase))
+            ).length === 0 && (
+              <Card className="p-12 text-center">
+                <Baby className="h-16 w-16 mx-auto mb-4 text-pink-400" />
+                <h3 className="text-xl font-semibold mb-2">Pregnancy Content Coming Soon</h3>
+                <p className="text-muted-foreground">Supportive practices for pregnancy and postpartum are being prepared with care.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Menopause & Beyond Tab */}
+          <TabsContent value="menopause" className="space-y-6">
+            <Card className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 border-purple-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Sparkles className="h-10 w-10 text-purple-600" />
+                  <div>
+                    <h2 className="text-xl font-semibold text-purple-800 dark:text-purple-300">Menopause & Beyond</h2>
+                    <p className="text-purple-600 dark:text-purple-400 text-sm">Holistic routines that may help you feel better during this transition</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => 
+                    item.cycle_phases?.some(phase => ['perimenopause', 'menopause', 'post-menopause'].includes(phase)) ||
+                    item.tags?.some(tag => ['menopause', 'perimenopause', 'post-menopause', 'hormonal', 'hot-flush'].includes(tag))
+                  )
+                  .map((item) => renderContentCard(item))}
+              </div>
+            )}
+            {!loading && content.filter(item => 
+              item.cycle_phases?.some(phase => ['perimenopause', 'menopause', 'post-menopause'].includes(phase))
+            ).length === 0 && (
+              <Card className="p-12 text-center">
+                <Sparkles className="h-16 w-16 mx-auto mb-4 text-purple-400" />
+                <h3 className="text-xl font-semibold mb-2">Menopause Content Coming Soon</h3>
+                <p className="text-muted-foreground">Supportive practices for menopause and beyond are being prepared with care.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Emotional & Spiritual Tab */}
+          <TabsContent value="emotional" className="space-y-6">
+            <SpiritualPhilosophyCard />
+            <Card className="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/30 dark:to-blue-950/30 border-indigo-200">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <Brain className="h-10 w-10 text-indigo-600" />
+                  <div>
+                    <h2 className="text-xl font-semibold text-indigo-800 dark:text-indigo-300">Emotional & Spiritual Wellbeing</h2>
+                    <p className="text-indigo-600 dark:text-indigo-400 text-sm">Mindfulness, meditation, and spiritual tools (Islamic + universal options)</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {loading ? (
+              <ContentGridSkeleton count={6} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {content
+                  .filter(item => 
+                    item.content_type === 'meditation' ||
+                    item.tags?.some(tag => ['emotional', 'spiritual', 'mindfulness', 'meditation', 'breathwork', 'grounding', 'dhikr', 'prayer', 'gratitude', 'reflection'].includes(tag))
+                  )
+                  .map((item) => renderContentCard(item))}
+              </div>
+            )}
+            {!loading && content.filter(item => 
+              item.content_type === 'meditation' ||
+              item.tags?.some(tag => ['emotional', 'spiritual', 'mindfulness'].includes(tag))
+            ).length === 0 && (
+              <Card className="p-12 text-center">
+                <Brain className="h-16 w-16 mx-auto mb-4 text-indigo-400" />
+                <h3 className="text-xl font-semibold mb-2">Spiritual Content Coming Soon</h3>
+                <p className="text-muted-foreground">Mindfulness and spiritual support are being prepared with care.</p>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+        </div>
+
+        {/* Content Detail Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            {selectedContent && (
+              <>
+                <DialogHeader>
+                  <div className="flex items-center justify-between gap-2">
+                    <DialogTitle className="flex items-center gap-2 flex-1">
+                      {getContentIcon(selectedContent.content_type)}
+                      <span className="line-clamp-1">{selectedContent.title}</span>
+                    </DialogTitle>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {selectedContent.is_premium && (
+                        <Badge className="bg-gradient-to-r from-purple-600 to-pink-600">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Premium
+                        </Badge>
+                      )}
+                      <Button
+                        variant={savedContentIds.has(selectedContent.id) ? "default" : "outline"}
+                        size="sm"
+                        className={`text-xs ${savedContentIds.has(selectedContent.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
+                        onClick={() => toggleSaveContent(selectedContent.id)}
+                      >
+                        <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(selectedContent.id) ? 'fill-white' : ''}`} />
+                        {savedContentIds.has(selectedContent.id) ? 'Saved ✓' : 'Save'}
+                      </Button>
+                    </div>
+                  </div>
+                  <DialogDescription>
+                    {selectedContent.description}
+                  </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="max-h-[50vh]">
+                  <div className="space-y-4">
+                    {/* Pose Image Sequence - Primary display for all content */}
+                    <PoseImageSequence
+                      contentId={selectedContent.id}
+                      videoUrl={selectedContent.video_url}
+                      isPremiumUser={userTier === 'premium'}
+                      isPremiumContent={selectedContent.tier_requirement === 'premium'}
+                    />
+
+                    {/* Fallback: Animation Section - If no pose images uploaded */}
+                    {selectedContent.animation_url && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Sparkles className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-foreground">Animated Instruction</span>
+                          <Badge variant="outline" className="text-xs">All Tiers</Badge>
+                        </div>
+                        <video controls className="w-full rounded-lg bg-black">
+                          <source src={selectedContent.animation_url} type="video/mp4" />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    )}
+
+                    {/* Title and Tags Section */}
+                    <div className="space-y-3">
+                      {/* Dosha Icons */}
+                      {selectedContent.doshas?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Recommended for Doshas:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedContent.doshas.map((dosha) => (
+                              <div key={dosha}>
+                                {getDoshaIcon(dosha)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Category, Phase, and Difficulty Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="capitalize">
+                          {selectedContent.content_type}
+                        </Badge>
+                        {selectedContent.cycle_phases?.length > 0 && (
+                          <Badge variant="outline">
+                            {selectedContent.cycle_phases.join(', ')}
+                          </Badge>
+                        )}
+                        {selectedContent.pregnancy_statuses?.length > 0 && (
+                          <Badge variant="outline">
+                            {selectedContent.pregnancy_statuses.join(', ')}
+                          </Badge>
+                        )}
+                        {selectedContent.difficulty_level && (
+                          <Badge variant="outline" className="capitalize">
+                            {selectedContent.difficulty_level}
+                          </Badge>
+                        )}
+                        {selectedContent.duration_minutes && (
+                          <Badge variant="outline">{selectedContent.duration_minutes} min</Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Structural Sections: How to, Options, Benefits */}
+                    <div className="space-y-6 pt-6 border-t border-border">
+                       {/* High-Level Description (Why this helps) */}
+                       <div className="mb-6">
+                         <p className="text-[15px] text-muted-foreground leading-relaxed whitespace-pre-wrap font-medium">
+                           {formatAyurvedic(selectedContent.description)}
+                         </p>
+                       </div>
+
+                       {/* The Practice (Instructions) */}
+                       <div className="mb-6">
+                         <h3 className="font-semibold text-lg mb-3 text-wellness-plum border-b border-wellness-plum/10 pb-2 flex items-center gap-2">
+                            {selectedContent.content_type === 'nutrition' ? (
+                              <Salad className="h-5 w-5" />
+                            ) : (
+                              <BookOpen className="h-5 w-5" />
+                            )}
+                            {selectedContent.content_type === 'nutrition' ? 'Preparation & Ingredients' : 'The Practice Steps'}
+                         </h3>
+                         <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none prose-p:my-2 prose-ul:my-2">
+                            {isContentUnlocked(selectedContent) 
+                              ? (selectedContent.detailed_guidance && selectedContent.detailed_guidance.length > 50 
+                                  ? formatAyurvedic(selectedContent.detailed_guidance) 
+                                  : "Since this is an intuitively guided practice, please follow along with the video/audio above. Move slowly, allowing your breath to lead your body without forcing any depth.")
+                              : formatAyurvedic(selectedContent.preview_content || 'Unlock to see full practice steps...')}
+                         </div>
+                       </div>
+
+                       {/* Benefits */}
+                       {(Array.isArray(selectedContent.benefits) && selectedContent.benefits.length > 0) && (
+                         <div className="mb-6 bg-wellness-sage/5 p-5 rounded-2xl border border-wellness-sage/10">
+                           <h3 className="font-semibold text-lg mb-3 text-wellness-sage flex items-center gap-2">
+                             <Sparkles className="h-5 w-5" />
+                             Anatomical & Ayurvedic Benefits
+                           </h3>
+                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                             {selectedContent.benefits.map((benefit: string, i: number) => (
+                               <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                 <CheckCircle2 className="h-4 w-4 text-wellness-sage shrink-0 mt-0.5" />
+                                 <span>{formatAyurvedic(benefit)}</span>
+                               </li>
+                             ))}
+                           </ul>
+                         </div>
+                       )}
+
+                       {/* Holistic Context: Dosha & Life Phase */}
+                       <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         {(Array.isArray(selectedContent.doshas) && selectedContent.doshas.length > 0) && (
+                           <div className="bg-orange-50/50 dark:bg-orange-950/20 p-4 rounded-xl border border-orange-100">
+                             <h4 className="font-semibold text-sm text-orange-800 dark:text-orange-300 flex items-center gap-2 mb-2">
+                               <Flower2 className="h-4 w-4" />
+                               Ayurvedic Wisdom
+                             </h4>
+                             <p className="text-xs text-orange-700/80 dark:text-orange-400">
+                               This practice specifically balances the {selectedContent.doshas.map(d => String(d).toUpperCase()).join(' & ')} dosha(s) by regulating its core elemental qualities through targeted movement and breath.
+                             </p>
+                           </div>
+                         )}
+                         {(Array.isArray(selectedContent.cycle_phases) && selectedContent.cycle_phases.length > 0 && typeof selectedContent.cycle_phases[0] === 'string') && (
+                           <div className="bg-indigo-50/50 dark:bg-indigo-950/20 p-4 rounded-xl border border-indigo-100">
+                             <h4 className="font-semibold text-sm text-indigo-800 dark:text-indigo-300 flex items-center gap-2 mb-2">
+                               <Moon className="h-4 w-4" />
+                               Honoring Your Phase
+                             </h4>
+                             <p className="text-xs text-indigo-700/80 dark:text-indigo-400">
+                               Selected to support the shifting hormones and energy demands of the {selectedContent.cycle_phases[0].replace(/-/g, ' ').toUpperCase()} season of your life.
+                             </p>
+                           </div>
+                         )}
+                       </div>
+
+                       {/* Modifications & Options */}
+                       <div className="bg-wellness-lilac/10 p-5 rounded-2xl border border-wellness-lilac/20 mb-2">
+                         <h3 className="font-semibold text-lg mb-3 text-wellness-plum flex items-center gap-2">
+                            <Activity className="h-5 w-5" />
+                            Gentle Modifications
+                         </h3>
+                         <ul className="space-y-3 prose prose-sm text-muted-foreground">
+                           <li className="flex items-start gap-2">
+                             <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                             <span><strong>Listen to your body:</strong> Never push through pain. Connect deeply with your breath. Less effort is often more healing.</span>
+                           </li>
+                           <li className="flex items-start gap-2">
+                             <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                             <span><strong>Chair & Bed Support:</strong> If standing or floor-work feels exhausting, perform the upper-body movements seated or lying deeply supported by pillows.</span>
+                           </li>
+                           {selectedContent.detailed_guidance && selectedContent.detailed_guidance.includes('Safe for') && (
+                             <li className="flex items-start gap-2">
+                               <span className="text-wellness-plum font-bold mt-0.5">•</span>
+                               <span>{selectedContent.detailed_guidance.split(';').find(s => s.includes('Safe for')) || 'Always consult your practitioner before moving.'}</span>
+                             </li>
+                           )}
+                         </ul>
+                       </div>
+                    </div>
+
+                    {/* Herbal Gate — auto-triggered when content mentions herbs */}
+                    {containsHerbalContent(String(selectedContent.description || '') + ' ' + String(selectedContent.detailed_guidance || '')) && (
+                      <HerbalGate />
+                    )}
+
+                    <div className="bg-gradient-to-br from-wellness-sage/10 to-wellness-lilac/10 p-5 rounded-2xl border border-wellness-sage/20 shadow-sm relative overflow-hidden">
+                      <div className="flex flex-col sm:flex-row gap-5 items-center relative z-10">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 rounded-full overflow-hidden border-2 border-white shadow-md">
+                          <img src={mumtazYoga8} alt="Mumtaz Haque" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="text-center sm:text-left space-y-2 flex-1">
+                          <h4 className="text-base font-semibold text-wellness-taupe">
+                            Need Personalized Healing?
+                          </h4>
+                          <p className="text-sm text-wellness-taupe/80 leading-relaxed max-w-sm">
+                            Every woman's journey is unique. Let's create a tailored plan for your current phase and dosha.
+                          </p>
+                          <Button 
+                            className="w-full sm:w-auto mt-2 bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full shadow-md font-medium"
+                            onClick={() => navigate('/bookings')}
+                          >
+                            <Calendar className="w-4 h-4 mr-2" /> Book a Consultation
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Locked Content Overlay for Text */}
+                    {!isContentUnlocked(selectedContent) && (
+                      <div className="mt-8 bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-100 text-center shadow-inner relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                          <Lock className="w-24 h-24" />
+                        </div>
+                        <div className="relative z-10">
+                          <div className="w-16 h-16 mx-auto bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                            <Lock className="h-8 w-8 text-purple-600" />
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">Deepen Your Practice</h3>
+                          <p className="text-gray-600 mb-6 max-w-sm mx-auto leading-relaxed">
+                            This extended wellness guide is part of the <strong className="text-purple-700">Standard Signature</strong> tier. Unlock the entire holistic library, advanced routines, and recipes for just £5.99/month.
+                          </p>
+                          <Button 
+                            className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-8 py-6 text-lg font-medium shadow-md shadow-purple-200"
+                            onClick={() => navigate('/auth?tab=subscription')}
+                          >
+                            <Crown className="w-5 h-5 mr-2" /> Unlock Standard Access
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Benefits Section - Only show when unlocked */}
+                    {isContentUnlocked(selectedContent) && selectedContent.benefits?.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2">Benefits</h3>
+                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                          {selectedContent.benefits.map((benefit, index) => (
+                            <li key={index}>{benefit}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Content Image - Supporting Visual */}
+                    {isContentUnlocked(selectedContent) && getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url, selectedContent.title) && (
+                      <div>
+                        <img 
+                          src={getContentImage(selectedContent.content_type, selectedContent.tags, selectedContent.image_url, selectedContent.title)}
+                          alt={selectedContent.title}
+                          loading="lazy"
+                          className="w-full rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    {/* Audio Section - Only show when unlocked */}
+                    {isContentUnlocked(selectedContent) && selectedContent.audio_url && (
+                      <div>
+                        <h3 className="font-semibold mb-2">Audio Guide</h3>
+                        <audio controls className="w-full">
+                          <source src={selectedContent.audio_url} type="audio/mpeg" />
+                          Your browser does not support the audio element.
+                        </audio>
+                      </div>
+                    )}
+
+                    {/* Daily Reminder Button */}
+                    {isContentUnlocked(selectedContent) && (
+                      <div className="pt-6 border-t border-border flex flex-col gap-3">
+                        <Button 
+                          className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white font-bold h-12"
+                          onClick={() => {
+                            setIsDialogOpen(false);
+                            setTimeout(() => setIsCrossroadsOpen(true), 300);
+                          }}
+                        >
+                          <CheckCircle2 className="h-5 w-5 mr-2" />
+                          Complete Session
+                        </Button>
+                        <DailyReminderButton 
+                          contentId={selectedContent.id}
+                          contentTitle={selectedContent.title}
+                          userId={user?.id || null}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <SessionCrossroads 
+          open={isCrossroadsOpen}
+          onOpenChange={setIsCrossroadsOpen}
+          nextStepPath="/content-library"
+          nextStepLabel="related therapeutic practices"
+        />
+      </div>
+    </div>
+  );
+};
+
+export default ContentLibrary;
