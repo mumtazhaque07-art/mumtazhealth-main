@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 // In a real app, this should be a role check against the database
 // For now, we use a simple environmental or hardcoded check
-const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com'];
+const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com', 'mumtazhaque07@gmail.com'];
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);

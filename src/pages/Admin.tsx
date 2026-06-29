@@ -40,7 +40,7 @@ export default function Admin() {
 
   const checkAdminRole = async (user: User) => {
     // Hardcoded admin emails for immediate access without DB configuration
-    const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com'];
+    const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com', 'mumtazhaque07@gmail.com'];
     if (user.email && ADMIN_EMAILS.includes(user.email)) {
       setIsAdmin(true);
       loadProfiles();
