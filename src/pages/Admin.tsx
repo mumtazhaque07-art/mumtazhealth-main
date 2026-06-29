@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
-import { Video, CheckCircle2, MessageCircle, ChevronRight, Flower2, ArrowLeft } from "lucide-react";
+import { Video, CheckCircle2, MessageCircle, ChevronRight, Flower2, ArrowLeft, Users, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { PERSONA_CONFIG } from "@/config/personas";
+import { AdminThemesManager } from "@/components/AdminThemesManager";
 
 interface Profile {
   id: string;
@@ -25,6 +26,7 @@ export default function Admin() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedWellness, setSelectedWellness] = useState<WellnessProfile | null>(null);
+  const [activeTab, setActiveTab] = useState<"users" | "themes">("users");
   
   const navigate = useNavigate();
 
@@ -88,17 +90,36 @@ export default function Admin() {
   return (
     <div className="flex flex-col md:flex-row bg-[#FAFAFA] min-h-[100dvh]">
       <div className="w-full md:w-80 bg-white border-r border-slate-100 flex flex-col shadow-sm z-10 shrink-0">
-        <div className="p-6 border-b border-slate-100 bg-[#F4F0F8]/50 flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-light text-slate-800">Mumtaz's Desk</h2>
-            <p className="text-sm text-slate-500 mt-1">Reviewing your community</p>
+        <div className="p-6 border-b border-slate-100 bg-[#F4F0F8]/50 flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-light text-slate-800">Mumtaz's Desk</h2>
+              <p className="text-sm text-slate-500 mt-1">Admin Dashboard</p>
+            </div>
+            <button onClick={() => navigate('/')} className="p-2 border border-slate-200 rounded-full hover:bg-slate-50">
+              <ArrowLeft className="w-4 h-4 text-slate-500" />
+            </button>
           </div>
-          <button onClick={() => navigate('/')} className="p-2 border border-slate-200 rounded-full hover:bg-slate-50">
-            <ArrowLeft className="w-4 h-4 text-slate-500" />
-          </button>
+          
+          <div className="flex bg-white rounded-lg p-1 border border-slate-200 shadow-sm">
+            <button 
+              onClick={() => setActiveTab("users")}
+              className={`flex-1 flex justify-center items-center gap-2 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'users' ? 'bg-[#7A9684] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              <Users className="w-4 h-4" /> Users
+            </button>
+            <button 
+              onClick={() => setActiveTab("themes")}
+              className={`flex-1 flex justify-center items-center gap-2 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === 'themes' ? 'bg-[#7A9684] text-white shadow' : 'text-slate-600 hover:text-slate-900'}`}
+            >
+              <CalendarDays className="w-4 h-4" /> Themes
+            </button>
+          </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {profiles.map(profile => {
+        
+        {activeTab === "users" && (
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {activeTab === "users" && profiles.map(profile => {
              const isSelected = selectedUserId === profile.user_id;
              return (
               <div 
@@ -119,7 +140,11 @@ export default function Admin() {
         </div>
       </div>
 
-      {selectedProfile ? (
+      {activeTab === "themes" ? (
+        <div className="flex-1 flex flex-col bg-[#FAFAFA] overflow-hidden">
+          <AdminThemesManager />
+        </div>
+      ) : selectedProfile ? (
         <div className="flex-1 flex flex-col bg-white">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
             <div className="flex items-center gap-4">

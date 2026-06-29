@@ -22,6 +22,7 @@ import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import JournalHistory from "./pages/JournalHistory";
 
 // All other pages are lazy-loaded — downloaded only when the user navigates there.
 // This keeps the initial app load fast.

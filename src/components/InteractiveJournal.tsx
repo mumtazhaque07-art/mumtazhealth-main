@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { BookOpen, Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InteractiveJournalProps {
   contentTitle: string;
@@ -22,13 +23,31 @@ export const InteractiveJournal: React.FC<InteractiveJournalProps> = ({ contentT
     }
     
     setIsSubmitting(true);
-    // Simulate saving to backend - in reality this would go to a user_journal_entries table
-    setTimeout(() => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("You must be logged in to save journal entries.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error } = await supabase.from('user_journal_entries' as any).insert({
+        user_id: user.id,
+        content_title: contentTitle,
+        reflection: reflection
+      });
+
+      if (error) throw error;
+
       toast.success("Your reflection has been logged securely in your private journal.");
       setReflection('');
-      setIsSubmitting(false);
       onClose();
-    }, 800);
+    } catch (error) {
+      console.error("Error saving journal entry:", error);
+      toast.error("Could not save your journal entry. Make sure you have run the database migrations.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
