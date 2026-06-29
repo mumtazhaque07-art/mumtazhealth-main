@@ -39,6 +39,14 @@ export default function Admin() {
   }, [navigate]);
 
   const checkAdminRole = async (user: User) => {
+    // Hardcoded admin emails for immediate access without DB configuration
+    const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com'];
+    if (user.email && ADMIN_EMAILS.includes(user.email)) {
+      setIsAdmin(true);
+      loadProfiles();
+      return;
+    }
+
     const { data } = await supabase
       .from('user_roles')
       .select('role')
