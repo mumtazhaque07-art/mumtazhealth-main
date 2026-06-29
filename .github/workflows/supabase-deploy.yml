@@ -37,3 +37,6 @@ jobs:
 
       - name: Deploy stripe-webhook
         run: supabase functions deploy stripe-webhook --project-ref $SUPABASE_PROJECT_ID
+
+      - name: Deploy analyze-wellness-insights
+        run: supabase functions deploy analyze-wellness-insights --project-ref $SUPABASE_PROJECT_ID
