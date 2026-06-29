@@ -1,283 +1,206 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navigation } from "@/components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Heart, MessageCircle, Sparkles, UserCircle, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Star, Quote, Heart } from "lucide-react";
 
-interface CommunityPost {
-  id: string;
-  user_id: string;
-  content: string;
-  theme: string;
-  created_at: string;
-  approved: boolean;
-  user_name?: string;
-  support_count?: number;
-}
-
-const THEMES = [
-  "Cycle Health",
-  "Fertility Journey",
-  "Pregnancy & Postpartum",
-  "Perimenopause Support",
-  "Menopause Liberation",
-  "Ayurvedic Wisdom",
-  "General Support"
+// You can easily add or edit your Google Reviews right here!
+const GOOGLE_REVIEWS = [
+  {
+    id: 1,
+    name: "Benjamin Crowley",
+    date: "48 weeks ago",
+    rating: 5,
+    text: "I honestly can't recommend Mumtaz enough. I first attended one of her sessions five years ago when she introduced me to Nidra Yoga, and it had such a powerful impact on me. It helped me slow down, reset, and gave me the calm I didn't even realise I needed... She brings something truly special to her yoga – it's not just movement, it's care, connection, and healing. Thank you, Mumtaz!",
+    source: "Google Reviews"
+  },
+  {
+    id: 2,
+    name: "Kate Smith",
+    date: "2 Oct 2023",
+    rating: 5,
+    text: "I completed the yoga teacher training with Mumtaz last year. I have now embarked on the 300hour continued advanced learning with Mumtaz because she is so knowledgeable, so passionate and as a teacher, she really shares that with you. No stone is left unturned, you really do explore the meaning of yoga in true depth. And also with love.",
+    source: "Google Reviews"
+  },
+  {
+    id: 3,
+    name: "Aneela Asim",
+    date: "2 Oct 2023",
+    rating: 5,
+    text: "Mumtaz has been a life saver for me with her healing hands and the ultimate experience of care from her one to one session to the group yoga classes 5 star review doesn't do her justice.",
+    source: "Google Reviews"
+  },
+  {
+    id: 4,
+    name: "Shoana Qureshi-khan",
+    date: "11 Oct 2024",
+    rating: 5,
+    text: "Mumtaz Yoga spent a rejuvenating morning with therapists and staff at Nottingham Counselling Services, focusing on self-care in the field of giving. The session was invigorating, healing, and wonderfully supportive, offering much-needed relaxation. We can't wait to have you back again for another inspiring experience!",
+    source: "Google Reviews"
+  },
+  {
+    id: 5,
+    name: "Austin Mepham",
+    date: "22 weeks ago",
+    rating: 5,
+    text: "Mumtaz selflessly shared the abundance of her knowledge, experience and love for yoga in a form of Power yoga module, yesterday and today, with an attention to detail and fun that can rarely be matched. We had fun and learned a lot, as we were deeply immersed in a 2 day programme, equipped to take our new knowledge and experience to our own students! Big thank you to Mumtaz and her family.",
+    source: "Google Reviews"
+  },
+  {
+    id: 6,
+    name: "Roshni",
+    date: "8 weeks ago",
+    rating: 5,
+    text: "I wanted to complete my yoga teacher training for years but never found the right fit. Until I found Mumtaz. From the very beginning, there was a balance of in-depth learning alongside supportive and welcoming environment. What stood out most was the sense of community and authenticity throughout the training. It wasn't just about gaining a certificate; it was about personal growth, connection, and transformation.",
+    source: "Google Reviews"
+  },
+  {
+    id: 7,
+    name: "Christina Ihenacho",
+    date: "7 weeks ago",
+    rating: 5,
+    text: "The past year has been the most rewarding learning experience with Mumtaz. Learning from her years of knowledge has been a privilege. I couldn't have asked for a better teacher or a more perfect course. The pace of the course and the topic of each module has kept me curious and excited for the next session. I'm going to miss weekends of giggling, yoga, yummy food and learning with my fellow yogis.",
+    source: "Google Reviews"
+  },
+  {
+    id: 8,
+    name: "Aggie",
+    date: "6 weeks ago",
+    rating: 5,
+    text: "I don't think any words can do justice to yoga classes, workshops and trainings run by Mumtaz. She's a real specialist in what she does, from explaining anatomy of different postures, through going into deeper knowledge/science of asanas and connecting them to particular needs and emotions. Classes are beautifully designed making yogis feeling grounded calmier and happier during and after sessions.",
+    source: "Google Reviews"
+  },
+  {
+    id: 9,
+    name: "Eleanor Rowley",
+    date: "4 weeks ago",
+    rating: 5,
+    text: "I absolutely loved Mumtaz's inversion workshop. Her approach made inversions feel accessible, regardless of experience level, while also helping us build the strength, confidence, and technique needed to progress safely. What stood out most was her personalised teaching style. Mumtaz took the time to work with each individual, meeting us where we were and offering guidance that felt supportive.",
+    source: "Google Reviews"
+  },
+  {
+    id: 10,
+    name: "Tamsin Johnson",
+    date: "26 Sept 2023",
+    rating: 5,
+    text: "Mumtaz's yoga offerings are truly unique, as is she! I completed my 200hr training with her and it was one of best decisions I've ever made - it really did transform my life. Mumtaz's teachings are a beautiful journey of self discovery - she exudes love, knowledge and strength. I cannot recommend her highly enough! Xxx",
+    source: "Google Reviews"
+  },
+  {
+    id: 11,
+    name: "Debbie Dunlop",
+    date: "26 Sept 2023",
+    rating: 5,
+    text: "As a late bloomer yogi, I started a couple of years ago at Mumtaz's yoga classes. Debbie you are so inspirational.. I love your energy and commitment no matter what challenges you face you always make the effort to show up. It's an absolute honour to have students like you .. Yoga is for everyone no matter what your background.",
+    source: "Google Reviews"
+  },
+  {
+    id: 12,
+    name: "Malgorzata Szczygiel",
+    date: "19 Mar 2024",
+    rating: 5,
+    text: "I start my YTT with Mumtaz Yoga January 2024. Just gone 2 month and I'm able to teach 1:1 at my home. Don't know what she did to me but massive thank you to this amazing women. She is the best yoga teacher that I could dream for 😍",
+    source: "Google Reviews"
+  },
+  {
+    id: 13,
+    name: "L Caroline",
+    date: "15 Nov 2023",
+    rating: 5,
+    text: "Fabulous so relaxing and informative can definitely recommend for the yoga journey. Thank you Mumtaz x",
+    source: "Google Reviews"
+  },
+  {
+    id: 14,
+    name: "Seyna Drame",
+    date: "29 Apr 2024",
+    rating: 5,
+    text: "Just finished the yoga power module with Mumtaz and as one of her graduate, I has a great week-end, it was fun and increased my knowledge. Mumtaz is a great mentor and I strongly recommend her school of yoga <3",
+    source: "Google Reviews"
+  },
+  {
+    id: 15,
+    name: "Sophie",
+    date: "14 May 2024",
+    rating: 5,
+    text: "Had such a fantastic experience doing Mumtaz's hands-on adjustment module. After doing my 200 YTT with Mumtaz, she was always going to be the place first I looked to for extra modules to top up my knowledge. I came away from the training feeling so confident with the subject matter and I now know how to adjust safely and with intent. Highly recommend Mumtaz for all your yoga training needs.",
+    source: "Google Reviews"
+  },
+  {
+    id: 16,
+    name: "Be YOU Wellbeing Energy Sound Mind",
+    date: "14 Jun 2024",
+    rating: 5,
+    text: "Doing my yoga teacher training has always been something I wanted to do but I didn't just want to do it with anyone for the sake of a certificate, I wanted an experience, self discovery & a life changing journey! So after searching & feeling like it was never going to happen for me, I crossed paths with Mumtaz & my dreams have come true! Everything I wanted my YTT to be is with Mumtaz plus much, much MORE! The way she teaches is incredible, you are learning SO much yet it's an absolute pleasure not a chore & her authenticity, love & ethos in everything she delivers is unreal! I'll be forever grateful for having this experience & journey because of you! If you're thinking of embarking on this magical yoga journey then I wouldn't go anywhere else!!!",
+    source: "Google Reviews"
+  }
 ];
 
 const SisterhoodSanctuary = () => {
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
-  const [newPostContent, setNewPostContent] = useState("");
-  const [newPostTheme, setNewPostTheme] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [supportedPosts, setSupportedPosts] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-  }, []);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const fetchPosts = async () => {
-    setLoading(true);
-    // In a real implementation, we would join with profiles to get the user's name.
-    // For now, we mock some posts if empty, or fetch from community_posts if available.
-    
-    const { data, error } = await supabase
-      .from('community_posts')
-      .select('*')
-      .eq('approved', true)
-      .order('created_at', { ascending: false });
-
-    if (!error && data && data.length > 0) {
-      setPosts(data as CommunityPost[]);
-    } else {
-      // Mock data for immediate visual feedback
-      setPosts([
-        {
-          id: '1',
-          user_id: 'mock1',
-          user_name: 'Aisha T.',
-          content: 'Just finished the Monthly Grounding practice for Perimenopause. I cannot explain how much the Yin postures helped calm my Vata anxiety today. Sending love to anyone else feeling overwhelmed this week.',
-          theme: 'Perimenopause Support',
-          created_at: new Date(Date.now() - 3600000).toISOString(),
-          approved: true,
-          support_count: 12
-        },
-        {
-          id: '2',
-          user_id: 'mock2',
-          user_name: 'Sarah M.',
-          content: 'Does anyone have tips for managing Pitta heat flashes at night? The cooling chutney recipe was great, but looking for more bedtime rituals.',
-          theme: 'Menopause Liberation',
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          approved: true,
-          support_count: 8
-        },
-        {
-          id: '3',
-          user_id: 'mock3',
-          user_name: 'Fatima R.',
-          content: 'The postpartum bone broth recipe literally gave me my life back today. Remember to be gentle with yourselves, mamas.',
-          theme: 'Pregnancy & Postpartum',
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          approved: true,
-          support_count: 24
-        }
-      ]);
-    }
-    setLoading(false);
-  };
-
-  const handleCreatePost = async () => {
-    if (!user) {
-      toast.error("Please log in to share in the sanctuary.");
-      return;
-    }
-    if (!newPostContent.trim() || !newPostTheme) {
-      toast.error("Please add a message and select a theme.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    // Attempt to insert into real table. If it fails, fallback to local state for demo.
-    const { error } = await supabase.from('community_posts').insert({
-      user_id: user.id,
-      content: newPostContent,
-      theme: newPostTheme,
-      approved: true // Auto-approve for now based on previous discussion
-    });
-
-    if (error) {
-      // Mock insert for immediate demo feedback
-      const newPost: CommunityPost = {
-        id: Math.random().toString(),
-        user_id: user.id,
-        user_name: 'You',
-        content: newPostContent,
-        theme: newPostTheme,
-        created_at: new Date().toISOString(),
-        approved: true,
-        support_count: 0
-      };
-      setPosts([newPost, ...posts]);
-    } else {
-      fetchPosts();
-    }
-
-    toast.success("Your message has been shared with the sisterhood!");
-    setNewPostContent("");
-    setNewPostTheme("");
-    setIsDialogOpen(false);
-    setIsSubmitting(false);
-  };
-
-  const handleSupport = (postId: string) => {
-    if (supportedPosts.has(postId)) return;
-    
-    const newSupported = new Set(supportedPosts);
-    newSupported.add(postId);
-    setSupportedPosts(newSupported);
-    
-    setPosts(posts.map(p => {
-      if (p.id === postId) {
-        return { ...p, support_count: (p.support_count || 0) + 1 };
-      }
-      return p;
-    }));
-    
-    toast.success("Support sent!");
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    
-    if (diff < 86400000) { // Less than 24 hours
-      const hours = Math.floor(diff / 3600000);
-      if (hours === 0) return 'Just now';
-      return `${hours}h ago`;
-    }
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
   return (
     <div className="min-h-screen bg-wellness-sand/30 pb-20">
       <Navigation />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         {/* Header Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex bg-wellness-sage/10 p-4 rounded-full mb-4">
-            <Users className="h-8 w-8 text-wellness-sage" />
+        <div className="text-center mb-16">
+          <div className="inline-flex bg-white p-4 rounded-full mb-6 shadow-sm border border-wellness-sage/20">
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
+            <Star className="h-8 w-8 text-yellow-400 fill-yellow-400" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 font-serif">
-            The Sisterhood Sanctuary
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 font-serif">
+            Success Stories
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            A safe, sacred space to share your journey, ask questions, and support other women walking the same path.
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Real experiences from women who have transformed their cycles, fertility, and menopausal journeys with Mumtaz Health.
           </p>
         </div>
 
-        {/* Create Post Button */}
-        <div className="flex justify-center mb-10">
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-105">
-                <Sparkles className="mr-2 h-5 w-5" /> Share Your Journey
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] border-wellness-sage/30">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-serif text-gray-900">Share with the Sisterhood</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <Select value={newPostTheme} onValueChange={setNewPostTheme}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a Theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {THEMES.map(theme => (
-                      <SelectItem key={theme} value={theme}>{theme}</SelectItem>
+        {/* Reviews Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {GOOGLE_REVIEWS.map((review) => (
+            <Card key={review.id} className="border-none shadow-md hover:shadow-lg transition-shadow bg-white overflow-hidden relative group">
+              <div className="absolute top-0 left-0 w-1 h-full bg-wellness-sage opacity-50" />
+              <CardContent className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex flex-col">
+                    <span className="font-serif text-xl text-gray-900 font-bold">{review.name}</span>
+                    <span className="text-sm text-gray-500 mt-1">{review.date}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
                     ))}
-                  </SelectContent>
-                </Select>
-                <Textarea
-                  placeholder="What's on your heart today?"
-                  className="min-h-[150px] resize-none"
-                  value={newPostContent}
-                  onChange={(e) => setNewPostContent(e.target.value)}
-                />
-                <Button 
-                  onClick={handleCreatePost} 
-                  disabled={isSubmitting}
-                  className="w-full bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full"
-                >
-                  {isSubmitting ? "Sharing..." : "Post to Sanctuary"}
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+                  </div>
+                </div>
+                
+                <div className="relative">
+                  <Quote className="absolute -top-3 -left-3 w-8 h-8 text-wellness-sage/20 rotate-180" />
+                  <p className="text-gray-700 leading-relaxed relative z-10 pl-6 italic">
+                    "{review.text}"
+                  </p>
+                </div>
+                
+                <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                  <Heart className="w-3 h-3 text-wellness-plum" />
+                  Verified Google Review
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        
+        {/* Footer CTA */}
+        <div className="mt-20 text-center bg-white p-10 rounded-3xl shadow-sm border border-wellness-sage/10">
+          <h3 className="text-2xl font-serif text-gray-900 mb-4">Ready to start your own healing journey?</h3>
+          <p className="text-gray-600 mb-8 max-w-lg mx-auto">Join hundreds of women discovering holistic relief and empowerment.</p>
+          <a href="/pricing" className="inline-block bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-4 font-medium transition-transform hover:scale-105">
+            View Membership Plans
+          </a>
         </div>
 
-        {/* Feed */}
-        <ScrollArea className="h-[600px] rounded-xl">
-          <div className="space-y-6">
-            {posts.map((post) => (
-              <Card key={post.id} className="border-wellness-sage/20 shadow-sm hover:shadow-md transition-shadow bg-white overflow-hidden">
-                <div className="h-1.5 w-full bg-gradient-to-r from-wellness-sand via-wellness-sage to-wellness-plum/30" />
-                <CardHeader className="pb-3 flex flex-row items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-wellness-sand/50 p-2 rounded-full">
-                      <UserCircle className="h-6 w-6 text-gray-500" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base font-semibold text-gray-900">
-                        {post.user_name || "A Sister"}
-                      </CardTitle>
-                      <p className="text-xs text-gray-500">{formatDate(post.created_at)}</p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="bg-wellness-sand/30 border-wellness-sage/30 text-wellness-sage">
-                    {post.theme}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="py-2">
-                  <p className="text-gray-700 leading-relaxed text-[15px]">
-                    {post.content}
-                  </p>
-                </CardContent>
-                <CardFooter className="pt-3 pb-4 border-t border-gray-50 mx-6 px-0 mt-4">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`text-gray-500 hover:text-wellness-plum hover:bg-wellness-plum/10 rounded-full px-4 ${supportedPosts.has(post.id) ? 'text-wellness-plum bg-wellness-plum/5' : ''}`}
-                    onClick={() => handleSupport(post.id)}
-                  >
-                    <Heart className={`h-4 w-4 mr-2 ${supportedPosts.has(post.id) ? 'fill-wellness-plum' : ''}`} /> 
-                    Send Love {(post.support_count || 0) > 0 && <span className="ml-1 font-semibold">({post.support_count})</span>}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
       </div>
     </div>
   );

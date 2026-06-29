@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { shifaRecipes } from "@/data/recipes";
 import { ThemeOfTheMonth } from "@/components/ThemeOfTheMonth";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { InteractiveJournal } from "@/components/InteractiveJournal";
 
 // Standardize Ayurvedic Terms
@@ -571,45 +572,55 @@ const ContentLibrary = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[80vh]">
           {selectedContent && (
-            <>
-              <DialogHeader>
+            <div className="bg-wellness-sand/10">
+              <DialogHeader className="px-6 pt-6 pb-2 border-b bg-white/50 backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <DialogTitle className="flex items-center gap-2 flex-1">
-                    <span className="line-clamp-1">{selectedContent.title}</span>
+                  <DialogTitle className="flex items-center gap-2 flex-1 text-2xl font-serif text-gray-900">
+                    <span className="line-clamp-2">{selectedContent.title}</span>
                   </DialogTitle>
                 </div>
-                <DialogDescription>
+                <DialogDescription className="text-base text-gray-600 mt-2 font-medium">
                   {selectedContent.description}
                 </DialogDescription>
               </DialogHeader>
-              <ScrollArea className="max-h-[50vh]">
-                <div className="space-y-4 pt-4">
-                  <PoseImageSequence
-                    contentId={selectedContent.id}
-                    videoUrl={selectedContent.video_url}
-                    isPremiumUser={userTier === 'premium'}
-                    isPremiumContent={selectedContent.tier_requirement === 'premium'}
-                  />
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-lg mb-3 pb-2 border-b">The Practice</h3>
-                    <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {selectedContent.detailed_guidance || "Please follow along with the video/audio."}
+              <ScrollArea className="max-h-[70vh] px-6">
+                <div className="space-y-6 pt-6 pb-12">
+                  
+                  {/* Hero Audio/Video Area */}
+                  <div className="bg-white rounded-2xl shadow-sm border border-wellness-sage/20 overflow-hidden mb-6">
+                    <PoseImageSequence
+                      contentId={selectedContent.id}
+                      videoUrl={selectedContent.video_url}
+                      isPremiumUser={userTier === 'premium'}
+                      isPremiumContent={selectedContent.tier_requirement === 'premium'}
+                    />
+                  </div>
+
+                  {/* The Intention & Practice Sections parsed nicely */}
+                  <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="prose prose-wellness max-w-none">
+                      <MarkdownRenderer content={selectedContent.detailed_guidance || "Please follow along with the video/audio."} />
                     </div>
                   </div>
                   
-                  <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col items-center justify-center text-center">
-                    <h4 className="font-serif text-xl text-gray-900 mb-2">How did this practice feel?</h4>
-                    <p className="text-sm text-gray-500 mb-4 max-w-md">Your journey is unique. Take a moment to log your reflections and track your healing over time.</p>
+                  <div className="mt-8 pt-8 border-t border-gray-200 flex flex-col items-center justify-center text-center bg-wellness-sage/5 rounded-3xl p-8">
+                    <div className="bg-white p-3 rounded-full shadow-sm mb-4">
+                      <BookOpen className="w-8 h-8 text-wellness-sage" />
+                    </div>
+                    <h4 className="font-serif text-2xl text-gray-900 mb-3">How did this practice feel?</h4>
+                    <p className="text-base text-gray-600 mb-6 max-w-md leading-relaxed">
+                      Your journey is entirely unique. Take a moment to pause, log your reflections, and track your healing over time.
+                    </p>
                     <Button 
                       onClick={() => setIsJournalOpen(true)}
-                      className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-8 py-6 text-lg shadow-md"
+                      className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
                     >
-                      <BookOpen className="w-5 h-5 mr-2" /> Log My Journey
+                      Log My Journey
                     </Button>
                   </div>
                 </div>
               </ScrollArea>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
