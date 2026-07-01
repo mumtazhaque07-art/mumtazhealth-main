@@ -18,20 +18,7 @@ import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { InteractiveJournal } from "@/components/InteractiveJournal";
 
 // Standardize Ayurvedic Terms
-const formatAyurvedic = (text?: string) => {
-  if (!text) return '';
-  const terms = ['dosha', 'vata', 'pitta', 'kapha', 'pranayama', 'yoga', 'ayurveda', 'ayurvedic'];
-  let formatted = text;
-  terms.forEach(term => {
-    const regex = new RegExp(`\\b${term}\\b`, 'gi');
-    formatted = formatted.replace(regex, (match) => {
-      // Don't modify if it's already properly capitalized
-      if (match.charAt(0) === match.charAt(0).toUpperCase()) return match;
-      return match.charAt(0).toUpperCase() + match.slice(1);
-    });
-  });
-  return formatted;
-};
+// moving formatAyurvedic below imports
 
 import yogaImage from "@/assets/wellness-yoga.jpg";
 import { HerbalGate, containsHerbalContent } from "@/components/HerbalGate";
@@ -118,6 +105,21 @@ import { NutritionPhilosophyCard } from "@/components/NutritionPhilosophyCard";
 import { YogaPhilosophyCard } from "@/components/YogaPhilosophyCard";
 import { SpiritualPhilosophyCard } from "@/components/SpiritualPhilosophyCard";
 
+// Standardize Ayurvedic Terms
+const formatAyurvedic = (text?: string) => {
+  if (!text) return '';
+  const terms = ['dosha', 'vata', 'pitta', 'kapha', 'pranayama', 'yoga', 'ayurveda', 'ayurvedic'];
+  let formatted = text;
+  terms.forEach(term => {
+    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+    formatted = formatted.replace(regex, (match) => {
+      // Don't modify if it's already properly capitalized
+      if (match.charAt(0) === match.charAt(0).toUpperCase()) return match;
+      return match.charAt(0).toUpperCase() + match.slice(1);
+    });
+  });
+  return formatted;
+};
 interface WellnessContent {
   id: string;
   title: string;
