@@ -18,7 +18,7 @@ const corsHeaders = {
 const ADMIN_EMAIL = Deno.env.get("ADMIN_EMAIL") || "mumtazhaque07@gmail.com";
 
 interface BookingEmailRequest {
-  type: "confirmed" | "cancelled" | "admin_notification";
+  type: "confirmed" | "cancelled" | "admin_notification" | "created" | "waitlist";
   bookingId: string;
   userEmail?: string;
   userName?: string;
@@ -84,7 +84,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate required fields
     const { type, bookingId } = body;
     
-    if (!type || !['confirmed', 'cancelled', 'admin_notification'].includes(type)) {
+    if (!type || !['confirmed', 'cancelled', 'admin_notification', 'created', 'waitlist'].includes(type)) {
       return new Response(
         JSON.stringify({ error: 'Invalid email type' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -172,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
       subject = `Booking Cancelled: ${serviceTitle}`;
       to = userEmail;
-    } else if (type === "admin_notification") {
+    } else if (type === "admin_notification" || type === "created" || type === "waitlist") {
       html = await renderAsync(
         React.createElement(AdminNotificationEmail, {
           userName,
@@ -187,7 +187,9 @@ const handler = async (req: Request): Promise<Response> => {
           bookingId,
         })
       );
-      subject = `New Booking Request: ${serviceTitle}`;
+      subject = type === "waitlist" 
+        ? `New Waitlist Join: ${serviceTitle}` 
+        : `New Booking Request: ${serviceTitle}`;
       to = ADMIN_EMAIL;
     } else {
       throw new Error("Invalid email type");

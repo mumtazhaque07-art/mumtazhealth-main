@@ -205,10 +205,29 @@ export default function Bookings() {
       .select()
       .single();
 
-    if (error) {
-      console.error('Error creating booking:', error);
-      toast.error('Failed to create booking');
-      return;
+    // Send email notification to Mumtaz
+    if (user) {
+      try {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('user_id', user.id)
+          .single();
+
+        await supabase.functions.invoke('send-booking-email', {
+          body: {
+            type: finalStatus === 'waitlisted' ? 'waitlist' : 'created',
+            bookingId: bookingData.id,
+            userEmail: user.email,
+            userName: profileData?.username || user.email?.split('@')[0] || 'User',
+            serviceTitle: selectedService.title,
+            bookingDate: finalStatus === 'waitlisted' ? 'Waitlist' : new Date(finalBookingDate).toLocaleString(),
+            notes: validatedData.notes || 'No notes provided.',
+          },
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+      }
     }
 
     if (finalStatus === 'waitlisted') {
@@ -655,7 +674,7 @@ export default function Bookings() {
 
         {/* Booking Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-md rounded-3xl overflow-hidden p-0 border-0 shadow-2xl">
+          <DialogContent className="max-w-md rounded-3xl overflow-hidden p-0 border-0 shadow-2xl flex flex-col max-h-[90vh]">
             <div className="bg-gradient-to-br from-wellness-sage to-wellness-sage/90 text-white p-8 pb-10">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-white mb-2">Reserve Your Space</DialogTitle>
@@ -664,7 +683,7 @@ export default function Bookings() {
                 </DialogDescription>
               </DialogHeader>
             </div>
-            <div className="space-y-4 p-8 -mt-6 bg-card rounded-t-3xl relative z-10">
+            <div className="space-y-4 p-8 -mt-6 bg-card rounded-t-3xl relative z-10 overflow-y-auto flex-1">
               <div className="bg-muted p-4 rounded-xl border border-border mb-2">
                 <p className="text-sm text-foreground leading-relaxed">
                   {selectedService?.category === 'workshop' 
