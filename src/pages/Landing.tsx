@@ -167,7 +167,7 @@ const Landing = () => {
       // who hasn't finished setting up their profile.
       const quickCheckInDone = localStorage.getItem('mumtaz_quick_checkin_completed') === 'true';
       if (!wellness?.onboarding_completed && !quickCheckInDone) {
-        navigate("/onboarding");
+        navigate("/ayurveda-101");
         return;
       }
     } catch (error) {
@@ -639,6 +639,27 @@ const Landing = () => {
               </div>
             </div>
           )}
+
+          {/* Ayurveda 101 Quick Link */}
+          <div className="max-w-3xl mx-auto cursor-pointer" onClick={() => navigate('/ayurveda-101')}>
+            <Card className="bg-gradient-to-r from-wellness-sand/30 to-wellness-sage/10 border-wellness-sage/20 shadow-sm hover:shadow-md transition-all hover:scale-[1.01] overflow-hidden relative">
+              <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-white/40 to-transparent pointer-events-none" />
+              <CardContent className="p-5 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-wellness-sage/20 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-wellness-sage-dark" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-foreground">Ayurveda 101 Guide</h3>
+                    <p className="text-sm text-muted-foreground">Discover your true nature and understand your Dosha.</p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="icon" className="text-wellness-sage-dark rounded-full bg-white/50 hover:bg-white">
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* The Unified "Today" Action Block */}
           <div className="max-w-3xl mx-auto space-y-6" data-tour="entry-cards">
