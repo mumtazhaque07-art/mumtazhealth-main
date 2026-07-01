@@ -1467,6 +1467,8 @@ export default function Tracker() {
           />
         )}
 
+        {user && <EvolutionLoopModal />}
+
         <AppCompanionDisclaimer variant="subtle" className="pt-8 pb-32 text-center" />
       </div>
 

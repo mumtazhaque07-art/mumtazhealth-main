@@ -188,6 +188,7 @@ const ContentLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
   const [activeDosha, setActiveDosha] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || searchParams.get('tag') || '');
   const [savedContentIds, setSavedContentIds] = useState<Set<string>>(new Set());
   
   // Dialog state
@@ -237,6 +238,11 @@ const ContentLibrary = () => {
         const found = libraryStages.find(s => s.id === stageParam);
         if (found) setActiveTab(stageParam);
       }
+    }
+    
+    const searchOrTagParam = searchParams.get('search') || searchParams.get('tag');
+    if (searchOrTagParam) {
+      setSearchQuery(searchOrTagParam);
     }
   }, [searchParams]);
 
@@ -322,6 +328,17 @@ const ContentLibrary = () => {
       filtered = filtered.filter(item => {
         const itemDoshas = Array.isArray(item.doshas) ? item.doshas : [];
         return itemDoshas.length === 0 || itemDoshas.includes(activeDosha);
+      });
+    }
+
+    if (searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(item => {
+        const itemTags = Array.isArray(item.tags) ? item.tags : [];
+        const inTitle = item.title.toLowerCase().includes(query);
+        const inDesc = item.description?.toLowerCase().includes(query);
+        const inTags = itemTags.some(t => t.toLowerCase().includes(query));
+        return inTitle || inDesc || inTags;
       });
     }
     
@@ -519,6 +536,24 @@ const ContentLibrary = () => {
                 </TabsTrigger>
               ))}
             </TabsList>
+            
+            <div className="relative mt-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search by keyword, dosha, or issue..." 
+                className="pl-9 w-full bg-white/50 backdrop-blur-sm border-wellness-sage/20 rounded-xl focus-visible:ring-wellness-sage"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Dosha Filter Toggle */}

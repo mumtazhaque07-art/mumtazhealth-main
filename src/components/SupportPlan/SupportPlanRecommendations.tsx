@@ -116,7 +116,9 @@ const getYogaRecommendations = (lifeStage: string, symptoms: string[]): Recommen
   }
   
   // Symptom-based additions
-  if (symptoms.includes('tired') || symptoms.includes('fatigue')) {
+  const symptomText = symptoms.join(' ').toLowerCase();
+  
+  if (symptomText.includes('tired') || symptomText.includes('fatigue')) {
     recommendations.push({ 
       id: 'energy-savasana', 
       title: 'Supported Savasana (Corpse Pose)', 
@@ -128,7 +130,7 @@ const getYogaRecommendations = (lifeStage: string, symptoms: string[]): Recommen
       modifications: "Use an eye pillow to block out light and place a blanket over yourself for warmth and grounding weight."
     });
   }
-  if (symptoms.includes('pain') || symptoms.includes('aches')) {
+  if (symptomText.includes('pain') || symptomText.includes('aches') || symptomText.includes('ache')) {
     recommendations.push({ 
       id: 'pain-supta-matsyendrasana', 
       title: 'Supta Matsyendrasana (Supine Twist)', 
@@ -146,9 +148,10 @@ const getYogaRecommendations = (lifeStage: string, symptoms: string[]): Recommen
 
 const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosha?: string): Recommendation[] => {
   const recommendations: Recommendation[] = [];
+  const symptomText = symptoms.join(' ').toLowerCase();
   
   // Dosha-based recommendations
-  if (dosha === 'vata' || symptoms.includes('anxious') || symptoms.includes('cold')) {
+  if (dosha === 'vata' || symptomText.includes('anxious') || symptomText.includes('cold') || symptomText.includes('worry')) {
     recommendations.push(
       { 
         id: 'vata-warm', title: 'Warm, Rooted Nourishment', 
@@ -168,7 +171,7 @@ const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosh
       },
     );
   }
-  if (dosha === 'pitta' || symptoms.includes('hot') || symptoms.includes('irritable')) {
+  if (dosha === 'pitta' || symptomText.includes('hot') || symptomText.includes('irritable') || symptomText.includes('angry')) {
     recommendations.push(
       { 
         id: 'pitta-cool', title: 'Cooling Hydration Bowl', 
@@ -180,7 +183,7 @@ const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosh
       },
     );
   }
-  if (dosha === 'kapha' || symptoms.includes('sluggish') || symptoms.includes('heavy')) {
+  if (dosha === 'kapha' || symptomText.includes('sluggish') || symptomText.includes('heavy') || symptomText.includes('lethargic')) {
     recommendations.push(
       { 
         id: 'kapha-light', title: 'Light & Spiced Broth', 
@@ -209,8 +212,9 @@ const getNutritionRecommendations = (lifeStage: string, symptoms: string[], dosh
 
 const getLifestyleRecommendations = (lifeStage: string, symptoms: string[]): Recommendation[] => {
   const recommendations: Recommendation[] = [];
+  const symptomText = symptoms.join(' ').toLowerCase();
   
-  if (symptoms.includes('tired') || symptoms.includes('insomnia')) {
+  if (symptomText.includes('tired') || symptomText.includes('insomnia') || symptomText.includes('sleep')) {
     recommendations.push({ 
       id: 'sleep-routine', title: 'Digital Sunset Ritual', 
       description: 'A gentle routine to prepare your body for rest.', duration: '15 min', tags: ['sleep', 'evening'],
@@ -220,9 +224,9 @@ const getLifestyleRecommendations = (lifeStage: string, symptoms: string[]): Rec
     });
   }
   
-  if (symptoms.includes('anxious') || symptoms.includes('stressed')) {
+  if (symptomText.includes('anxious') || symptomText.includes('stressed') || symptomText.includes('overwhelmed')) {
     recommendations.push({ 
-      id: 'stress-pause', title: 'The 3-Minute Vagus Nerve Reset', 
+      id: 'stress-pause', title: 'The 3-Minute Vagus Nerve Reset',  
       description: 'A brief reset to support your nervous system.', duration: '5 min', tags: ['stress', 'reset'],
       mumtaz_thought_process: "When overwhelmed, we unconsciously hold our breath. A long, audible sigh instantly reminds the body it is safe.",
       anatomical_benefit: "Extending the exhale physically stretches the vagus nerve, immediately slowing heart rate.",

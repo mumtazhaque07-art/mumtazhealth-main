@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, PlayCircle, BookOpen, Utensils, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface ThemeOfTheMonthProps {
   stageId: string;
@@ -12,6 +13,7 @@ interface ThemeOfTheMonthProps {
 export const ThemeOfTheMonth: React.FC<ThemeOfTheMonthProps> = ({ stageId }) => {
   const [theme, setTheme] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Fallback mock data in case the DB isn't migrated yet or no theme exists
   const getFallbackTheme = (stage: string) => {
@@ -131,7 +133,10 @@ export const ThemeOfTheMonth: React.FC<ThemeOfTheMonthProps> = ({ stageId }) => 
               </div>
             </div>
 
-            <Button className="w-full sm:w-fit bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-[1.02]">
+            <Button 
+              onClick={() => navigate('/content-library')} 
+              className="w-full sm:w-fit bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-[1.02]"
+            >
               Start This Month's Journey
             </Button>
           </div>
