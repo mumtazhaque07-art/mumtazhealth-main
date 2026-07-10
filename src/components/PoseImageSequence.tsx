@@ -92,10 +92,22 @@ export const PoseImageSequence = ({
             <span className="text-sm font-medium text-foreground">Full Guided Video</span>
             <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-xs">Premium</Badge>
           </div>
-          <video controls className="w-full rounded-2xl bg-black border border-muted/20 shadow-lg">
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+          
+          {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
+            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-muted/20 shadow-lg">
+              <iframe 
+                src={videoUrl.includes('watch?v=') ? videoUrl.replace('watch?v=', 'embed/') : videoUrl} 
+                className="absolute inset-0 w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <video controls className="w-full rounded-2xl bg-black border border-muted/20 shadow-lg">
+              <source src={videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          )}
         </div>
       )}
 
