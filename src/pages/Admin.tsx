@@ -142,8 +142,8 @@ export default function Admin() {
         
         {activeTab === "users" && (
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {activeTab === "users" && profiles.map(profile => {
-             const isSelected = selectedUserId === profile.user_id;
+            {profiles.map(profile => {
+              const isSelected = selectedUserId === profile.user_id;
              const userWellness = wellnessProfiles[profile.user_id];
              return (
               <div 
@@ -168,7 +168,8 @@ export default function Admin() {
               </div>
              );
           })}
-        </div>
+          </div>
+        )}
       </div>
 
       {activeTab === "themes" ? (
