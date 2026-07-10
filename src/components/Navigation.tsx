@@ -23,7 +23,10 @@ import {
   Sun,
   Users,
   BookMarked,
+  LogOut,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useLifeMap } from "@/contexts/LifeMapContext";
@@ -38,6 +41,17 @@ export function Navigation({ className }: NavigationProps) {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { islamicMode, setIslamicMode } = useLifeMap();
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/auth');
+      toast.success("Successfully signed out");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   const navItems = [
     { label: "Home", icon: Home, href: "/", description: "Your dashboard" },
@@ -114,6 +128,15 @@ export function Navigation({ className }: NavigationProps) {
             >
               <Settings className="h-4 w-4" />
             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleSignOut}
+              className="text-muted-foreground hover:text-red-600 hover:bg-red-50 ml-1"
+              title="Sign Out"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
           </div>
         )}
 
@@ -185,6 +208,16 @@ export function Navigation({ className }: NavigationProps) {
               >
                 <Settings className="h-5 w-5 text-muted-foreground" />
                 <span className="font-medium text-foreground">Settings</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  handleSignOut();
+                  setIsMenuOpen(false);
+                }}
+                className="flex items-center gap-3 py-3 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Sign Out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
