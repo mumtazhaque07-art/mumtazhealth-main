@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Heart, HelpCircle, Settings as SettingsIcon, Crown, LogOut, Moon } from "lucide-react";
+import { ArrowLeft, Heart, HelpCircle, Settings as SettingsIcon, Crown, LogOut, Moon, ShieldCheck } from "lucide-react";
 import { ProfilePhotoUpload } from "@/components/ProfilePhotoUpload";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { Navigation } from "@/components/Navigation";
@@ -27,6 +27,7 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [username, setUsername] = useState<string>("");
   const [isEditingJourney, setIsEditingJourney] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { islamicMode, setIslamicMode } = useLifeMap();
 
   useEffect(() => {
@@ -43,6 +44,11 @@ export default function Settings() {
         toast.error("Please log in first");
         navigate("/auth");
         return;
+      }
+
+      const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com', 'mumtazhaque07@gmail.com'];
+      if (user.email && ADMIN_EMAILS.includes(user.email)) {
+        setIsAdmin(true);
       }
 
       // Fetch wellness profile
@@ -156,6 +162,26 @@ export default function Settings() {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
+
+        {isAdmin && (
+          <Card className="mb-6 border-wellness-sage bg-wellness-sage/5 shadow-md">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-xl flex items-center gap-2 text-wellness-sage">
+                <ShieldCheck className="w-6 h-6" />
+                Admin Controls
+              </CardTitle>
+              <CardDescription>Manage monthly themes, user data, and app configurations.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full sm:w-auto bg-wellness-sage hover:bg-wellness-sage/90"
+                onClick={() => navigate('/admin')}
+              >
+                Go to Admin Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

@@ -134,7 +134,11 @@ export const ThemeOfTheMonth: React.FC<ThemeOfTheMonthProps> = ({ stageId }) => 
             </div>
 
             <Button 
-              onClick={() => navigate('/content-library')} 
+              onClick={() => {
+                // Navigate to search for the posture/recipe so the library filters, and scroll down
+                navigate(`/content-library?search=${encodeURIComponent(theme.posture.split('(')[0].trim())}`);
+                window.scrollTo({ top: 500, behavior: 'smooth' });
+              }} 
               className="w-full sm:w-fit bg-primary hover:bg-primary/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-[1.02]"
             >
               Start This Month's Journey

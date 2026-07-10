@@ -412,20 +412,29 @@ const ContentLibrary = () => {
   };
 
   const renderContentCard = (item: WellnessContent) => {
-    const isLocked = false; // Simplified for now, everything is visible
+    const isLocked = userTier === 'free' && (item.tier_requirement === 'standard' || item.tier_requirement === 'premium' || item.tier_requirement === 'vip');
+    
     return (
-      <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
-        <div className="h-40 overflow-hidden bg-muted relative">
+      <Card key={item.id} className={`overflow-hidden transition-shadow relative ${isLocked ? 'opacity-90' : 'hover:shadow-lg'}`}>
+        <div className="h-40 overflow-hidden bg-muted relative group">
           <img 
             src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
             alt={item.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${isLocked ? 'blur-[2px] grayscale-[30%]' : 'transition-transform duration-500 group-hover:scale-105'}`}
           />
+          {isLocked && (
+            <div className="absolute inset-0 bg-background/60 flex flex-col items-center justify-center backdrop-blur-[1px]">
+              <div className="bg-background/90 p-3 rounded-full mb-2 shadow-sm">
+                <Lock className="w-5 h-5 text-primary" />
+              </div>
+              <span className="text-xs font-semibold text-foreground px-3 py-1 bg-background/80 rounded-full">Premium Content</span>
+            </div>
+          )}
           <Badge className="absolute top-2 left-2 capitalize text-xs">
             {item.content_type}
           </Badge>
-          <Badge className="absolute top-2 right-2 bg-black/60 capitalize text-xs">
-            {item.tier_requirement === 'free' ? 'Foundational' : item.tier_requirement === 'standard' ? 'Premium' : 'VIP'}
+          <Badge className={`absolute top-2 right-2 capitalize text-xs ${item.tier_requirement === 'premium' ? 'bg-amber-500 hover:bg-amber-600 text-white' : item.tier_requirement === 'standard' ? 'bg-purple-500 hover:bg-purple-600 text-white' : 'bg-black/60 text-white'}`}>
+            {item.tier_requirement === 'free' ? 'Foundational' : item.tier_requirement === 'standard' ? 'Premium' : item.tier_requirement === 'premium' ? 'VIP' : 'Premium'}
           </Badge>
         </div>
         
@@ -447,11 +456,25 @@ const ContentLibrary = () => {
         
         <CardContent className="pt-0">
           <Button 
-            className="w-full" 
+            className={`w-full ${isLocked ? 'bg-muted text-muted-foreground hover:bg-muted' : ''}`}
+            variant={isLocked ? 'secondary' : 'default'}
             size="sm"
-            onClick={() => { setSelectedContent(item); setIsDialogOpen(true); }}
+            onClick={() => {
+              if (isLocked) {
+                toast("This content requires a premium subscription", {
+                  description: "Upgrade your membership to access this entire library.",
+                  action: {
+                    label: "Upgrade",
+                    onClick: () => navigate('/settings')
+                  }
+                });
+              } else {
+                setSelectedContent(item); 
+                setIsDialogOpen(true);
+              }
+            }}
           >
-            View Details
+            {isLocked ? 'Unlock Access' : 'View Details'}
           </Button>
         </CardContent>
       </Card>

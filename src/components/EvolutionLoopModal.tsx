@@ -32,7 +32,7 @@ export function EvolutionLoopModal() {
           .select("*")
           .eq("user_id", user.id)
           .gte("entry_date", yesterdayStr)
-          .is("feedback_rating", null) // Assuming we add a feedback_rating column or use a generic one
+          .is("support_rating", null)
           .in("action_taken", ["tried", "added_to_plan"])
           .limit(3); // Don't overwhelm them, max 3
 
@@ -68,18 +68,27 @@ export function EvolutionLoopModal() {
 
   const handleFeedback = async (rating: string, ratingText: string) => {
     try {
-      // Update the log with the feedback
-      const { error } = await supabase
-        .from("support_plan_logs")
-        .update({ 
-          action_taken: `reviewed_${rating}` // Hacky way to store rating if we don't have a dedicated column
-        })
-        .eq("id", currentPractice.id);
+      // Convert rating string to 1-5 support_rating integer
+      let ratingNum = 0;
+      if (rating === 'amazing') ratingNum = 5;
+      else if (rating === 'okay') ratingNum = 3;
+      else if (rating === 'didn_work') ratingNum = 1;
+      else if (rating === 'didnt_try') ratingNum = 0;
 
-      if (error) {
-        console.error("Failed to save feedback", error);
-      } else {
-        toast.success(`Feedback saved! We will adjust your future plans.`);
+      if (ratingNum > 0) {
+        // Update the log with the feedback
+        const { error } = await supabase
+          .from("support_plan_logs")
+          .update({ 
+            support_rating: ratingNum
+          })
+          .eq("id", currentPractice.id);
+
+        if (error) {
+          console.error("Failed to save feedback", error);
+        } else {
+          toast.success(`Feedback saved! We will adjust your future plans.`);
+        }
       }
     } catch (err) {
       console.error(err);

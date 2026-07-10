@@ -31,6 +31,7 @@ interface UserProfile {
   spiritualPreference?: string;
   isMenarcheJourney?: boolean;
   postpartumDeliveryType?: string;
+  subscriptionTier?: string;
 }
 
 interface Conversation {
@@ -174,7 +175,7 @@ export function MumtazWisdomGuide() {
 
       const { data: profile } = await supabase
         .from("profiles")
-        .select("username")
+        .select("username, subscription_tier")
         .eq("user_id", user.id)
         .single();
 
@@ -195,7 +196,14 @@ export function MumtazWisdomGuide() {
         spiritualPreference: wellnessProfile?.spiritual_preference || undefined,
         isMenarcheJourney: wellnessProfile?.is_menarche_journey || undefined,
         postpartumDeliveryType: wellnessProfile?.postpartum_delivery_type || undefined,
+        subscriptionTier: profile?.subscription_tier || 'free',
       });
+
+      // Also check if admin
+      const ADMIN_EMAILS = ['admin@holistic-wellness.com', 'mumtaz@mumtazhealth.com', 'mumtazhaque07@gmail.com'];
+      if (user.email && ADMIN_EMAILS.includes(user.email)) {
+        setUserProfile(prev => prev ? { ...prev, subscriptionTier: 'admin' } : null);
+      }
     } catch (error) {
       console.error("[CHATBOT_UI_ERROR] Error fetching profile:", error);
     }
@@ -338,6 +346,19 @@ export function MumtazWisdomGuide() {
         variant: "destructive",
       });
       return;
+    }
+
+    // Free tier 5-message limit check
+    if (userProfile?.subscriptionTier === 'free') {
+      const userMessageCount = messages.filter(m => m.role === 'user').length;
+      if (userMessageCount >= 5) {
+        toast({
+          title: "Trial Limit Reached",
+          description: "You have reached the 5-message limit for your free account. Please upgrade to continue chatting.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     const userMessage: Message = { role: "user", content: textToSend };
