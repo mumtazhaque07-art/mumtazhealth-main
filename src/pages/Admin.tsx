@@ -14,9 +14,11 @@ interface Profile {
 }
 
 interface WellnessProfile {
+  user_id?: string;
   life_stage: string;
   primary_dosha: string;
   primary_focus: string[];
+  subscription_tier?: string;
 }
 
 export default function Admin() {
@@ -24,6 +26,7 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [wellnessProfiles, setWellnessProfiles] = useState<Record<string, WellnessProfile>>({});
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedWellness, setSelectedWellness] = useState<WellnessProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "themes">("users");
@@ -65,14 +68,26 @@ export default function Admin() {
   };
 
   const loadProfiles = async () => {
-    const { data, error } = await supabase.from('profiles').select('*').order('username');
-    if (error) {
-      console.error('Error loading profiles:', error);
+    const { data: profilesData, error: profilesError } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    const { data: wellnessData, error: wellnessError } = await supabase.from('user_wellness_profiles').select('*');
+
+    if (profilesError) {
+      console.error('Error loading profiles:', profilesError);
       return;
     }
-    setProfiles(data || []);
-    if (data && data.length > 0) {
-      handleUserSelect(data[0].user_id);
+    
+    setProfiles(profilesData || []);
+    
+    const wellnessMap: Record<string, WellnessProfile> = {};
+    if (wellnessData) {
+      wellnessData.forEach(w => {
+        wellnessMap[w.user_id] = w;
+      });
+    }
+    setWellnessProfiles(wellnessMap);
+
+    if (profilesData && profilesData.length > 0) {
+      handleUserSelect(profilesData[0].user_id);
     } else {
       setLoading(false);
     }
@@ -129,6 +144,7 @@ export default function Admin() {
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {activeTab === "users" && profiles.map(profile => {
              const isSelected = selectedUserId === profile.user_id;
+             const userWellness = wellnessProfiles[profile.user_id];
              return (
               <div 
                 key={profile.user_id} 
@@ -138,7 +154,14 @@ export default function Admin() {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-medium text-slate-800 text-lg">{profile.username || "Anonymous User"}</h3>
-                    <p className="text-xs text-slate-500 font-medium mt-1">Member</p>
+                    <p className="text-xs text-slate-500 font-medium mt-1">
+                      {userWellness?.subscription_tier === 'premium' ? '👑 Premium' : userWellness?.subscription_tier === 'standard' ? '✨ Standard' : '🌱 Free User'}
+                    </p>
+                    {userWellness?.life_stage && (
+                      <span className="inline-block px-2 py-1 bg-slate-100 text-slate-600 text-[10px] uppercase tracking-wider rounded-md mt-2">
+                        {userWellness.life_stage.replace('_', ' ')}
+                      </span>
+                    )}
                   </div>
                   {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-[#7A9684] mt-1"></span>}
                 </div>
