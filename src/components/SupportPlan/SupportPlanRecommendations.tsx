@@ -398,18 +398,8 @@ export function SupportPlanRecommendations({
   );
 
   return (
-    <Card className="border-border bg-card">
-      <CardHeader className="text-center pb-2">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Sparkles className="w-5 h-5 text-foreground opacity-80" />
-          <CardTitle className="text-xl text-foreground">Your Support Plan</CardTitle>
-        </div>
-        <CardDescription className="text-sm leading-relaxed text-muted-foreground">
-          Based on how you're feeling today, here are some gentle suggestions. 
-          There's no pressure — explore what feels right for you.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardContent className="p-0">
         <Tabs defaultValue="yoga" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="yoga" className="text-xs sm:text-sm">
