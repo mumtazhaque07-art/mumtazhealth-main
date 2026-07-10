@@ -92,7 +92,7 @@ function CredibilityPanel() {
       </div>
 
       <div className="relative z-10 mb-8">
-        <div className="inline-flex items-center gap-3 bg-white/15 border border-white/25 rounded-2xl px-5 py-3.5 backdrop-blur-sm">
+        <a href="https://mumtazyoga.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 bg-white/15 border border-white/25 rounded-2xl px-5 py-3.5 backdrop-blur-sm hover:bg-white/20 hover:scale-105 transition-all cursor-pointer">
           <div className="flex-shrink-0 w-9 h-9 rounded-full bg-amber-400/25 border border-amber-400/40 flex items-center justify-center">
             <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
           </div>
@@ -100,7 +100,7 @@ function CredibilityPanel() {
             <p className="text-xs text-white/75 uppercase tracking-widest font-medium">As featured in</p>
             <p className="text-sm font-semibold text-white leading-tight">OM Yoga Magazine</p>
           </div>
-        </div>
+        </a>
       </div>
 
       <div className="relative z-10 flex-1 flex flex-col justify-center">
@@ -119,10 +119,10 @@ function CredibilityPanel() {
 
       <div className="relative z-10 mt-8 grid grid-cols-4 gap-2">
         {credentials.map((c) => (
-          <div key={c.label} className="bg-white/12 border border-white/25 rounded-xl p-3 text-center">
-            <p className="text-white font-bold text-sm leading-tight">{c.label}</p>
-            <p className="text-white/80 text-xs leading-tight mt-0.5">{c.sublabel}</p>
-          </div>
+          <a href="https://mumtazyoga.com" target="_blank" rel="noopener noreferrer" key={c.label} className="bg-white/12 border border-white/25 rounded-xl p-3 text-center hover:bg-white/20 transition-all cursor-pointer group block">
+            <p className="text-white font-bold text-sm leading-tight group-hover:text-amber-100 transition-colors">{c.label}</p>
+            <p className="text-white/80 text-xs leading-tight mt-0.5 group-hover:text-amber-100/80 transition-colors">{c.sublabel}</p>
+          </a>
         ))}
       </div>
     </div>
@@ -132,20 +132,20 @@ function CredibilityPanel() {
 function MobileCredibilityStrip() {
   return (
     <div className="lg:hidden w-full flex items-center justify-center gap-2 sm:gap-4 py-4 bg-white/40 backdrop-blur-md border-b border-mumtaz-plum/5 mb-6 -mt-8">
-      <div className="flex items-center gap-1.5">
+      <a href="https://mumtazyoga.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
         <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
         <span className="text-[10px] font-bold text-mumtaz-plum/80 uppercase tracking-tight">5-Star Rated</span>
-      </div>
+      </a>
       <div className="w-px h-3 bg-mumtaz-plum/10" />
-      <div className="flex items-center gap-1.5">
+      <a href="https://mumtazyoga.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
         <Shield className="w-3.5 h-3.5 text-wellness-sage" />
         <span className="text-[10px] font-bold text-mumtaz-plum/80 uppercase tracking-tight">Accredited</span>
-      </div>
+      </a>
       <div className="w-px h-3 bg-mumtaz-plum/10" />
-      <div className="flex items-center gap-1.5">
+      <a href="https://mumtazyoga.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:opacity-70 transition-opacity">
         <span className="text-[10px] text-mumtaz-plum/60 italic font-accent">Featured in</span>
         <span className="text-[10px] font-bold text-mumtaz-plum">OM Yoga</span>
-      </div>
+      </a>
     </div>
   );
 }
@@ -344,19 +344,6 @@ export default function Auth() {
     }
   };
 
-  const handleFaceIDSignIn = async () => {
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPasskey();
-      if (error) throw error;
-      toast.success("Signed in with Face/Touch ID!");
-      navigate(redirectTarget ? `/${redirectTarget}` : "/");
-    } catch (error: any) {
-      toast.error(error.message || "Face ID failed. Ensure Passkeys are setup and enabled.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleMagicLink = async () => {
     const emailError = validateField('email', email);
