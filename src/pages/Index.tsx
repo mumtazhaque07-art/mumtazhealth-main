@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play, ArrowRight } from "lucide-react";
+import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play, ArrowRight, Settings, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PERSONA_CONFIG } from "@/config/personas";
 import { ElementsGuideModal } from "@/components/ElementsGuideModal";
 import { useLifeMap } from "@/contexts/LifeMapContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { SanctuaryManifesto } from "@/components/SanctuaryManifesto";
 
 export default function Index() {
@@ -32,12 +33,31 @@ export default function Index() {
   const config = PERSONA_CONFIG[persona];
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.substring(1);
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/auth');
+      toast.success("Successfully signed out");
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   return (
     <div className="w-full h-[100dvh] flex flex-col bg-[#FDFBF7] relative overflow-hidden">
       
       <div className="flex-1 overflow-y-auto pb-24">
-        <header className="px-6 pt-12 pb-4">
-          <h1 className="text-3xl font-light tracking-tight text-[#1D1C1C]">Welcome {username}, <br/>to your sanctuary.</h1>
+        <header className="px-6 pt-12 pb-4 relative">
+          <div className="absolute top-12 right-6 flex items-center gap-3">
+             <button onClick={() => navigate('/settings')} className="text-slate-400 hover:text-slate-600 transition-colors bg-white/50 p-2 rounded-full backdrop-blur-sm border border-slate-100 shadow-sm" title="Settings">
+               <Settings className="w-5 h-5" />
+             </button>
+             <button onClick={handleSignOut} className="text-slate-400 hover:text-red-500 transition-colors bg-white/50 p-2 rounded-full backdrop-blur-sm border border-slate-100 shadow-sm" title="Sign Out">
+               <LogOut className="w-5 h-5" />
+             </button>
+          </div>
+          <h1 className="text-3xl font-light tracking-tight text-[#1D1C1C] pr-20">Welcome {username}, <br/>to your sanctuary.</h1>
           <p className="text-sm text-[#1D1C1C]/60 mt-2">A safe space with zero judgment.</p>
         </header>
 
