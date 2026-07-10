@@ -795,16 +795,18 @@ export default function Bookings() {
                 />
               </div>
 
+            {/* Sticky footer for buttons to ensure they are never cut off on mobile */}
+            <div className="p-6 bg-card border-t border-border mt-auto shrink-0 relative z-20">
               <Button 
                 onClick={executeBooking}
-                className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold mt-4"
+                className="w-full bg-wellness-sage hover:bg-wellness-sage/90 text-white h-12 rounded-xl shadow-lg shadow-wellness-sage/20 transition-all font-semibold"
               >
                 {selectedService?.category === 'workshop' && (!selectedService.upcoming_dates || selectedService.upcoming_dates.length === 0)
                   ? "Join Waitlist"
                   : "Send Request"}
               </Button>
               
-              <div className="pt-2">
+              <div className="pt-3">
                  <p className="text-xs text-center text-wellness-taupe/50">
                    You are not charged yet. Fees are discussed after schedule confirmation.
                  </p>
