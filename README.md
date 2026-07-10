@@ -1,16 +1,18 @@
-# Welcome to your Lovable project
+# Welcome to Mumtaz Health
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/29c6c6a8-1873-4d30-a5ad-ec10e2532225
+**Official URL**: https://mumtazhealth.app
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
+**Use an AI Assistant**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/29c6c6a8-1873-4d30-a5ad-ec10e2532225) and start prompting.
+Simply ask your AI assistant to make modifications to the codebase.
+
+Changes made will be automatically committed to this repo when pushed.
 
 Changes made via Lovable will be committed automatically to this repo.
 
