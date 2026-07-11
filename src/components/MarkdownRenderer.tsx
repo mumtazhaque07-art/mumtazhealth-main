@@ -27,7 +27,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
     
     if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
       currentList.push(
-        <li key={`li-${index}`} className="text-gray-700">
+        <li key={`li-${index}`} className="text-foreground">
           {parseInlineFormatting(trimmed.substring(2))}
         </li>
       );
@@ -39,19 +39,19 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
         renderedElements.push(<div key={`br-${index}`} className="h-2"></div>);
       } else if (trimmed.startsWith('### ')) {
         renderedElements.push(
-          <h3 key={`h3-${index}`} className="text-xl font-serif font-bold text-gray-900 mt-6 mb-3">
+          <h3 key={`h3-${index}`} className="text-xl font-serif font-bold text-foreground mt-6 mb-3">
             {parseInlineFormatting(trimmed.substring(4))}
           </h3>
         );
       } else if (trimmed.startsWith('#### ')) {
         renderedElements.push(
-          <h4 key={`h4-${index}`} className="text-lg font-medium text-gray-800 mt-4 mb-2">
+          <h4 key={`h4-${index}`} className="text-lg font-medium text-foreground mt-4 mb-2">
             {parseInlineFormatting(trimmed.substring(5))}
           </h4>
         );
       } else {
         renderedElements.push(
-          <p key={`p-${index}`} className="text-gray-700 leading-relaxed my-1">
+          <p key={`p-${index}`} className="text-foreground leading-relaxed my-1">
             {parseInlineFormatting(trimmed)}
           </p>
         );
@@ -70,22 +70,25 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) =
 
 // Helper function to parse bold and italic inline
 function parseInlineFormatting(text: string) {
-  // First extract bold **text**
-  const boldParts = text.split(/(\*\*.*?\*\*)/g);
+  // Use a combined regex to find bold, italic, and underline tokens
+  // This avoids the nested splitting issues.
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*|_.*?_)/g);
   
-  return boldParts.map((boldPart, i) => {
-    if (boldPart.startsWith('**') && boldPart.endsWith('**')) {
-      return <strong key={`b-${i}`} className="font-semibold text-gray-900">{boldPart.slice(2, -2)}</strong>;
+  return parts.map((part, i) => {
+    if (!part) return null;
+    
+    if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+      return <strong key={`b-${i}`} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+      return <em key={`i-${i}`} className="italic text-foreground">{part.slice(1, -1)}</em>;
+    }
+    if (part.startsWith('_') && part.endsWith('_') && part.length > 2) {
+      return <em key={`em-${i}`} className="italic text-foreground">{part.slice(1, -1)}</em>;
     }
     
-    // Then extract italic *text* but ensure it's not a bullet point collision
-    const italicParts = boldPart.split(/(\b_[^_]+_\b|\b\*[^*]+\*\b)/g);
-    
-    return italicParts.map((italicPart, j) => {
-      if ((italicPart.startsWith('*') && italicPart.endsWith('*')) || (italicPart.startsWith('_') && italicPart.endsWith('_'))) {
-        return <em key={`i-${i}-${j}`} className="italic text-gray-800">{italicPart.slice(1, -1)}</em>;
-      }
-      return <React.Fragment key={`t-${i}-${j}`}>{italicPart}</React.Fragment>;
-    });
+    // Replace literal escaped asterisks if any
+    const unescaped = part.replace(/\\\*/g, '*');
+    return <React.Fragment key={`t-${i}`}>{unescaped}</React.Fragment>;
   });
 }

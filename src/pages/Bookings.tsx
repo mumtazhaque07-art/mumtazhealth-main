@@ -699,13 +699,13 @@ export default function Bookings() {
                 <div className="grid grid-cols-1 gap-6">
                   <div>
                     <Label className="text-foreground text-sm font-semibold mb-3 block">Select Date</Label>
-                    <div className="border rounded-2xl bg-white flex justify-center p-2">
+                    <div className="border border-border rounded-2xl bg-card text-card-foreground flex justify-center p-2 shadow-sm">
                       <CalendarUI
                         mode="single"
                         selected={bookingDate}
                         onSelect={setBookingDate}
                         disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                        className="rounded-xl border-none shadow-none"
+                        className="rounded-xl border-none shadow-none text-card-foreground"
                       />
                     </div>
                   </div>

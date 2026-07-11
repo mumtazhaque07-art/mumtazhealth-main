@@ -520,10 +520,10 @@ const ContentLibrary = () => {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
         <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 font-serif">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 font-serif">
             The Content Library
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl">
+          <p className="text-lg text-muted-foreground max-w-2xl">
             A simplified, 7-stage holistic journey. Select your current life stage below.
           </p>
         </div>
@@ -633,13 +633,13 @@ const ContentLibrary = () => {
         <DialogContent className="max-w-3xl max-h-[80vh]">
           {selectedContent && (
             <div className="bg-wellness-sand/10">
-              <DialogHeader className="px-6 pt-6 pb-2 border-b bg-white/50 backdrop-blur-sm">
+              <DialogHeader className="px-6 pt-6 pb-2 border-b bg-background/50 backdrop-blur-sm">
                 <div className="flex items-center justify-between gap-2">
-                  <DialogTitle className="flex items-center gap-2 flex-1 text-2xl font-serif text-gray-900">
+                  <DialogTitle className="flex items-center gap-2 flex-1 text-2xl font-serif text-foreground">
                     <span className="line-clamp-2">{selectedContent.title}</span>
                   </DialogTitle>
                 </div>
-                <DialogDescription className="text-base text-gray-600 mt-2 font-medium">
+                <DialogDescription className="text-base text-muted-foreground mt-2 font-medium">
                   {selectedContent.description}
                 </DialogDescription>
               </DialogHeader>
@@ -657,18 +657,18 @@ const ContentLibrary = () => {
                   </div>
 
                   {/* The Intention & Practice Sections parsed nicely */}
-                  <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="prose prose-wellness max-w-none">
+                  <div className="bg-card text-card-foreground p-6 md:p-8 rounded-2xl shadow-sm border border-border">
+                    <div className="prose prose-wellness max-w-none dark:prose-invert">
                       <MarkdownRenderer content={selectedContent.detailed_guidance || "Please follow along with the video/audio."} />
                     </div>
                   </div>
                   
-                  <div className="mt-8 pt-8 border-t border-gray-200 flex flex-col items-center justify-center text-center bg-wellness-sage/5 rounded-3xl p-8">
-                    <div className="bg-white p-3 rounded-full shadow-sm mb-4">
+                  <div className="mt-8 pt-8 border-t border-border flex flex-col items-center justify-center text-center bg-wellness-sage/10 rounded-3xl p-8">
+                    <div className="bg-background p-3 rounded-full shadow-sm mb-4">
                       <BookOpen className="w-8 h-8 text-wellness-sage" />
                     </div>
-                    <h4 className="font-serif text-2xl text-gray-900 mb-3">How did this practice feel?</h4>
-                    <p className="text-base text-gray-600 mb-6 max-w-md leading-relaxed">
+                    <h4 className="font-serif text-2xl text-foreground mb-3">How did this practice feel?</h4>
+                    <p className="text-base text-muted-foreground mb-6 max-w-md leading-relaxed">
                       Your journey is entirely unique. Take a moment to pause, log your reflections, and track your healing over time.
                     </p>
                     <Button 
