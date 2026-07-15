@@ -38,12 +38,7 @@ export function UserInbox() {
       .maybeSingle();
       
     setIsPremium(profile?.subscription_tier === 'premium');
-    
-    if (profile?.subscription_tier === 'premium') {
-      loadMessages(user.id);
-    } else {
-      setLoading(false);
-    }
+    loadMessages(user.id);
   };
 
   const loadMessages = async (uid: string) => {
@@ -81,22 +76,8 @@ export function UserInbox() {
     return <div className="p-8 text-center text-slate-500">Loading inbox...</div>;
   }
 
-  if (isPremium === false) {
-    return (
-      <div className="bg-white rounded-3xl p-8 md:p-12 text-center border border-wellness-sage/20 shadow-sm">
-        <div className="bg-wellness-sage/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Lock className="w-8 h-8 text-wellness-sage" />
-        </div>
-        <h3 className="text-2xl font-serif text-gray-900 mb-4">Direct 1-on-1 Coaching</h3>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
-          Upgrade to a Premium Membership to unlock a private, direct inbox with Mumtaz. Receive personalized guidance, check-ins, and direct support for your healing journey.
-        </p>
-        <Button onClick={() => navigate('/pricing')} className="bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:-translate-y-1">
-          Upgrade to Premium
-        </Button>
-      </div>
-    );
-  }
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const isLockedOut = isPremium === false && userMessageCount >= 3;
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-wellness-sage/20 shadow-sm flex flex-col h-[600px]">
@@ -128,21 +109,36 @@ export function UserInbox() {
         )}
       </div>
 
-      <div className="p-4 bg-white border-t border-slate-100">
-        <div className="flex gap-3 max-w-4xl mx-auto">
-          <Input 
-            type="text" 
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder="Type your message to Mumtaz..." 
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-6 py-6 text-[15px] outline-none transition-all focus-visible:ring-1 focus-visible:ring-wellness-sage focus-visible:border-wellness-sage"
-          />
-          <Button onClick={sendMessage} disabled={!newMessage.trim()} className="bg-wellness-sage hover:bg-wellness-sage/90 text-white w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:-translate-y-1">
-            <Send className="w-5 h-5 ml-1" />
+      {isLockedOut ? (
+        <div className="p-8 bg-wellness-sage/5 border-t border-slate-100 text-center">
+          <div className="bg-white w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm border border-slate-100">
+            <Lock className="w-5 h-5 text-wellness-sage" />
+          </div>
+          <h4 className="font-serif text-lg text-gray-900 mb-2">Continue Your Journey</h4>
+          <p className="text-sm text-gray-600 mb-4 max-w-sm mx-auto">
+            You've reached your free trial limit of 3 direct messages. Upgrade to Premium for unlimited 1-on-1 coaching and personalized support.
+          </p>
+          <Button onClick={() => navigate('/pricing')} className="bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-6 shadow-sm transition-transform hover:scale-105">
+            Upgrade to Premium
           </Button>
         </div>
-      </div>
+      ) : (
+        <div className="p-4 bg-white border-t border-slate-100">
+          <div className="flex gap-3 max-w-4xl mx-auto">
+            <Input 
+              type="text" 
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder="Type your message to Mumtaz..." 
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-6 py-6 text-[15px] outline-none transition-all focus-visible:ring-1 focus-visible:ring-wellness-sage focus-visible:border-wellness-sage"
+            />
+            <Button onClick={sendMessage} disabled={!newMessage.trim()} className="bg-wellness-sage hover:bg-wellness-sage/90 text-white w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 shadow-md transition-all hover:-translate-y-1">
+              <Send className="w-5 h-5 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
