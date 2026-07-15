@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, PlayCircle, BookOpen, Utensils, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { getScheduledTheme } from "@/config/themeSchedule";
 
 interface ThemeOfTheMonthProps {
   stageId: string;
@@ -51,7 +52,18 @@ export const ThemeOfTheMonth: React.FC<ThemeOfTheMonthProps> = ({ stageId }) => 
     const fetchTheme = async () => {
       setLoading(true);
       try {
-        // Try to get a specific stage theme first
+        // 1. Try to get the hardcoded scheduled theme for the current month
+        const d = new Date();
+        const currentMonthYear = `${d.toLocaleString('default', { month: 'long' })} ${d.getFullYear()}`;
+        const scheduled = getScheduledTheme(currentMonthYear);
+        
+        if (scheduled) {
+          setTheme(scheduled);
+          setLoading(false);
+          return;
+        }
+
+        // 2. Try to get a specific stage theme from DB
         let { data, error } = await supabase
           .from("monthly_themes" as any)
           .select("*")
