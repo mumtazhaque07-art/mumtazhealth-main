@@ -651,7 +651,7 @@ const ContentLibrary = () => {
                   {selectedContent.description}
                 </DialogDescription>
               </DialogHeader>
-              <ScrollArea className="flex-1 px-6">
+              <div className="overflow-y-auto flex-1 px-6">
                 <div className="space-y-6 pt-6 pb-12">
                   
                   {/* Hero Audio/Video Area */}
@@ -687,7 +687,7 @@ const ContentLibrary = () => {
                     </Button>
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
             </div>
           )}
         </DialogContent>
