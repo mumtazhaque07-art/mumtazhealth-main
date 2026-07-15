@@ -16,6 +16,7 @@ import { shifaRecipes } from "@/data/recipes";
 import { ThemeOfTheMonth } from "@/components/ThemeOfTheMonth";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { InteractiveJournal } from "@/components/InteractiveJournal";
+import { builtInContent } from "@/config/builtInContent";
 
 // Standardize Ayurvedic Terms
 // moving formatAyurvedic below imports
@@ -267,14 +268,17 @@ const ContentLibrary = () => {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setContent(data.map(item => ({
+      const mappedData = data.map(item => ({
         ...item,
         doshas: item.doshas || [],
         benefits: item.benefits || [],
         cycle_phases: item.cycle_phases || [],
         pregnancy_statuses: item.pregnancy_statuses || [],
         tags: item.tags || []
-      })));
+      }));
+      setContent([...mappedData, ...builtInContent]);
+    } else {
+      setContent(builtInContent);
     }
     setLoading(false);
   };
