@@ -56,8 +56,9 @@ export function UserInbox() {
   const sendMessage = async () => {
     if (!newMessage.trim() || !userId) return;
     
+    const msgContent = newMessage.trim();
     const msg = {
-      content: newMessage.trim(),
+      content: msgContent,
       role: 'user',
       user_id: userId,
       conversation_id: 'direct_inbox'
@@ -67,6 +68,19 @@ export function UserInbox() {
     if (!error) {
       setMessages([...messages, { ...msg, id: Date.now().toString(), created_at: new Date().toISOString() } as any]);
       setNewMessage("");
+      
+      // Fire and forget email notification to Admin
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) {
+          supabase.functions.invoke('send-chat-notification', {
+            body: {
+              userName: data.user.user_metadata?.username || data.user.email?.split('@')[0] || 'Student',
+              userEmail: data.user.email,
+              messagePreview: msgContent
+            }
+          }).catch(err => console.error("Notification error:", err));
+        }
+      });
     } else {
       toast({ title: "Failed to send message", variant: "destructive" });
     }
