@@ -20,6 +20,9 @@ Sukhasana (Easy Pose) is the foundational posture for all grounding, centering, 
 * **With Back Issues:** Sit with your back fully supported against a wall.
 * **With Knee/Hip Issues:** Sit on a sturdy chair with feet hip-width apart on the floor. Maintain the navel lock and tall spine.
 
+**Timing & Universal Benefits:**
+This posture brings all three doshas (Vata, Pitta, and Kapha) into immediate equilibrium. You can practice this whenever you feel scattered or heavy. *If you don't have time for a full physical practice, you can do just five minutes of this in the morning to awaken your Agni, or five minutes in the evening to digest the day.*
+
 **The Intention:**
 Hold this posture for 3-5 minutes while practicing slow, deep breathing. Visualize a warm, golden fire in your center, digesting your food, your thoughts, and your experiences.
     `,

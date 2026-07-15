@@ -405,6 +405,10 @@ const ContentLibrary = () => {
     if (imageUrl) {
       const resolved = resolveImageUrl(imageUrl);
       if (resolved) return resolved;
+      // Pass through direct imports, base64, or external URLs
+      if (imageUrl.startsWith('/') || imageUrl.startsWith('http') || imageUrl.startsWith('data:')) {
+        return imageUrl;
+      }
     }
     // Simple fallback
     switch (type) {
@@ -634,10 +638,10 @@ const ContentLibrary = () => {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh]">
+        <DialogContent className="max-w-3xl max-h-[90vh] p-0 flex flex-col gap-0 overflow-hidden">
           {selectedContent && (
-            <div className="bg-wellness-sand/10">
-              <DialogHeader className="px-6 pt-6 pb-2 border-b bg-background/50 backdrop-blur-sm">
+            <div className="flex flex-col h-full bg-wellness-sand/10 overflow-hidden">
+              <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background/50 backdrop-blur-sm shrink-0">
                 <div className="flex items-center justify-between gap-2">
                   <DialogTitle className="flex items-center gap-2 flex-1 text-2xl font-serif text-foreground">
                     <span className="line-clamp-2">{selectedContent.title}</span>
@@ -647,7 +651,7 @@ const ContentLibrary = () => {
                   {selectedContent.description}
                 </DialogDescription>
               </DialogHeader>
-              <ScrollArea className="max-h-[70vh] px-6">
+              <ScrollArea className="flex-1 px-6">
                 <div className="space-y-6 pt-6 pb-12">
                   
                   {/* Hero Audio/Video Area */}
