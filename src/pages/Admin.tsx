@@ -21,6 +21,18 @@ interface WellnessProfile {
   subscription_tier?: string;
 }
 
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+}
+
+interface Checkin {
+  feeling_label: string;
+  created_at: string;
+}
+
 export default function Admin() {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -30,6 +42,10 @@ export default function Admin() {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedWellness, setSelectedWellness] = useState<WellnessProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "themes">("users");
+  
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [recentCheckin, setRecentCheckin] = useState<Checkin | null>(null);
   
   const navigate = useNavigate();
 
@@ -97,7 +113,44 @@ export default function Admin() {
     setSelectedUserId(userId);
     const { data } = await supabase.from('user_wellness_profiles').select('*').eq('user_id', userId).maybeSingle();
     setSelectedWellness(data);
+    
+    const { data: msgs } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('conversation_id', 'direct_inbox')
+      .order('created_at', { ascending: true });
+    setMessages(msgs || []);
+    
+    const { data: checkin } = await supabase
+      .from('quick_checkin_logs')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setRecentCheckin(checkin || null);
+    
     setLoading(false);
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedUserId) return;
+    
+    const msg = {
+      content: newMessage.trim(),
+      role: 'assistant',
+      user_id: selectedUserId,
+      conversation_id: 'direct_inbox'
+    };
+    
+    const { error } = await supabase.from('chat_messages').insert(msg);
+    if (!error) {
+      setMessages([...messages, { ...msg, id: Date.now().toString(), created_at: new Date().toISOString() } as any]);
+      setNewMessage("");
+    } else {
+      toast.error("Failed to send message");
+    }
   };
 
   if (loading) {
@@ -214,6 +267,16 @@ export default function Admin() {
                   </li>
                 </ul>
               </div>
+              
+              {recentCheckin && (
+                <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm mb-8">
+                  <h4 className="text-sm font-medium uppercase tracking-widest text-slate-400 mb-3">Latest Check-in</h4>
+                  <p className="text-slate-800 flex items-center gap-2">
+                    <span className="text-lg">Feeling: {recentCheckin.feeling_label}</span>
+                  </p>
+                  <p className="text-xs text-slate-400 mt-2">Logged on {new Date(recentCheckin.created_at).toLocaleDateString()}</p>
+                </div>
+              )}
             </div>
 
             <div className="w-full lg:w-[400px] flex flex-col bg-[#FAFAFA]">
@@ -223,21 +286,34 @@ export default function Admin() {
                 </h3>
               </div>
               
-              <div className="flex-1 p-5 overflow-y-auto space-y-6 flex items-center justify-center">
-                <div className="text-center text-slate-400 text-sm p-4 bg-white border border-slate-100 rounded-2xl">
-                  Messaging system pending database integration.
-                </div>
+              <div className="flex-1 p-5 overflow-y-auto space-y-4 flex flex-col">
+                {messages.length === 0 ? (
+                  <div className="text-center text-slate-400 text-sm p-4 bg-white border border-slate-100 rounded-2xl m-auto">
+                    No direct messages yet.
+                  </div>
+                ) : (
+                  messages.map(msg => (
+                    <div key={msg.id} className={`max-w-[80%] rounded-2xl p-4 ${msg.role === 'assistant' ? 'bg-[#7A9684] text-white self-end' : 'bg-white border border-slate-100 text-slate-800 self-start'}`}>
+                      <p className="text-sm">{msg.content}</p>
+                      <span className={`text-[10px] mt-2 block ${msg.role === 'assistant' ? 'text-white/70' : 'text-slate-400'}`}>
+                        {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="p-5 bg-white border-t border-slate-100">
                 <div className="flex gap-3">
                   <input 
-                    disabled
                     type="text" 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Message your student..." 
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 text-sm outline-none transition-all cursor-not-allowed opacity-60"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-full px-5 py-3 text-sm outline-none transition-all focus:border-[#7A9684]"
                   />
-                  <button disabled className="bg-slate-300 text-white p-3 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm cursor-not-allowed">
+                  <button onClick={sendMessage} disabled={!newMessage.trim()} className="bg-[#7A9684] text-white p-3 w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm disabled:opacity-50 transition-opacity">
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>

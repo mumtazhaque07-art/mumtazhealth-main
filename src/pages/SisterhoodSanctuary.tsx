@@ -1,7 +1,9 @@
 import React from 'react';
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, Quote, Heart } from "lucide-react";
+import { Star, Quote, Heart, MessageCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UserInbox } from "@/components/UserInbox";
 
 // You can easily add or edit your Google Reviews right here!
 const GOOGLE_REVIEWS = [
@@ -158,48 +160,74 @@ const SisterhoodSanctuary = () => {
           </p>
         </div>
 
-        {/* Reviews Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {GOOGLE_REVIEWS.map((review) => (
-            <Card key={review.id} className="border-none shadow-md hover:shadow-lg transition-shadow bg-white overflow-hidden relative group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-wellness-sage opacity-50" />
-              <CardContent className="p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex flex-col">
-                    <span className="font-serif text-xl text-gray-900 font-bold">{review.name}</span>
-                    <span className="text-sm text-gray-500 mt-1">{review.date}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="relative">
-                  <Quote className="absolute -top-3 -left-3 w-8 h-8 text-wellness-sage/20 rotate-180" />
-                  <p className="text-gray-700 leading-relaxed relative z-10 pl-6 italic">
-                    "{review.text}"
-                  </p>
-                </div>
-                
-                <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
-                  <Heart className="w-3 h-3 text-wellness-plum" />
-                  Verified Google Review
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        
-        {/* Footer CTA */}
-        <div className="mt-20 text-center bg-white p-10 rounded-3xl shadow-sm border border-wellness-sage/10">
-          <h3 className="text-2xl font-serif text-gray-900 mb-4">Ready to start your own healing journey?</h3>
-          <p className="text-gray-600 mb-8 max-w-lg mx-auto">Join hundreds of women discovering holistic relief and empowerment.</p>
-          <a href="/pricing" className="inline-block bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-4 font-medium transition-transform hover:scale-105">
-            View Membership Plans
-          </a>
-        </div>
+        {/* Tabs Section */}
+        <Tabs defaultValue="inbox" className="w-full">
+          <div className="flex justify-center mb-12">
+            <TabsList className="bg-white/50 backdrop-blur-sm p-1 rounded-full border border-wellness-sage/20 shadow-sm">
+              <TabsTrigger value="inbox" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
+                <MessageCircle className="w-4 h-4" /> Direct Coaching
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
+                <Star className="w-4 h-4" /> Success Stories
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="inbox" className="mt-0 animate-in fade-in duration-500">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-serif text-gray-900 mb-4">Your Private Coaching Space</h2>
+                <p className="text-gray-600 max-w-xl mx-auto">A secure, direct line to Mumtaz for personalized guidance and check-ins along your healing journey.</p>
+              </div>
+              <UserInbox />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="reviews" className="mt-0 animate-in fade-in duration-500">
+            {/* Reviews Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {GOOGLE_REVIEWS.map((review) => (
+                <Card key={review.id} className="border-none shadow-md hover:shadow-lg transition-shadow bg-white overflow-hidden relative group">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-wellness-sage opacity-50" />
+                  <CardContent className="p-8">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="flex flex-col">
+                        <span className="font-serif text-xl text-gray-900 font-bold">{review.name}</span>
+                        <span className="text-sm text-gray-500 mt-1">{review.date}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {[...Array(review.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <Quote className="absolute -top-3 -left-3 w-8 h-8 text-wellness-sage/20 rotate-180" />
+                      <p className="text-gray-700 leading-relaxed relative z-10 pl-6 italic">
+                        "{review.text}"
+                      </p>
+                    </div>
+                    
+                    <div className="mt-8 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400">
+                      <Heart className="w-3 h-3 text-wellness-plum" />
+                      Verified Google Review
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            {/* Footer CTA */}
+            <div className="mt-20 text-center bg-white p-10 rounded-3xl shadow-sm border border-wellness-sage/10">
+              <h3 className="text-2xl font-serif text-gray-900 mb-4">Ready to start your own healing journey?</h3>
+              <p className="text-gray-600 mb-8 max-w-lg mx-auto">Join hundreds of women discovering holistic relief and empowerment.</p>
+              <a href="/pricing" className="inline-block bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-4 font-medium transition-transform hover:scale-105">
+                View Membership Plans
+              </a>
+            </div>
+          </TabsContent>
+        </Tabs>
 
       </div>
     </div>
