@@ -71,6 +71,10 @@ function RootPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       setLoading(false);
+    }).catch((error) => {
+      console.error("Failed to get Supabase session:", error);
+      setUser(null);
+      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
