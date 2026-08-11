@@ -34,8 +34,11 @@ import {
   Pencil,
   Save,
   Check,
-  CheckCircle2
+  CheckCircle2,
+  BookOpen
 } from "lucide-react";
+
+import { mumtazYoga8 } from "@/assets/brandImages";
 
 // Import joint care images
 import chairYogaImg from "@/assets/joint-care-chair-yoga.jpg";
@@ -421,16 +424,30 @@ export default function MyDailyPractice() {
 
         {/* Empty State */}
         {reminders.length === 0 && (
-          <Card className="border-dashed border-2 border-muted animate-fade-in">
-            <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="p-4 rounded-full bg-muted mb-4">
-                <Sparkles className="h-8 w-8 text-muted-foreground" />
+          <Card className="relative overflow-hidden border-none shadow-sm animate-fade-in group">
+            {/* Background Image with Overlay */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src={mumtazYoga8} 
+                alt="Mumtaz Yoga" 
+                className="w-full h-full object-cover opacity-20 grayscale transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-wellness-sage/90 to-wellness-sand/90" />
+            </div>
+            
+            <CardContent className="relative z-10 flex flex-col items-center justify-center py-16 text-center px-6">
+              <div className="p-4 rounded-full bg-white/40 backdrop-blur-sm mb-6 shadow-sm">
+                <Heart className="h-10 w-10 text-wellness-plum/80" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">Your routine is empty</h3>
-              <p className="text-muted-foreground mb-6 max-w-md text-sm">
-                Add gentle practices from the library to build your schedule.
+              <h3 className="text-2xl font-serif text-gray-900 mb-3">Your daily rhythm is waiting to be written.</h3>
+              <p className="text-gray-700 mb-8 max-w-md text-base leading-relaxed">
+                Explore the sanctuary library to find practices that nourish your body today.
               </p>
-              <Button onClick={() => navigate("/content-library")} size="lg">
+              <Button 
+                onClick={() => navigate("/content-library")} 
+                size="lg" 
+                className="bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-[1.02]"
+              >
                 Explore Library
               </Button>
             </CardContent>

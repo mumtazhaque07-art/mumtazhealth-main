@@ -4,6 +4,9 @@ import { Navigation } from "@/components/Navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Calendar, Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { mumtazYoga7 } from "@/assets/brandImages";
 
 interface JournalEntry {
   id: string;
@@ -13,6 +16,7 @@ interface JournalEntry {
 }
 
 export default function JournalHistory() {
+  const navigate = useNavigate();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -64,13 +68,31 @@ export default function JournalHistory() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : entries.length === 0 ? (
-          <Card className="bg-white shadow-sm border-wellness-sage/20">
-            <CardContent className="flex flex-col items-center justify-center py-20 text-center">
-              <BookOpen className="h-12 w-12 text-wellness-sage/50 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Your journal is waiting</h3>
-              <p className="text-gray-500 max-w-sm">
-                After you complete a practice in the Content Library, click "Log My Journey" to save your reflections here.
+          <Card className="relative overflow-hidden border-none shadow-sm bg-white">
+            <div className="absolute inset-0 z-0">
+              <img 
+                src={mumtazYoga7} 
+                alt="Mumtaz Yoga" 
+                className="w-full h-full object-cover opacity-10 grayscale"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-white/90 to-wellness-sand/80" />
+            </div>
+            
+            <CardContent className="relative z-10 flex flex-col items-center justify-center py-20 text-center px-6">
+              <div className="p-4 rounded-full bg-wellness-sage/20 mb-6 shadow-sm">
+                <BookOpen className="h-10 w-10 text-wellness-sage" />
+              </div>
+              <h3 className="text-2xl font-serif text-gray-900 mb-3">A safe space for your reflections.</h3>
+              <p className="text-gray-700 max-w-md mb-8 text-base leading-relaxed">
+                Take a deep breath, explore a practice, and log your journey here whenever you are ready.
               </p>
+              <Button 
+                onClick={() => navigate("/content-library")} 
+                size="lg" 
+                className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-8 py-6 text-lg shadow-md transition-transform hover:scale-[1.02]"
+              >
+                Start a Practice
+              </Button>
             </CardContent>
           </Card>
         ) : (
