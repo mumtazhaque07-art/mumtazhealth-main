@@ -130,7 +130,7 @@ export function UserInbox() {
           </div>
           <h4 className="font-serif text-lg text-gray-900 mb-2">Continue Your Journey</h4>
           <p className="text-sm text-gray-600 mb-4 max-w-sm mx-auto">
-            You've reached your free trial limit of 3 direct messages. Upgrade to Premium for unlimited 1-on-1 coaching and personalized support.
+            You've reached your free trial limit of 3 direct messages. Upgrade to Premium for unlimited 1-on-1 consultation and personalized support.
           </p>
           <Button onClick={() => navigate('/pricing')} className="bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-6 shadow-sm transition-transform hover:scale-105">
             Upgrade to Premium

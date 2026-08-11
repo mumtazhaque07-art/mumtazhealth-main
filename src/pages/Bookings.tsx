@@ -557,7 +557,7 @@ export default function Bookings() {
                     </CardDescription>
                     <ul className="space-y-3 mb-8">
                       <li className="flex items-center gap-2 text-sm text-wellness-taupe/70">
-                        <Check className="w-4 h-4 text-wellness-sage" /> Live group coaching & Q&A
+                        <Check className="w-4 h-4 text-wellness-sage" /> Live group consultation & Q&A
                       </li>
                       <li className="flex items-center gap-2 text-sm text-wellness-taupe/70">
                         <Check className="w-4 h-4 text-wellness-sage" /> Themed seasonal practices

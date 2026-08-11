@@ -165,7 +165,7 @@ const SisterhoodSanctuary = () => {
           <div className="flex justify-center mb-12">
             <TabsList className="bg-white/50 backdrop-blur-sm p-1 rounded-full border border-wellness-sage/20 shadow-sm">
               <TabsTrigger value="inbox" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" /> Direct Coaching
+                <MessageCircle className="w-4 h-4" /> Direct Consultation
               </TabsTrigger>
               <TabsTrigger value="reviews" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
                 <Star className="w-4 h-4" /> Success Stories
@@ -176,7 +176,7 @@ const SisterhoodSanctuary = () => {
           <TabsContent value="inbox" className="mt-0 animate-in fade-in duration-500">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif text-gray-900 mb-4">Your Private Coaching Space</h2>
+                <h2 className="text-3xl font-serif text-gray-900 mb-4">Your Private Consultation Space</h2>
                 <p className="text-gray-600 max-w-xl mx-auto">A secure, direct line to Mumtaz for personalized guidance and check-ins along your healing journey.</p>
               </div>
               <UserInbox />
