@@ -1,4 +1,5 @@
 import seatedMeditation from "@/assets/poses/seated-meditation.jpeg";
+import { getBrandImage } from "@/assets/brandImages";
 
 export const builtInContent = [
   {
@@ -77,7 +78,7 @@ Sip this tea slowly about 20-30 minutes *after* a meal to aid in digestion. Do n
     tags: ["nutrition", "recipe", "digestion", "tea"],
     difficulty_level: "beginner",
     duration_minutes: 10,
-    image_url: "https://images.unsplash.com/photo-1576092762791-dd9e2220afa1?q=80&w=1200&auto=format&fit=crop",
+    image_url: getBrandImage('article', ['tea', 'digestion']),
     video_url: "",
     animation_url: "",
     audio_url: "",

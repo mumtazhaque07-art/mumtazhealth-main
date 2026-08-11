@@ -6,6 +6,7 @@ import { CalendarDays, PlayCircle, BookOpen, Utensils, Loader2 } from "lucide-re
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { getScheduledTheme } from "@/config/themeSchedule";
+import { getBrandImage } from "@/assets/brandImages";
 
 interface ThemeOfTheMonthProps {
   stageId: string;
@@ -159,7 +160,7 @@ export const ThemeOfTheMonth: React.FC<ThemeOfTheMonthProps> = ({ stageId }) => 
           
           <div className="bg-gray-200 relative min-h-[300px]">
             <img 
-              src={theme.image_url || "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200&auto=format&fit=crop"} 
+              src={theme.image_url || getBrandImage('yoga')} 
               alt="Yoga practice" 
               className="absolute inset-0 w-full h-full object-cover"
             />
