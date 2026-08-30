@@ -17,6 +17,8 @@ import { WellnessTrendCharts } from "@/components/WellnessTrendCharts";
 import { WellnessExport } from "@/components/WellnessExport";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { PageLoadingSkeleton } from "@/components/PageLoadingSkeleton";
+import { useLifeMap } from "@/contexts/LifeMapContext";
+import { PremiumSurfaceEmpty } from "@/components/TasteJourneyEmpty";
 
 interface Insight {
   title: string;
@@ -45,6 +47,7 @@ interface AnalysisData {
 }
 
 export default function Insights() {
+  const { isPremium, loading: premiumLoading } = useLifeMap();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -69,7 +72,7 @@ export default function Insights() {
   }, [navigate]);
 
   useEffect(() => {
-    if (user && !analysisData && !analyzing && !hasAutoAnalyzed) {
+    if (isPremium && user && !analysisData && !analyzing && !hasAutoAnalyzed) {
       setHasAutoAnalyzed(true);
       analyzeInsights(false);
     }
@@ -142,8 +145,19 @@ export default function Insights() {
   // Integrate with global loading indicator
   useGlobalLoading(loading);
 
-  if (loading) {
+  if (loading || premiumLoading) {
     return <PageLoadingSkeleton variant="simple" />;
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 animate-fade-in">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 pt-24 max-w-6xl">
+          <PremiumSurfaceEmpty onStay={() => navigate("/tracker")} />
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -9,6 +9,9 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { Calendar, TrendingUp, Plus, Activity } from "lucide-react";
 import { Navigation } from "@/components/Navigation";
+import { useNavigate } from "react-router-dom";
+import { useLifeMap } from "@/contexts/LifeMapContext";
+import { PremiumSurfaceEmpty } from "@/components/TasteJourneyEmpty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, subDays, startOfMonth, endOfMonth } from "date-fns";
 import {
@@ -80,6 +83,8 @@ const IRREGULAR_SYMPTOMS = [
 ];
 
 export default function ConditionTracker() {
+  const navigate = useNavigate();
+  const { isPremium, loading: premiumLoading } = useLifeMap();
   const [selectedCondition, setSelectedCondition] = useState<ConditionType>("pcos");
   const [painLevel, setPainLevel] = useState(0);
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
@@ -197,6 +202,25 @@ export default function ConditionTracker() {
       painLevel: entry.pain_level,
       symptomCount: entry.symptoms.length,
     }));
+
+  if (premiumLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+      </div>
+    );
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto p-6 max-w-6xl pt-20">
+          <PremiumSurfaceEmpty onStay={() => navigate("/tracker")} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

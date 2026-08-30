@@ -165,7 +165,7 @@ const SisterhoodSanctuary = () => {
           <div className="flex justify-center mb-12">
             <TabsList className="bg-white/50 backdrop-blur-sm p-1 rounded-full border border-wellness-sage/20 shadow-sm">
               <TabsTrigger value="inbox" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
-                <MessageCircle className="w-4 h-4" /> Direct Consultation
+                <MessageCircle className="w-4 h-4" /> Private line
               </TabsTrigger>
               <TabsTrigger value="reviews" className="rounded-full px-8 py-3 data-[state=active]:bg-wellness-sage data-[state=active]:text-white transition-all text-base font-medium flex items-center gap-2">
                 <Star className="w-4 h-4" /> Success Stories
@@ -175,10 +175,6 @@ const SisterhoodSanctuary = () => {
 
           <TabsContent value="inbox" className="mt-0 animate-in fade-in duration-500">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-serif text-gray-900 mb-4">Your Private Consultation Space</h2>
-                <p className="text-gray-600 max-w-xl mx-auto">A secure, direct line to Mumtaz for personalized guidance and check-ins along your healing journey.</p>
-              </div>
               <UserInbox />
             </div>
           </TabsContent>
@@ -222,8 +218,8 @@ const SisterhoodSanctuary = () => {
             <div className="mt-20 text-center bg-white p-10 rounded-3xl shadow-sm border border-wellness-sage/10">
               <h3 className="text-2xl font-serif text-gray-900 mb-4">Ready to start your own healing journey?</h3>
               <p className="text-gray-600 mb-8 max-w-lg mx-auto">Join hundreds of women discovering holistic relief and empowerment.</p>
-              <a href="/pricing" className="inline-block bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-4 font-medium transition-transform hover:scale-105">
-                View Membership Plans
+              <a href="/upgrade" className="inline-block bg-wellness-plum hover:bg-wellness-plum/90 text-white rounded-full px-8 py-4 font-medium transition-transform hover:scale-105">
+                Continue with Premium
               </a>
             </div>
           </TabsContent>

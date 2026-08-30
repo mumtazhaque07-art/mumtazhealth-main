@@ -98,6 +98,7 @@ import { RecipeCard } from "@/components/RecipeCard";
 import { trackLastActivity } from "@/components/ReturningUserWelcome";
 import { trackRecentActivity } from "@/components/RecentlyViewed";
 import { usePregnancySafeMode } from "@/hooks/usePregnancySafeMode";
+import { useLifeMap } from "@/contexts/LifeMapContext";
 import { PregnancySafetyIndicator, PregnancySafetyBadge, getContentPregnancySafety } from "@/components/PregnancySafetyIndicator";
 import { TrimesterPoseRecommendations } from "@/components/TrimesterPoseRecommendations";
 import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
@@ -174,7 +175,7 @@ const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
 
 const libraryStages = [
   { id: 'stage1', label: '1. Cycle Health', icon: Flower2, match: ['menstrual', 'follicular', 'ovulatory', 'luteal', 'cycle-health'] },
-  { id: 'stage2', label: '2. Fertility', icon: Heart, match: ['fertility', 'pre-conception'] },
+  { id: 'stage2', label: '2. Fertility', icon: Heart, match: ['fertility', 'pre-conception', 'ttc'] },
   { id: 'stage3', label: '3. Pregnancy', icon: Baby, match: ['pregnancy', 'pregnant', 'trimester-1', 'trimester-2', 'trimester-3'] },
   { id: 'stage4', label: '4. Postpartum', icon: Activity, match: ['postpartum'] },
   { id: 'stage5', label: '5. Perimenopause', icon: Sparkles, match: ['perimenopause'] },
@@ -186,7 +187,7 @@ const ContentLibrary = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [user, setUser] = useState<any>(null);
-  const [userTier, setUserTier] = useState<string>("free");
+  const { isPremium } = useLifeMap();
   const [content, setContent] = useState<WellnessContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -218,7 +219,6 @@ const ContentLibrary = () => {
   useEffect(() => {
     loadContent();
     if (user) {
-      loadUserProfile();
       loadSavedContent();
     }
   }, [user]);
@@ -227,37 +227,20 @@ const ContentLibrary = () => {
   useEffect(() => {
     const stageParam = searchParams.get('stage');
     if (stageParam) {
-      // Map legacy stage strings to new stage IDs if needed
-      const mapping: Record<string, string> = {
-        'menopause': 'stage6',
-        'perimenopause': 'stage5',
-        'pregnancy': 'stage3',
-        'fertility': 'stage2',
-        'postpartum': 'stage4'
-      };
-      if (mapping[stageParam]) {
-        setActiveTab(mapping[stageParam]);
-      } else {
-        const found = libraryStages.find(s => s.id === stageParam);
-        if (found) setActiveTab(stageParam);
+      // Find a stage where the stageParam matches either the id or one of its match aliases
+      const found = libraryStages.find(s => s.id === stageParam || s.match.includes(stageParam.toLowerCase()));
+      if (found) {
+        setActiveTab(found.id);
       }
     }
     
     const searchOrTagParam = searchParams.get('search') || searchParams.get('tag');
     if (searchOrTagParam) {
       setSearchQuery(searchOrTagParam);
+    } else {
+      setSearchQuery('');
     }
   }, [searchParams]);
-
-  const loadUserProfile = async () => {
-    if (!user) return;
-    const { data } = await supabase
-      .from('user_wellness_profiles')
-      .select('subscription_tier')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    setUserTier(data?.subscription_tier || 'free');
-  };
 
   const loadContent = async () => {
     setLoading(true);
@@ -419,101 +402,119 @@ const ContentLibrary = () => {
     }
   };
 
+  const isPremiumContent = (item: WellnessContent) =>
+    item.is_premium === true ||
+    item.tier_requirement === 'standard' ||
+    item.tier_requirement === 'premium' ||
+    item.tier_requirement === 'vip';
+
   const renderContentCard = (item: WellnessContent) => {
-    const isLocked = userTier === 'free' && (item.tier_requirement === 'standard' || item.tier_requirement === 'premium' || item.tier_requirement === 'vip');
+    const isPremiumItem = isPremiumContent(item);
+    const isLocked = !isPremium && isPremiumItem;
     
+    const description = item.description?.trim() || "A short practice for this moment. Take what serves you.";
+    const openCard = (e?: { stopPropagation: () => void }) => {
+      e?.stopPropagation();
+      if (isLocked) {
+        toast("This practice is on Premium.", {
+          description: "Taste Journey keeps the foundational videos free. Go deeper when you are ready.",
+          action: {
+            label: "Continue with Premium",
+            onClick: () => navigate('/upgrade')
+          }
+        });
+      } else {
+        setSelectedContent(item);
+        setIsDialogOpen(true);
+      }
+    };
+
     return (
-      <Card key={item.id} className={`overflow-hidden transition-shadow relative ${isLocked ? 'opacity-90' : 'hover:shadow-lg'}`}>
+      <Card key={item.id} className={`overflow-hidden transition-shadow relative cursor-pointer ${isLocked ? 'opacity-60 hover:shadow-none' : 'hover:shadow-lg'}`} onClick={() => openCard()}>
         <div className="h-40 overflow-hidden bg-muted relative group">
           <img 
             src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
             alt={item.title}
-            className={`w-full h-full object-cover ${isLocked ? 'blur-[2px] grayscale-[30%]' : 'transition-transform duration-500 group-hover:scale-105'}`}
+            className={`w-full h-full object-cover ${isLocked ? '' : 'transition-transform duration-500 group-hover:scale-105'}`}
           />
-          {isLocked && (
-            <div className="absolute inset-0 bg-background/60 flex flex-col items-center justify-center backdrop-blur-[1px]">
-              <div className="bg-background/90 p-3 rounded-full mb-2 shadow-sm">
-                <Lock className="w-5 h-5 text-primary" />
-              </div>
-              <span className="text-xs font-semibold text-foreground px-3 py-1 bg-background/80 rounded-full">Premium Content</span>
-            </div>
-          )}
-          <Badge className="absolute top-2 left-2 capitalize text-xs">
-            {item.content_type}
-          </Badge>
-          <Badge className={`absolute top-2 right-2 capitalize text-xs ${item.tier_requirement === 'premium' ? 'bg-amber-500 hover:bg-amber-600 text-white' : item.tier_requirement === 'standard' ? 'bg-purple-500 hover:bg-purple-600 text-white' : 'bg-black/60 text-white'}`}>
-            {item.tier_requirement === 'free' ? 'Foundational' : item.tier_requirement === 'standard' ? 'Premium' : item.tier_requirement === 'premium' ? 'VIP' : 'Premium'}
+          <Badge className={`absolute top-2 left-2 text-xs shadow-sm ${isPremiumItem ? 'bg-white/80 text-slate-600' : 'bg-slate-800/80 text-white'}`}>
+            {isPremiumItem ? 'Premium' : 'Free Taste'}
           </Badge>
         </div>
         
         <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-base line-clamp-2">{item.title}</CardTitle>
-            <Button
-              variant={savedContentIds.has(item.id) ? "default" : "outline"}
-              size="sm"
-              className={`flex-shrink-0 text-xs ${savedContentIds.has(item.id) ? 'bg-primary/90 hover:bg-primary' : ''}`}
-              onClick={(e) => { e.stopPropagation(); toggleSaveContent(item.id); }}
-            >
-              <Heart className={`h-3.5 w-3.5 mr-1.5 ${savedContentIds.has(item.id) ? 'fill-white' : ''}`} />
-              {savedContentIds.has(item.id) ? 'Saved' : 'Save'}
-            </Button>
-          </div>
-          <CardDescription className="line-clamp-2 text-sm">{item.description}</CardDescription>
+          <CardTitle className="text-base line-clamp-2 text-slate-800 font-serif">{item.title}</CardTitle>
+          {item.duration_minutes ? (
+            <p className="text-xs text-muted-foreground">{item.duration_minutes} min</p>
+          ) : null}
+          <CardDescription className="line-clamp-2 text-sm">{description}</CardDescription>
         </CardHeader>
         
         <CardContent className="pt-0">
           <Button 
-            className={`w-full ${isLocked ? 'bg-muted text-muted-foreground hover:bg-muted' : ''}`}
+            className={`w-full ${isLocked ? 'bg-slate-100 text-slate-500 hover:bg-slate-100' : 'bg-wellness-plum hover:bg-wellness-plum/90 text-white'}`}
             variant={isLocked ? 'secondary' : 'default'}
             size="sm"
-            onClick={() => {
-              if (isLocked) {
-                toast("This content requires a premium subscription", {
-                  description: "Upgrade your membership to access this entire library.",
-                  action: {
-                    label: "Upgrade",
-                    onClick: () => navigate('/settings')
-                  }
-                });
-              } else {
-                setSelectedContent(item); 
-                setIsDialogOpen(true);
-              }
-            }}
+            onClick={openCard}
           >
-            {isLocked ? 'Unlock Access' : 'View Details'}
+            {isLocked ? 'Continue with Premium' : 'Start Practice'}
           </Button>
         </CardContent>
       </Card>
     );
   };
 
-  const renderTierGroup = (tierValue: string, title: string, items: WellnessContent[]) => {
-    let tierItems = items.filter(item => item.tier_requirement === tierValue || (!item.tier_requirement && tierValue === 'free'));
-    
-    // Temporary visual demonstration: If no standard items exist, borrow half from premium so the user can see the 3-tier journey
-    const actualStandardCount = items.filter(item => item.tier_requirement === 'standard').length;
-    if (tierValue === 'standard' && actualStandardCount === 0) {
-      const premiumItems = items.filter(item => item.tier_requirement === 'premium');
-      tierItems = premiumItems.slice(0, Math.ceil(premiumItems.length / 2));
-    }
-    if (tierValue === 'premium' && actualStandardCount === 0) {
-      const premiumItems = items.filter(item => item.tier_requirement === 'premium');
-      tierItems = premiumItems.slice(Math.ceil(premiumItems.length / 2));
-    }
+  const renderTierGroup = (tierValue: 'free' | 'premium', title: string, items: WellnessContent[]) => {
+    let tierItems = items.filter(item => {
+      const premium = isPremiumContent(item);
+      return tierValue === 'free' ? !premium : premium;
+    });
 
-    if (tierItems.length === 0) return null;
+    if (tierItems.length === 0) {
+      if (tierValue === 'free') {
+        const stageEmpty = activeTab !== 'all' && activeTab !== 'favorites';
+        return (
+          <div className="mb-10">
+            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-wellness-sage/20">
+              <Leaf className="h-5 w-5 text-wellness-sage" />
+              <h3 className="text-xl font-serif text-slate-800">{title}</h3>
+            </div>
+            <Card className="p-10 text-center">
+              {stageEmpty ? (
+                <>
+                  <h3 className="text-xl font-serif mb-2">Nothing here yet for this stage.</h3>
+                  <p className="text-muted-foreground mb-6">Foundational practices live under Free Taste Journey.</p>
+                  <Button
+                    onClick={() => {
+                      setActiveTab('all');
+                      setActiveDosha('all');
+                      setSearchQuery('');
+                    }}
+                  >
+                    Show Free Taste Journey
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-serif mb-2">Your Taste Journey videos will appear here.</h3>
+                  <p className="text-muted-foreground">Foundational practices, in my voice. Nothing on this list is behind a wall.</p>
+                </>
+              )}
+            </Card>
+          </div>
+        );
+      }
+      return null;
+    }
     
     return (
       <div className="mb-10">
-        <div className="flex items-center gap-2 mb-4 pb-2 border-b">
-          {tierValue === 'premium' ? <Crown className="h-5 w-5 text-amber-500" /> : 
-           tierValue === 'standard' ? <Sparkles className="h-5 w-5 text-purple-500" /> : 
-           <Leaf className="h-5 w-5 text-green-500" />}
-          <h3 className="text-xl font-bold">{title}</h3>
+        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-wellness-sage/20">
+          {tierValue === 'premium' ? <Crown className="h-5 w-5 text-wellness-sage" /> : 
+           <Leaf className="h-5 w-5 text-wellness-sage" />}
+          <h3 className="text-xl font-serif text-slate-800">{title}</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {tierItems.map(renderContentCard)}
         </div>
       </div>
@@ -531,13 +532,16 @@ const ContentLibrary = () => {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 font-serif">
             The Content Library
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl">
-            A simplified, 7-stage holistic journey. Select your current life stage below.
+          <p className="text-lg text-muted-foreground max-w-2xl font-serif">
+            Practices in my voice, for the body you have today.
+          </p>
+          <p className="text-sm text-muted-foreground/80 max-w-2xl mt-3">
+            Holistic suggestions only. Not medical advice.
           </p>
         </div>
 
         {/* Display Theme of the Month for the selected stage (or skip if 'all'/'favorites') */}
-        {activeTab !== 'all' && activeTab !== 'favorites' && (
+        {isPremium && activeTab !== 'all' && activeTab !== 'favorites' && (
           <ThemeOfTheMonth stageId={activeTab} />
         )}
 
@@ -621,17 +625,10 @@ const ContentLibrary = () => {
 
           {loading ? (
             <ContentGridSkeleton count={6} />
-          ) : filteredContent.length === 0 ? (
-            <Card className="p-12 text-center">
-              <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-              <h3 className="text-xl font-semibold mb-2">No Content Yet</h3>
-              <p className="text-muted-foreground">Content for this stage is currently being prepared.</p>
-            </Card>
           ) : (
             <div>
-              {renderTierGroup('free', 'Foundational Journey (Free)', filteredContent)}
-              {renderTierGroup('standard', 'Premium Journey (Standard)', filteredContent)}
-              {renderTierGroup('premium', 'VIP Journey (Premium)', filteredContent)}
+              {renderTierGroup('free', 'Free Taste Journey', filteredContent)}
+              {renderTierGroup('premium', 'Premium Access', filteredContent)}
             </div>
           )}
         </Tabs>
@@ -642,49 +639,29 @@ const ContentLibrary = () => {
           {selectedContent && (
             <div className="flex flex-col h-full bg-wellness-sand/10 overflow-hidden">
               <DialogHeader className="px-6 pt-6 pb-4 border-b bg-background/50 backdrop-blur-sm shrink-0">
-                <div className="flex items-center justify-between gap-2">
-                  <DialogTitle className="flex items-center gap-2 flex-1 text-2xl font-serif text-foreground">
-                    <span className="line-clamp-2">{selectedContent.title}</span>
-                  </DialogTitle>
-                </div>
-                <DialogDescription className="text-base text-muted-foreground mt-2 font-medium">
-                  {selectedContent.description}
-                </DialogDescription>
+                <DialogTitle className="text-2xl font-serif text-foreground">
+                  {selectedContent.title}
+                </DialogTitle>
               </DialogHeader>
               <div className="overflow-y-auto flex-1 px-6">
                 <div className="space-y-6 pt-6 pb-12">
-                  
-                  {/* Hero Audio/Video Area */}
-                  <div className="bg-white rounded-2xl shadow-sm border border-wellness-sage/20 overflow-hidden mb-6">
-                    <PoseImageSequence
-                      contentId={selectedContent.id}
-                      videoUrl={selectedContent.video_url}
-                      isPremiumUser={userTier === 'premium'}
-                      isPremiumContent={selectedContent.tier_requirement === 'premium'}
-                    />
-                  </div>
-
-                  {/* The Intention & Practice Sections parsed nicely */}
-                  <div className="bg-card text-card-foreground p-6 md:p-8 rounded-2xl shadow-sm border border-border">
-                    <div className="prose prose-wellness max-w-none dark:prose-invert">
-                      <MarkdownRenderer content={selectedContent.detailed_guidance || "Please follow along with the video/audio."} />
+                  {selectedContent.video_url ? (
+                    <div className="bg-white rounded-2xl shadow-sm border border-wellness-sage/20 overflow-hidden">
+                      <PoseImageSequence
+                        contentId={selectedContent.id}
+                        videoUrl={selectedContent.video_url}
+                        isPremiumUser={isPremium}
+                        isPremiumContent={isPremiumContent(selectedContent)}
+                      />
                     </div>
-                  </div>
-                  
-                  <div className="mt-8 pt-8 border-t border-border flex flex-col items-center justify-center text-center bg-wellness-sage/10 rounded-3xl p-8">
-                    <div className="bg-background p-3 rounded-full shadow-sm mb-4">
-                      <BookOpen className="w-8 h-8 text-wellness-sage" />
-                    </div>
-                    <h4 className="font-serif text-2xl text-foreground mb-3">How did this practice feel?</h4>
-                    <p className="text-base text-muted-foreground mb-6 max-w-md leading-relaxed">
-                      Your journey is entirely unique. Take a moment to pause, log your reflections, and track your healing over time.
+                  ) : null}
+                  <div className="space-y-3">
+                    <p className="text-base text-foreground leading-relaxed">
+                      {selectedContent.description?.trim() || "A short practice for this moment. Take what serves you."}
                     </p>
-                    <Button 
-                      onClick={() => setIsJournalOpen(true)}
-                      className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
-                    >
-                      Log My Journey
-                    </Button>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      You may stop whenever you like. Holistic suggestions only. Not medical advice.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -693,13 +670,6 @@ const ContentLibrary = () => {
         </DialogContent>
       </Dialog>
       
-      {selectedContent && (
-        <InteractiveJournal 
-          contentTitle={selectedContent.title}
-          isOpen={isJournalOpen}
-          onClose={() => setIsJournalOpen(false)}
-        />
-      )}
     </div>
   );
 };

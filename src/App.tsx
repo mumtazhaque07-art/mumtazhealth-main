@@ -42,6 +42,7 @@ const HormonalTransitionTracker = lazy(() => import("./pages/HormonalTransitionT
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const SisterhoodSanctuary = lazy(() => import("./pages/SisterhoodSanctuary"));
+const PremiumUpgrade = lazy(() => import("./pages/PremiumUpgrade"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,6 +110,14 @@ const App = () => (
                     <PageTransition><RootPage /></PageTransition>
                   </RouteErrorBoundary>
                 } />
+
+                <Route path="/upgrade" element={
+                  <RouteErrorBoundary variant="simple">
+                    <PageTransition><PremiumUpgrade /></PageTransition>
+                  </RouteErrorBoundary>
+                } />
+
+                <Route path="/pricing" element={<Navigate replace to="/upgrade" />} />
 
                 <Route path="/tracker" element={
                   <RouteErrorBoundary variant="tracker">

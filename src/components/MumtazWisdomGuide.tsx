@@ -14,6 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatMarkdown } from "@/components/ChatMarkdown";
+import { useLifeMap } from "@/contexts/LifeMapContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -78,6 +79,7 @@ export function MumtazWisdomGuide() {
   const isMobile = useIsMobile();
   const location = useLocation();
   const navigate = useNavigate();
+  const { isPremium } = useLifeMap();
 
   // Check if we're on an auth page - don't render chatbot there
   const isAuthPage = AUTH_ROUTES.some(route => location.pathname.startsWith(route));
@@ -348,14 +350,21 @@ export function MumtazWisdomGuide() {
       return;
     }
 
-    // Free tier 5-message limit check
-    if (userProfile?.subscriptionTier === 'free') {
+    // Free tier 2-message limit check
+    if (!isPremium && userProfile?.subscriptionTier !== 'admin') {
       const userMessageCount = messages.filter(m => m.role === 'user').length;
-      if (userMessageCount >= 5) {
+      if (userMessageCount >= 2) {
         toast({
-          title: "Trial Limit Reached",
-          description: "You have reached the 5-message limit for your free account. Please upgrade to continue chatting.",
-          variant: "destructive",
+          title: "Two messages are included on Taste Journey.",
+          description: "Premium is unlimited Wisdom Guide, plus the full library and Sanctuary.",
+          action: (
+            <Button variant="outline" size="sm" onClick={() => {
+              setOpen(false);
+              navigate('/upgrade');
+            }}>
+              Continue with Premium
+            </Button>
+          )
         });
         return;
       }

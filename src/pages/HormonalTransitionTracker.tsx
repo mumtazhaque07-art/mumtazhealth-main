@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigation } from "@/components/Navigation";
+import { useLifeMap } from "@/contexts/LifeMapContext";
+import { PremiumSurfaceEmpty } from "@/components/TasteJourneyEmpty";
 import { HormonalTransitionTimeline } from "@/components/HormonalTransitionTimeline";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -82,6 +84,7 @@ const FOCUS_AREA_CONFIG: Record<string, { icon: any; label: string; color: strin
 
 export default function HormonalTransitionTracker() {
   const navigate = useNavigate();
+  const { isPremium, loading: premiumLoading } = useLifeMap();
   const [loading, setLoading] = useState(true);
   const [lifeStage, setLifeStage] = useState<string | null>(null);
   const [focusAreas, setFocusAreas] = useState<string[]>([]);
@@ -118,7 +121,7 @@ export default function HormonalTransitionTracker() {
     }
   };
 
-  if (loading) {
+  if (loading || premiumLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50/50 via-background to-wellness-sage-light p-4">
         <Navigation />
@@ -126,6 +129,17 @@ export default function HormonalTransitionTracker() {
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50/50 via-background to-wellness-sage-light p-4">
+        <Navigation />
+        <div className="max-w-4xl mx-auto py-8 pt-24">
+          <PremiumSurfaceEmpty onStay={() => navigate("/tracker")} />
         </div>
       </div>
     );

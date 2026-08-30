@@ -22,6 +22,14 @@ interface PoseImageSequenceProps {
   isPremiumContent: boolean;
 }
 
+const youtubeEmbedSrc = (url: string): string => {
+  const short = url.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/);
+  if (short) return `https://www.youtube.com/embed/${short[1]}`;
+  const watch = url.match(/[?&]v=([A-Za-z0-9_-]{6,})/);
+  if (watch) return `https://www.youtube.com/embed/${watch[1]}`;
+  return url;
+};
+
 export const PoseImageSequence = ({ 
   contentId, 
   videoUrl, 
@@ -84,19 +92,17 @@ export const PoseImageSequence = ({
 
   return (
     <div className="space-y-4">
-      {/* Premium Video Section - Only for Premium users */}
-      {videoUrl && isPremiumUser && (
+      {/* Taste Journey videos play for everyone. Only Premium-tier videos stay locked. */}
+      {videoUrl && (!isPremiumContent || isPremiumUser) && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-4 w-4 text-amber-500" />
-            <span className="text-sm font-medium text-foreground">Full Guided Video</span>
-            <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-xs">Premium</Badge>
+            <span className="text-sm font-medium text-foreground">Guided practice</span>
           </div>
           
           {videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be') ? (
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black border border-muted/20 shadow-lg">
               <iframe 
-                src={videoUrl.includes('watch?v=') ? videoUrl.replace('watch?v=', 'embed/') : videoUrl} 
+                src={youtubeEmbedSrc(videoUrl)} 
                 className="absolute inset-0 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowFullScreen
@@ -111,13 +117,12 @@ export const PoseImageSequence = ({
         </div>
       )}
 
-      {/* Premium Video Placeholder - For non-Premium users */}
-      {videoUrl && !isPremiumUser && (
+      {videoUrl && isPremiumContent && !isPremiumUser && (
         <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 border border-muted-foreground/10 shadow-sm">
           <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
             <div className="text-center p-6">
               <Crown className="h-10 w-10 mx-auto mb-3 text-amber-500/80" />
-              <p className="text-sm font-medium mb-2 text-foreground/80">Join live Premium sessions for full guided practice</p>
+              <p className="text-sm font-medium mb-2 text-foreground/80">This practice is on Premium. Taste Journey keeps the foundational videos free.</p>
               <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 shadow-sm border-none">
                 <Crown className="h-3 w-3 mr-1" />
                 Premium

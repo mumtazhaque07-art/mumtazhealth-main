@@ -257,11 +257,10 @@ export default function Auth() {
       } else if (isLogin) {
         const { error, data } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
-          // Detect email not confirmed error
-          if (error.message.toLowerCase().includes("email not confirmed") || 
-              error.message.toLowerCase().includes("email_not_confirmed")) {
-            setEmailNotConfirmed(true);
-            throw new Error("Your email hasn't been confirmed yet. Please check your inbox (and spam folder) for a confirmation link, or click below to resend it.");
+          // Pre-existing unconfirmed users: toast the constraint, do not rebuild a confirmation screen.
+          if ((error.message || "").toLowerCase().includes("email not confirmed") ||
+              (error.message || "").toLowerCase().includes("email_not_confirmed")) {
+            console.warn("[Auth] email_not_confirmed for pre-existing user; no confirmation screen.");
           }
           throw error;
         }
@@ -289,15 +288,38 @@ export default function Auth() {
           password, 
           options: { data: { username }, emailRedirectTo: `${authBase}/auth` } 
         });
-        if (error) throw error;
+        if (error) {
+          const msg = (error.message || "").toLowerCase();
+          const isDuplicate =
+            msg.includes("already registered") ||
+            msg.includes("already been registered") ||
+            msg.includes("user already exists") ||
+            msg.includes("already exists");
+          if (isDuplicate) {
+            setIsLogin(true);
+            setEmailNotConfirmed(false);
+            toast.info("This email already has an account. Sign in instead.");
+            return;
+          }
+          throw error;
+        }
         if (data.user) {
           if (data.user.identities && data.user.identities.length === 0) {
-            // User already exists but is unconfirmed
-            setEmailNotConfirmed(true);
-            toast.info("This email is already registered. Please check your inbox for the confirmation link.");
+            setIsLogin(true);
+            setEmailNotConfirmed(false);
+            toast.info("This email already has an account. Sign in instead.");
+          } else if (data.session) {
+            toast.success("Welcome. Your Taste Journey starts here.");
+            navigate(redirectTarget ? `/${redirectTarget}` : "/");
           } else {
-            toast.success("Account created! Check your email to confirm your account.");
-            setEmailNotConfirmed(true); // Show the confirmation banner
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (sessionData.session) {
+              toast.success("Welcome. Your Taste Journey starts here.");
+              navigate(redirectTarget ? `/${redirectTarget}` : "/");
+            } else {
+              setIsLogin(true);
+              setEmailNotConfirmed(true);
+            }
           }
         }
       }
@@ -361,8 +383,8 @@ export default function Auth() {
         },
       });
       if (error) throw error;
-      toast.success("Magic link sent! Check your inbox.", {
-        description: "Click the link in your email to sign in instantly — no password needed.",
+      toast.success("Sign-in link sent. Check your inbox and spam folder.", {
+        description: "Open the link to sign in. No password needed.",
         duration: 8000,
       });
     } catch (error: any) {
@@ -435,32 +457,25 @@ export default function Auth() {
                       </div>
                     )}
 
-                    {/* Email not confirmed banner */}
+                    {/* Signup-without-session edge case — no confirmation / no resend */}
                     {emailNotConfirmed && (
-                      <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-3">
-                        <div className="flex items-start gap-3">
-                          <Mail className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-semibold text-amber-800">Email confirmation required</p>
-                            <p className="text-xs text-amber-700 mt-1 leading-relaxed">
-                              {confirmationResent 
-                                ? "✅ Confirmation email sent! Check your inbox and spam folder, then click the link to confirm your account."
-                                : "Your account exists but your email hasn't been confirmed yet. Check your inbox and spam folder for a confirmation link, or resend it below."}
-                            </p>
-                          </div>
+                      <div className="p-4 bg-wellness-sage/10 border border-wellness-sage/30 rounded-xl space-y-3">
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">We couldn&rsquo;t start your session.</p>
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            Try signing in with the same email. You do not need to confirm by email.
+                          </p>
                         </div>
-                        {!confirmationResent && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="w-full h-10 border-amber-400 text-amber-800 hover:bg-amber-100 font-medium"
-                            onClick={handleResendConfirmation}
-                            disabled={loading || resendCooldown > 0}
-                          >
-                            {loading ? <Loader2 className="animate-spin mr-2 w-4 h-4" /> : <RefreshCw className="mr-2 w-4 h-4" />}
-                            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Confirmation Email"}
-                          </Button>
-                        )}
+                        <Button
+                          type="button"
+                          className="w-full h-10 bg-wellness-sage hover:bg-wellness-sage/90 text-white font-medium"
+                          onClick={() => {
+                            setIsLogin(true);
+                            setEmailNotConfirmed(false);
+                          }}
+                        >
+                          Sign in
+                        </Button>
                       </div>
                     )}
 

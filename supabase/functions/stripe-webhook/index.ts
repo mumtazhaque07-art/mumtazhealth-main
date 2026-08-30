@@ -8,16 +8,6 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
 
 const endpointSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "";
 
-function getTierFromPriceId(priceId: string): string {
-  const tiers = ["premium", "vip"];
-  for (const tier of tiers) {
-    if (Deno.env.get(`STRIPE_PRICE_${tier.toUpperCase()}`) === priceId) {
-      return tier;
-    }
-  }
-  return "free";
-}
-
 serve(async (req) => {
   const signature = req.headers.get("stripe-signature");
 
@@ -30,7 +20,7 @@ serve(async (req) => {
   try {
     const body = await req.text();
     event = stripe.webhooks.constructEvent(body, signature, endpointSecret);
-  } catch (err) {
+  } catch (err: any) {
     console.error("Webhook signature verification failed:", err.message);
     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
@@ -44,66 +34,74 @@ serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.supabase_user_id;
-
+        const userId = session.metadata?.supabase_user_id || session.client_reference_id;
+        
         if (!userId) {
-          console.error("No supabase_user_id in checkout session metadata");
-          break;
-        }
-
-        // Get the subscription to find the price ID
-        if (session.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(
-            session.subscription as string
-          );
-          const priceId = subscription.items.data[0]?.price.id;
-          const tier = getTierFromPriceId(priceId || "");
-
-          const { error } = await supabaseAdmin
-            .from("user_wellness_profiles")
-            .update({ subscription_tier: tier })
-            .eq("user_id", userId);
-
-          if (error) {
-            console.error("Error updating subscription tier:", error);
-          } else {
-            console.log(`User ${userId} upgraded to ${tier}`);
+          // If metadata wasn't passed via checkout, fetch customer and get metadata
+          const customerId = session.customer as string;
+          if (customerId) {
+              const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+              if (customer.metadata?.supabase_user_id) {
+                  // Fallback user ID resolution
+              }
           }
         }
+        
+        // At this point we handle subscription updates via customer.subscription.created/updated
         break;
       }
 
+      case "customer.subscription.created":
       case "customer.subscription.updated": {
         const subscription = event.data.object as Stripe.Subscription;
-        const userId = subscription.metadata?.supabase_user_id;
+        const customerId = subscription.customer as string;
+        
+        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+        const userId = customer.metadata?.supabase_user_id || subscription.metadata?.supabase_user_id;
 
-        if (!userId) break;
+        if (!userId) {
+          console.error("Could not find user ID in metadata for customer:", customerId);
+          break;
+        }
 
-        const priceId = subscription.items.data[0]?.price.id;
-        const tier = subscription.status === "active"
-          ? getTierFromPriceId(priceId || "")
-          : "free";
+        const tier = subscription.status === "active" || subscription.status === "trialing" ? "premium" : "free";
 
         const { error } = await supabaseAdmin
-          .from("user_wellness_profiles")
-          .update({ subscription_tier: tier })
-          .eq("user_id", userId);
+          .from("user_subscriptions")
+          .upsert({
+            user_id: userId,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscription.id,
+            status: subscription.status,
+            tier: tier,
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            cancel_at_period_end: subscription.cancel_at_period_end
+          }, { onConflict: 'user_id' });
 
         if (error) {
           console.error("Error updating subscription:", error);
+        } else {
+          console.log(`User ${userId} subscription updated to ${subscription.status}`);
         }
         break;
       }
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        const userId = subscription.metadata?.supabase_user_id;
+        const customerId = subscription.customer as string;
+        
+        const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+        const userId = customer.metadata?.supabase_user_id || subscription.metadata?.supabase_user_id;
 
         if (!userId) break;
 
         const { error } = await supabaseAdmin
-          .from("user_wellness_profiles")
-          .update({ subscription_tier: "free" })
+          .from("user_subscriptions")
+          .update({ 
+            status: 'canceled', 
+            tier: 'free',
+            cancel_at_period_end: false
+          })
           .eq("user_id", userId);
 
         if (error) {

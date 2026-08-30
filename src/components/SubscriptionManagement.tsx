@@ -68,17 +68,20 @@ export function SubscriptionManagement() {
       if (!user) return;
 
       const { data, error } = await supabase
-        .from("user_wellness_profiles")
-        .select("subscription_tier")
+        .from("user_subscriptions")
+        .select("tier, status")
         .eq("user_id", user.id)
         .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error("Error fetching subscription:", error);
-        toast.error("Could not load subscription information");
       }
 
-      setCurrentTier(data?.subscription_tier || "free");
+      if (data && data.tier === 'premium' && (data.status === 'active' || data.status === 'trialing' || data.status === 'canceling')) {
+        setCurrentTier("premium");
+      } else {
+        setCurrentTier("free");
+      }
     } catch (error) {
       console.error("Subscription fetch error:", error);
       toast.error("Unable to load subscription details. Please try again.");

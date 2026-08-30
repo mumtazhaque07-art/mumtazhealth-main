@@ -52,7 +52,6 @@ import { PostpartumEducation } from "@/components/PostpartumEducation";
 import { PostBirthSupportEducation } from "@/components/PostBirthSupportEducation";
 import { DailyRhythm } from "@/components/DailyRhythm";
 import { BodyChangingEducation } from "@/components/BodyChangingEducation";
-import { AppCompanionDisclaimer } from "@/components/AppCompanionDisclaimer";
 import { SupportPlanModal } from "@/components/SupportPlan";
 import { GentleSignInPrompt } from "@/components/GentleSignInPrompt";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -61,8 +60,10 @@ import { FiqhCycleStatus } from "@/components/FiqhCycleStatus";
 import { CheckInReminder } from "@/components/CheckInReminder";
 import { useLifeMap } from "@/contexts/LifeMapContext";
 import { LifeStage } from "@/types/lifemap";
+import { TrackerFirstCheckInEmpty, PremiumSurfaceEmpty, SHIROO_DISCLAIMER } from "@/components/TasteJourneyEmpty";
 import { VoiceInput } from "@/components/VoiceInput";
 import { ElementsGuideModal } from "@/components/ElementsGuideModal";
+import { EvolutionLoopModal } from "@/components/EvolutionLoopModal";
 
 const AyurvedicTooltip = ({ term }: { term: string }) => {
   // We have intentionally removed complex Sanskrit from the UI to reduce overwhelm.
@@ -162,12 +163,14 @@ const ISLAMIC_PRACTICES: DailyPractice[] = [
 
 export default function Tracker() {
   const navigate = useNavigate();
-  const { lifeStage: currentLifeStage, config, islamicMode } = useLifeMap();
+  const { lifeStage: currentLifeStage, config, islamicMode, isPremium } = useLifeMap();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [hasAnyCheckIn, setHasAnyCheckIn] = useState(false);
+  const [startedCheckIn, setStartedCheckIn] = useState(false);
   const [cyclePhase, setCyclePhase] = useState('');
   const [isMenstrual, setIsMenstrual] = useState(false);
   const [lifeStage, setLifeStage] = useState<string>(currentLifeStage);
@@ -352,6 +355,7 @@ export default function Tracker() {
       checkOnboarding();
       loadSavedPractices();
       loadData();
+      loadCheckInPresence();
     }
   }, [user, selectedDate]);
 
@@ -456,6 +460,15 @@ export default function Tracker() {
     setIsAdmin(!!data);
   };
 
+  const loadCheckInPresence = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from('wellness_entries')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id);
+    if ((count ?? 0) > 0) setHasAnyCheckIn(true);
+  };
+
   const loadSavedPractices = async () => {
     if (!user) return;
     try {
@@ -510,6 +523,7 @@ export default function Tracker() {
     }
     
     if (data) {
+      setHasAnyCheckIn(true);
       setCyclePhase(data.cycle_phase || '');
       setTrimester(data.trimester?.toString() || '');
       setPainLevel(data.pain_level?.toString() || '');
@@ -779,6 +793,20 @@ export default function Tracker() {
     );
   }
 
+  const todayIso = new Date().toISOString().split('T')[0];
+  const isViewingHistory = selectedDate !== todayIso;
+
+  if (!isPremium && !hasAnyCheckIn && !startedCheckIn) {
+    return (
+      <div className="min-h-screen bg-wellness-beige animate-fade-in pb-24 md:pb-0">
+        <Navigation />
+        <div className="max-w-2xl mx-auto p-4 pt-24">
+          <TrackerFirstCheckInEmpty onCheckIn={() => setStartedCheckIn(true)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-wellness-beige animate-fade-in pb-24 md:pb-0">
       <Navigation />
@@ -846,11 +874,14 @@ export default function Tracker() {
           <CardContent className="py-3 flex items-start gap-3">
             <Info className="h-5 w-5 text-wellness-sage shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <strong>Practitioner's Guidance:</strong> This tracker provides wellness suggestions to help you flow with your natural rhythms. It is not medical advice.
+              Holistic suggestions only. Not medical advice. Always consult your GP or healthcare professional.
             </p>
           </CardContent>
         </Card>
 
+        {!isPremium && isViewingHistory ? (
+          <PremiumSurfaceEmpty onStay={() => setSelectedDate(todayIso)} />
+        ) : (
         <Tabs defaultValue="rhythm" className="space-y-6" onValueChange={() => saveData(false)}>
           <div className="sticky top-20 z-10 bg-wellness-beige/80 backdrop-blur-md py-4 -mx-4 px-4">
             <TabsList className="flex w-full overflow-x-auto bg-wellness-taupe/10 border border-wellness-taupe/20 h-auto p-1 scrollbar-hide">
@@ -1454,6 +1485,7 @@ export default function Tracker() {
              </Card>
           </TabsContent>
         </Tabs>
+        )}
 
         {user && (
           <SupportPlanModal
@@ -1469,7 +1501,9 @@ export default function Tracker() {
 
         {user && <EvolutionLoopModal />}
 
-        <AppCompanionDisclaimer variant="subtle" className="pt-8 pb-32 text-center" />
+        <p className="text-xs text-muted-foreground italic pt-8 pb-32 text-center">
+          {SHIROO_DISCLAIMER}
+        </p>
       </div>
 
       <div className="fixed bottom-0 inset-x-0 p-4 bg-background/80 backdrop-blur-lg border-t z-30 flex justify-center">

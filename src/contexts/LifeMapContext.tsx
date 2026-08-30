@@ -3,11 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { LifeStage, LifeMapConfig, getLifeMapConfig } from "@/types/lifemap";
 import { useLoading } from "./LoadingContext";
 import { toast } from "sonner";
+import { evaluatePremium, isAdminEmail } from "@/lib/subscription";
 
 interface LifeMapContextType {
   lifeStage: LifeStage;
   config: LifeMapConfig;
   islamicMode: boolean;
+  isPremium: boolean;
   loading: boolean;
   setLifeStage: (stage: LifeStage) => Promise<void>;
   setIslamicMode: (enabled: boolean) => Promise<void>;
@@ -19,6 +21,7 @@ const LifeMapContext = createContext<LifeMapContextType | undefined>(undefined);
 export const LifeMapProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lifeStage, setLifeStageState] = useState<LifeStage>("fertility");
   const [islamicMode, setIslamicModeState] = useState<boolean>(true);
+  const [isPremium, setIsPremium] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const { setLoading: setGlobalLoading } = useLoading();
 
@@ -46,6 +49,17 @@ export const LifeMapProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const savedIslamicMode = localStorage.getItem("mumtaz_islamic_mode");
       if (savedIslamicMode !== null) {
         setIslamicModeState(savedIslamicMode === "true");
+      }
+
+      if (isAdminEmail(user.email)) {
+        setIsPremium(true);
+      } else {
+        const { data: sub } = await supabase
+          .from("user_subscriptions")
+          .select("tier, status, current_period_end")
+          .eq("user_id", user.id)
+          .single();
+        setIsPremium(evaluatePremium(sub));
       }
 
     } catch (err) {
@@ -111,6 +125,7 @@ export const LifeMapProvider: React.FC<{ children: React.ReactNode }> = ({ child
         lifeStage,
         config,
         islamicMode,
+        isPremium,
         loading,
         setLifeStage: updateLifeStage,
         setIslamicMode: updateIslamicMode,
