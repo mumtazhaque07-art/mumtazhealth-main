@@ -656,10 +656,15 @@ const ContentLibrary = () => {
                     </div>
                   ) : null}
                   <div className="space-y-3">
-                    <p className="text-base text-foreground leading-relaxed">
-                      {selectedContent.description?.trim() || "A short practice for this moment. Take what serves you."}
+                    <p className="text-base text-foreground leading-relaxed font-medium">
+                      {selectedContent.description?.trim()}
                     </p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    {selectedContent.detailed_guidance && (
+                      <div className="mt-6 border-t border-wellness-sage/20 pt-6">
+                        <MarkdownRenderer content={selectedContent.detailed_guidance} />
+                      </div>
+                    )}
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-6">
                       You may stop whenever you like. Holistic suggestions only. Not medical advice.
                     </p>
                   </div>
