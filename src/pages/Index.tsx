@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play, ArrowRight, Settings, LogOut } from "lucide-react";
+import { Leaf, HeartPulse, Video, Moon, BookOpen, Users, MessageCircle, Play, ArrowRight, Settings, LogOut, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { PERSONA_CONFIG } from "@/config/personas";
 import { ElementsGuideModal } from "@/components/ElementsGuideModal";
 import { useLifeMap } from "@/contexts/LifeMapContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SanctuaryManifesto } from "@/components/SanctuaryManifesto";
+import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Navigation } from "@/components/Navigation";
 
 export default function Index() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { lifeStage } = useLifeMap();
   
-  // Default to fertility if not set, else use the mapped life stage
-  const mappedPersona = Object.keys(PERSONA_CONFIG).includes(lifeStage || '') ? lifeStage : 'fertility';
-  const [persona, setPersona] = useState<string>(mappedPersona || 'fertility');
+  const [persona, setPersona] = useState<string>(lifeStage || '');
   const [showElementsGuide, setShowElementsGuide] = useState(false);
   const [username, setUsername] = useState<string>("there");
 
@@ -30,39 +29,19 @@ export default function Index() {
     });
   }, []);
 
-  const config = PERSONA_CONFIG[persona];
-  const activeTab = location.pathname === '/' ? 'home' : location.pathname.substring(1);
-
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      navigate('/auth');
-      toast.success("Successfully signed out");
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
   return (
-    <div className="w-full h-[100dvh] flex flex-col bg-[#FDFBF7] relative overflow-hidden">
+    <div className="w-full h-[100dvh] flex flex-col bg-background relative overflow-hidden">
+      <Navigation />
       
-      <div className="flex-1 overflow-y-auto pb-24">
-        <header className="px-6 pt-12 pb-4 relative">
-          <div className="absolute top-12 right-6 flex items-center gap-3">
-             <button onClick={() => navigate('/settings')} className="text-slate-400 hover:text-slate-600 transition-colors bg-white/50 p-2 rounded-full backdrop-blur-sm border border-slate-100 shadow-sm" title="Settings">
-               <Settings className="w-5 h-5" />
-             </button>
-             <button onClick={handleSignOut} className="text-slate-400 hover:text-red-500 transition-colors bg-white/50 p-2 rounded-full backdrop-blur-sm border border-slate-100 shadow-sm" title="Sign Out">
-               <LogOut className="w-5 h-5" />
-             </button>
-          </div>
-          <h1 className="text-3xl font-light tracking-tight text-[#1D1C1C] pr-20">Welcome {username}, <br/>to your sanctuary.</h1>
-          <p className="text-sm text-[#1D1C1C]/60 mt-2">A safe space with zero judgment.</p>
+      <div className="flex-1 overflow-y-auto pb-32 pt-16">
+        <header className="px-6 pt-6 pb-6 relative">
+          <h1 className="text-[28px] font-bold tracking-tight text-slate-900 leading-tight">Welcome, {username}</h1>
+          <p className="text-sm text-slate-500 mt-1 font-medium">A safe space. No judgement.</p>
+          <p className="text-[15px] text-slate-800 font-semibold mt-8">Where are you today?</p>
         </header>
 
-        <div className="px-6 pb-6">
-          <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-2 -mx-6 px-6 snap-x">
+        <div className="px-6 pb-6 w-full">
+          <div className="flex overflow-x-auto scrollbar-hide gap-3 -mx-6 px-6 pb-2">
             {Object.keys(PERSONA_CONFIG).map((p) => {
               const isSelected = persona === p;
               const pConfig = PERSONA_CONFIG[p];
@@ -70,126 +49,74 @@ export default function Index() {
                 <button
                   key={p}
                   onClick={() => setPersona(p)}
-                  className={`snap-center flex-shrink-0 w-28 h-32 rounded-3xl flex flex-col items-center justify-center transition-all duration-300 border ${
-                    isSelected ? `${pConfig.color} ${pConfig.border} shadow-sm scale-105 ring-4 ring-[#FDFBF7]` : 'bg-transparent border-slate-200 hover:bg-slate-50 opacity-70 grayscale-[30%]'
+                  className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[15px] font-semibold transition-all duration-300 border ${
+                    isSelected ? 'bg-primary text-white border-primary shadow-md' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
                   }`}
                 >
-                  <div className={`mb-3 ${isSelected ? pConfig.accent : 'text-slate-400'}`}>
-                    {React.cloneElement(pConfig.icon as React.ReactElement, { className: 'w-10 h-10 stroke-[1.5]' })}
-                  </div>
-                  <span className={`text-xs font-medium ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>{pConfig.title}</span>
+                  {pConfig.title}
                 </button>
               );
             })}
           </div>
         </div>
 
-        <main className="px-6">
-          {/* SANCTUARY GUIDE (NEW FEATURED SECTION) */}
-          <section className="mb-6">
-            <div className={`relative w-full rounded-[2rem] overflow-hidden ${config.color} border ${config.border} p-6 transition-all duration-500 shadow-md`}>
-              <div className={`absolute -right-12 -top-12 w-48 h-48 rounded-full blur-[40px] opacity-40 ${config.accentBg}`}></div>
-              <div className={`absolute -left-8 -bottom-8 w-32 h-32 rounded-full blur-[30px] opacity-30 ${config.accentBg}`}></div>
-              
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex justify-between items-start mb-6">
-                  <div className={`p-3 rounded-2xl bg-white/70 backdrop-blur-md shadow-sm ${config.accent}`}>
-                    {React.cloneElement(config.icon as React.ReactElement, { className: 'w-6 h-6' })}
-                  </div>
-                  <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-bold text-slate-800 shadow-sm uppercase tracking-widest border border-white/20">
-                    Today's Wisdom
-                  </span>
-                </div>
-                
-                <div>
-                  <h2 className={`text-xl font-medium text-slate-900 mb-3 leading-tight pr-4`}>
-                    "{config.wisdom || config.remedy}"
-                  </h2>
-                  <div className="w-12 h-[2px] rounded-full bg-slate-900/20 mb-4"></div>
-                  
-                  <div className="flex items-center justify-between cursor-pointer group" onClick={() => {
-                    const stage =
-                      config.id === 'menarche' ? 'menstrual' :
-                      config.id === 'mobility' ? 'wise-woman' :
-                      config.id;
-                    navigate(`/content-library?stage=${stage}`);
-                  }}>
-                    <span className="text-sm font-semibold text-[#1D1C1C] group-hover:underline underline-offset-4 decoration-2">{config.action}</span>
-                    <button className={`w-12 h-12 rounded-full ${config.accentBg} text-white flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-black/10`}>
-                      <ArrowRight className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+        <main className="px-6 flex flex-col gap-4">
+          {!persona ? (
+            <div className="bg-white rounded-[32px] p-10 flex flex-col items-center text-center shadow-sm border border-slate-100 min-h-[220px] justify-center">
+               <h2 className="text-xl font-bold text-slate-800 mb-6">Choose a stage to begin.</h2>
             </div>
-          </section>
+          ) : (
+            <div className="bg-secondary/40 rounded-[32px] p-8 flex flex-col items-center text-center shadow-sm border border-slate-100 min-h-[220px] justify-center">
+               <h2 className="text-[22px] font-bold text-slate-900 mb-2 font-accent">Stay in your strength.</h2>
+               <p className="text-sm text-slate-600 mb-8 font-medium">{PERSONA_CONFIG[persona].title}</p>
+               
+               <Drawer>
+                 <DrawerTrigger asChild>
+                   <Button className="w-full max-w-[220px] bg-primary hover:bg-primary/90 text-white rounded-full h-14 text-base font-semibold shadow-md">
+                     View practices
+                   </Button>
+                 </DrawerTrigger>
+                 <DrawerContent className="px-4 pb-12 pt-2 rounded-t-[32px]">
+                   <DrawerHeader className="text-left px-2 mb-4">
+                     <DrawerTitle className="text-[22px] font-bold text-primary">{PERSONA_CONFIG[persona].title}</DrawerTitle>
+                     <p className="text-sm text-slate-500 mt-1 font-medium">Practices for the body you have today.</p>
+                   </DrawerHeader>
+                   <div className="flex flex-col gap-4 px-2">
+                     <div onClick={() => navigate(`/content-library?stage=${PERSONA_CONFIG[persona].id}`)} className="bg-primary/5 border border-primary/10 rounded-3xl p-5 flex items-center justify-between cursor-pointer hover:bg-primary/10 transition-colors">
+                       <div>
+                         <h4 className="font-bold text-slate-900 text-[17px]">The Crown of Wisdom</h4>
+                         <p className="text-[13px] text-slate-600 mt-1 font-medium">Honoring your phase.</p>
+                       </div>
+                       <Button size="sm" className="bg-primary text-white rounded-full px-5">Start</Button>
+                     </div>
+                     <div onClick={() => navigate(`/content-library?stage=${PERSONA_CONFIG[persona].id}`)} className="bg-white border border-slate-100 rounded-3xl p-5 flex items-center justify-between cursor-pointer shadow-sm hover:border-slate-200 transition-colors">
+                       <div>
+                         <h4 className="font-bold text-slate-900 text-[17px]">Gentle Movement</h4>
+                         <p className="text-[13px] text-slate-600 mt-1 font-medium">Strength, stability, and care.</p>
+                       </div>
+                       <Button variant="outline" size="sm" className="rounded-full border-slate-300 text-slate-700 px-5">Start</Button>
+                     </div>
+                   </div>
+                 </DrawerContent>
+               </Drawer>
+            </div>
+          )}
 
-          {/* Non-Judgmental "Optional" Actions */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <button onClick={() => navigate('/tracker')} className="flex flex-col items-center justify-center p-5 rounded-[2rem] bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors group text-center">
-              <HeartPulse className={`w-7 h-7 mb-2 ${config.accent} transition-transform group-hover:scale-110`} />
-              <span className="text-xs font-medium text-slate-800 mb-0.5">Gentle Check-in</span>
-              <span className="text-[10px] text-slate-400 font-medium">({config.metric} • Optional)</span>
+          {/* Action cards row */}
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            <button onClick={() => navigate('/tracker')} className="flex flex-col items-center justify-center p-6 rounded-[28px] bg-white border border-slate-100 hover:border-slate-200 transition-colors shadow-sm">
+              <HeartPulse className="w-7 h-7 mb-3 text-slate-700" />
+              <span className="text-[15px] font-semibold text-slate-800">Check in</span>
             </button>
-            
-            <button onClick={() => setShowElementsGuide(true)} className="flex flex-col items-center justify-center p-5 rounded-[2rem] bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors group text-center">
-              <Leaf className={`w-7 h-7 mb-2 ${config.accent} transition-transform group-hover:scale-110`} />
-              <span className="text-xs font-medium text-slate-800 mb-0.5">Learn Your Elements</span>
-              <span className="text-[10px] text-slate-400 font-medium">(Dosha Guide)</span>
+            <button onClick={() => setShowElementsGuide(true)} className="flex flex-col items-center justify-center p-6 rounded-[28px] bg-white border border-slate-100 hover:border-slate-200 transition-colors shadow-sm">
+              <Leaf className="w-7 h-7 mb-3 text-slate-700" />
+              <span className="text-[15px] font-semibold text-slate-800">Your elements</span>
             </button>
           </div>
-
-          {/* Letter from Mumtaz - The Deep Context */}
-          <section className="mb-6">
-            <SanctuaryManifesto />
-          </section>
-
-          {/* Direct Connection to Practitioner / Q&A */}
-          <section className="mb-6">
-            <div className="bg-mumtaz-lilac/20 border border-mumtaz-lilac/40 rounded-[2rem] p-6 relative overflow-hidden flex flex-col justify-between shadow-sm">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/40 rounded-full blur-2xl"></div>
-              <div className="relative z-10 mb-4">
-                <h3 className="text-mumtaz-plum font-medium text-xl tracking-tight">Connect with Mumtaz</h3>
-                <p className="text-slate-700 text-sm mt-2 leading-relaxed pr-6">
-                  This sanctuary is just a companion. Join our live Q&A circles or book a private session for true practitioner guidance.
-                </p>
-              </div>
-              <button onClick={() => navigate('/bookings')} className="relative z-10 bg-mumtaz-plum text-white hover:bg-mumtaz-plum/90 w-full py-3 rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mumtaz-plum/50 shadow-sm">
-                <Video className="w-4 h-4" /> Book a Consultation
-              </button>
-            </div>
-          </section>
         </main>
       </div>
 
       <ElementsGuideModal isOpen={showElementsGuide} onClose={() => setShowElementsGuide(false)} />
-
-      {/* Visual Bottom Navigation */}
-      <nav className="absolute inset-x-0 bottom-0 bg-white/90 backdrop-blur-lg border-t border-slate-100 px-8 py-5 flex justify-between items-center pb-safe-offset-8 z-40">
-        {[
-          { id: 'home', icon: <Leaf />, path: '/' },
-          { id: 'journal', icon: <BookOpen />, path: '/tracker' },
-          { id: 'bookings', icon: <Users />, path: '/bookings' },
-          { id: 'chat', icon: <MessageCircle />, path: '/chat' },
-        ].map((item) => {
-          const isActive = activeTab === item.id || (item.id === 'home' && activeTab === '');
-          return (
-            <button 
-              key={item.id}
-              onClick={() => navigate(item.path)}
-              aria-label={item.id}
-              className={`transition-all duration-300 relative min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full ${
-                isActive ? `${config.accent} scale-110` : 'text-slate-300 hover:text-slate-400'
-              }`}
-            >
-              {React.cloneElement(item.icon as React.ReactElement, { className: 'w-7 h-7 stroke-[1.5]' })}
-              {isActive && (
-                <span className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${config.accentBg}`} />
-              )}
-            </button>
-          )
-        })}
-      </nav>
     </div>
   );
 }
