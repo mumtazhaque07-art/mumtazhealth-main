@@ -1101,7 +1101,7 @@ const Landing = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
                   size="lg"
-                  onClick={openEntryDialog}
+                  onClick={() => navigate("/onboarding")}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
                 >
                   Get Started
