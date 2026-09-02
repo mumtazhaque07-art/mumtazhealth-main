@@ -63,6 +63,7 @@ export function Navigation({ className }: NavigationProps) {
   ];
 
   return (
+    <>
     <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50",
       className
