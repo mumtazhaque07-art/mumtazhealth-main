@@ -170,17 +170,17 @@ export default function Onboarding() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 flex flex-col items-center w-full px-8 pb-8">
-                <p className="text-slate-600 leading-relaxed text-center font-medium max-w-md">
+                <p className="text-slate-800 leading-relaxed text-center font-medium max-w-md">
                   In this sanctuary, we blend the ancient art of Ayurveda with gentle movement and intuition. 
                   It's what the old wives tell us and why they make sense.
                 </p>
-                <p className="text-slate-500 leading-relaxed text-center text-sm max-w-md">
+                <p className="text-slate-700 leading-relaxed text-center text-sm max-w-md">
                   We use simple elements—Air, Fire, and Earth—to help you understand your unique individual body without comparison. There are no labels here. We just walk hand in hand, celebrating you.
                 </p>
                 
-                <div className="w-full flex justify-between items-center mt-6 pt-4 border-t border-slate-100 max-w-md">
-                  <Button variant="ghost" onClick={() => setStep("welcome")} className="text-xs font-semibold text-slate-500">
-                    <ArrowLeft className="w-3 h-3 mr-1" /> Back
+                <div className="w-full flex justify-between items-center mt-6 pt-4 border-t border-slate-200 max-w-md">
+                  <Button variant="ghost" onClick={() => setStep("welcome")} className="text-sm font-semibold text-slate-700 hover:text-slate-900">
+                    <ArrowLeft className="w-4 h-4 mr-1.5" /> Back
                   </Button>
                   <Button onClick={() => setStep("elements")} className="bg-wellness-sage hover:bg-wellness-sage/90 text-white rounded-full px-6">
                     Discover your Elements <ArrowRight className="h-4 w-4 ml-2" />
