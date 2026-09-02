@@ -26,7 +26,7 @@ const ProgressIndicator = ({ currentStep, totalSteps }: { currentStep: number; t
           style={{ width: orbSize, height: orbSize, opacity: 0.4 + (progress * 0.6) }}
         />
       </div>
-      <span className="text-[10px] font-bold text-muted-foreground tracking-[0.2em] uppercase opacity-70">
+      <span className="text-xs font-bold text-slate-700 tracking-[0.2em] uppercase">
         {currentStep === totalSteps ? 'Complete' : 'Unfolding'}
       </span>
     </div>
@@ -135,24 +135,24 @@ export default function Onboarding() {
           <ProgressIndicator currentStep={currentIdx} totalSteps={6} />
         </div>
         
-        <div className="flex justify-center mb-4">
-          <Logo size="md" showText={false} />
+        <div className="flex justify-center mb-8 mt-2">
+          <Logo size="lg" showText={true} />
         </div>
 
-        <Card className="border-none shadow-xl bg-card/95 backdrop-blur-sm overflow-hidden min-h-[400px] flex flex-col justify-center">
+        <Card className="border border-slate-100 shadow-xl bg-white overflow-hidden min-h-[400px] flex flex-col justify-center rounded-[32px]">
           
           {step === "welcome" && (
             <>
               <CardHeader className="text-center space-y-6">
-                <CardTitle className="text-2xl sm:text-3xl font-bold text-mumtaz-plum leading-snug font-accent">
+                <CardTitle className="text-2xl sm:text-3xl font-bold text-slate-900 leading-snug font-accent">
                   Welcome to Your Sanctuary
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 text-center">
-                <p className="text-muted-foreground leading-relaxed px-4 text-base">
+                <p className="text-slate-700 font-medium leading-relaxed px-4 text-base">
                   A gentle space created to support you through every phase of womanhood. There are no heavy clinical forms here. We walk softly, learning about you intuitively together over time.
                 </p>
-                <Button onClick={() => setStep("philosophy")} size="lg" className="w-full max-w-xs mt-6 bg-mumtaz-plum hover:bg-mumtaz-plum/90 text-white rounded-full">
+                <Button onClick={() => setStep("philosophy")} size="lg" className="w-full max-w-xs mt-6 bg-primary hover:bg-primary/90 text-white rounded-full font-semibold h-12">
                   Begin Journey <ArrowRight className="h-4 w-4 shrink-0 ml-2" />
                 </Button>
               </CardContent>

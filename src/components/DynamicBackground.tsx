@@ -77,23 +77,6 @@ export function DynamicBackground({ children }: DynamicBackgroundProps) {
 
   return (
     <div className={`min-h-[100dvh] ${backgroundClass} transition-colors duration-1000 w-full`}>
-      {/* Hidden toggle for testing */}
-      <div className="fixed top-2 left-2 z-[9999] flex items-center gap-2 opacity-10 hover:opacity-100 transition-opacity">
-         <button 
-           onClick={() => setOverrideNightMode(prev => prev === true ? false : true)}
-           className="px-2 py-1 bg-black/40 text-white text-xs rounded shadow backdrop-blur-sm"
-         >
-           Toggle 3AM (Night: {isNightMode ? 'ON' : 'OFF'})
-         </button>
-         {overrideNightMode !== null && (
-           <button 
-             onClick={() => setOverrideNightMode(null)}
-             className="px-2 py-1 bg-black/40 text-white text-xs rounded shadow backdrop-blur-sm"
-           >
-             Auto Time
-           </button>
-         )}
-      </div>
       {children}
     </div>
   );
