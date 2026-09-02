@@ -8,48 +8,47 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Mumtaz Health Brand Colors */
-    /* Warm White/Light Neutral Background (Vellum #FAF9F6) */
-    --background: 45 30% 97%;
-    --foreground: 280 25% 25%;
+    /* Mumtaz Health Brand Colors (Lumen UI Redesign) */
+    /* Warm Cream Background (#FDFBF7) */
+    --background: 40 40% 98%;
+    /* Charcoal Text (#333333) */
+    --foreground: 0 0% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 280 25% 25%;
+    --card-foreground: 0 0% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 280 25% 25%;
+    --popover-foreground: 0 0% 20%;
 
-    /* True Sage Green - Primary */
-    --primary: 140 20% 70%;
+    /* Mumtaz Plum - Primary for active actions (#5C2D5C) */
+    --primary: 300 34% 27%;
     --primary-foreground: 0 0% 100%;
 
-    /* Soft Sand/Beige - Secondary */
-    --secondary: 35 35% 88%;
-    --secondary-foreground: 280 25% 25%;
+    /* Soft Sand/Cream - Secondary */
+    --secondary: 40 30% 94%;
+    --secondary-foreground: 0 0% 20%;
 
-    --muted: 35 20% 92%;
-    --muted-foreground: 280 15% 45%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 0 0% 40%;
 
-    /* Lilac/Soft Lavender - Accent (#C8A2C8) */
     --accent: 300 25% 71%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 280 15% 88%;
-    --input: 280 15% 88%;
-    --ring: 280 40% 70%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 300 34% 27%;
 
     --radius: 1.5rem;
     
     /* Mumtaz Brand Palette */
-    /* Exact translation from #92789D and #8C9F84 */
     --mumtaz-lilac: 282 17% 54%;
     --mumtaz-sage: 102 12% 57%;
-    --mumtaz-plum: 280 50% 35%;
-    --mumtaz-sand: 35 35% 88%;
-    --mumtaz-warm-white: 45 30% 97%;
+    --mumtaz-plum: 300 34% 27%;
+    --mumtaz-sand: 40 30% 94%;
+    --mumtaz-warm-white: 40 40% 98%;
     
     --mumtaz-sage-light: 100 20% 90%;
     --mumtaz-lilac-light: 280 40% 92%;
@@ -60,52 +59,52 @@ All colors MUST be HSL.
     --dosha-kapha: 120 25% 45%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 280 25% 25%;
-    --sidebar-primary: 280 40% 70%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 300 34% 27%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 35 35% 88%;
-    --sidebar-accent-foreground: 280 25% 25%;
-    --sidebar-border: 280 15% 88%;
-    --sidebar-ring: 280 40% 70%;
+    --sidebar-accent: 40 30% 94%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 300 34% 27%;
   }
 
 .dark {
-    /* Deep Sanctuary Plum/Lilac Shadow */
-    --background: 280 15% 12%;
-    --foreground: 35 30% 92%;
+    /* Deep Sanctuary Plum/Charcoal Shadow */
+    --background: 240 10% 10%;
+    --foreground: 40 20% 96%;
 
-    --card: 280 15% 15%;
-    --card-foreground: 35 30% 92%;
+    --card: 240 10% 13%;
+    --card-foreground: 40 20% 96%;
 
-    --popover: 280 15% 15%;
-    --popover-foreground: 35 30% 92%;
+    --popover: 240 10% 13%;
+    --popover-foreground: 40 20% 96%;
 
-    --primary: 140 20% 70%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 300 34% 60%;
+    --primary-foreground: 0 0% 10%;
 
-    --secondary: 280 15% 20%;
-    --secondary-foreground: 35 30% 96%;
+    --secondary: 240 10% 18%;
+    --secondary-foreground: 40 20% 96%;
 
-    --muted: 280 15% 20%;
-    --muted-foreground: 35 25% 80%;
+    --muted: 240 10% 18%;
+    --muted-foreground: 240 10% 70%;
 
     --accent: 300 25% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 60% 45%;
-    --destructive-foreground: 35 30% 96%;
+    --destructive-foreground: 40 20% 96%;
 
-    --border: 280 15% 25%;
-    --input: 280 15% 25%;
-    --ring: 280 40% 60%;
-    --sidebar-background: 280 25% 12%;
-    --sidebar-foreground: 35 30% 96%;
-    --sidebar-primary: 280 40% 60%;
+    --border: 240 10% 20%;
+    --input: 240 10% 20%;
+    --ring: 300 34% 60%;
+    --sidebar-background: 240 10% 10%;
+    --sidebar-foreground: 40 20% 96%;
+    --sidebar-primary: 300 34% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 280 15% 20%;
-    --sidebar-accent-foreground: 35 30% 96%;
-    --sidebar-border: 280 15% 25%;
-    --sidebar-ring: 280 40% 60%;
+    --sidebar-accent: 240 10% 18%;
+    --sidebar-accent-foreground: 40 20% 96%;
+    --sidebar-border: 240 10% 20%;
+    --sidebar-ring: 300 34% 60%;
 
     /* Soft Dark Mode Gradients */
     --mumtaz-sage-light: 102 12% 20%;
@@ -124,9 +123,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply text-foreground font-body;
-    background: linear-gradient(135deg, hsl(45, 30%, 97%), hsl(102, 12%, 94%), hsl(282, 17%, 94%));
-    background-attachment: fixed;
+    @apply text-foreground font-body bg-background;
     font-size: 1.125rem; /* ~18px for better accessibility */
     line-height: 1.7; /* Extra relaxed line height for tired eyes */
     -webkit-font-smoothing: antialiased;

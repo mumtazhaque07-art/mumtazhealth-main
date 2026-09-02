@@ -140,90 +140,49 @@ export function Navigation({ className }: NavigationProps) {
           </div>
         )}
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Top Navigation (Logo only) */}
         {isMobile && (
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIslamicMode(!islamicMode)}
-              className="rounded-full border border-border/50 bg-background/50 hover:bg-wellness-lilac/10 h-8 w-8 transition-transform active:scale-95"
-            >
-              {islamicMode ? (
-                <Moon className="h-3.5 w-3.5 text-mumtaz-plum" />
-              ) : (
-                <Sun className="h-3.5 w-3.5 text-wellness-sage" />
-              )}
-            </Button>
-
-            <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-              <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-foreground gap-2"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="text-sm">Menu</span>
-                <ChevronDown className={cn(
-                  "h-4 w-4 transition-transform duration-200",
-                  isMenuOpen && "rotate-180"
-                )} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-56 bg-card border-border shadow-lg"
-            >
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
-                return (
-                  <DropdownMenuItem
-                    key={item.href}
-                    onClick={() => {
-                      navigate(item.href);
-                      setIsMenuOpen(false);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 py-3 cursor-pointer",
-                      isActive && "bg-primary/5"
-                    )}
-                  >
-                    <Icon className={cn("h-5 w-5", isActive ? "text-primary": "text-accent")} />
-                    <div className="flex flex-col">
-                      <span className={cn("font-medium", isActive ? "text-primary font-bold": "text-foreground")}>{item.label}</span>
-                      <span className="text-xs text-muted-foreground">{item.description}</span>
-                    </div>
-                  </DropdownMenuItem>
-                );
-              })}
-              <DropdownMenuSeparator className="bg-border" />
-              <DropdownMenuItem
-                onClick={() => {
-                  navigate("/settings");
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center gap-3 py-3 cursor-pointer"
-              >
-                <Settings className="h-5 w-5 text-muted-foreground" />
-                <span className="font-medium text-foreground">Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  handleSignOut();
-                  setIsMenuOpen(false);
-                }}
-                className="flex items-center gap-3 py-3 cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="h-5 w-5" />
-                <span className="font-medium">Sign Out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            {/* The bottom nav handles the rest. Just logo at the top. */}
           </div>
         )}
       </div>
     </nav>
+    
+    {/* Mobile Bottom Tab Bar */}
+    {isMobile && (
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-slate-100 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+        <div className="flex justify-around items-center h-16 px-2">
+          {navItems.slice(0, 4).map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
+            return (
+              <button
+                key={item.href}
+                onClick={() => navigate(item.href)}
+                className={cn(
+                  "flex flex-col items-center justify-center w-full h-full space-y-1",
+                  isActive ? "text-mumtaz-plum" : "text-slate-400 hover:text-slate-600"
+                )}
+              >
+                <Icon className={cn("h-6 w-6 transition-transform duration-200", isActive && "scale-110")} />
+                <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+              </button>
+            );
+          })}
+          <button
+            onClick={() => navigate("/settings")}
+            className={cn(
+              "flex flex-col items-center justify-center w-full h-full space-y-1",
+              location.pathname.startsWith("/settings") ? "text-mumtaz-plum" : "text-slate-400 hover:text-slate-600"
+            )}
+          >
+            <Settings className={cn("h-6 w-6 transition-transform duration-200", location.pathname.startsWith("/settings") && "scale-110")} />
+            <span className="text-[10px] font-medium tracking-wide">Settings</span>
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

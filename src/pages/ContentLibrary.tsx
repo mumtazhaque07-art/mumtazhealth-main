@@ -180,7 +180,7 @@ const libraryStages = [
   { id: 'stage4', label: '4. Postpartum', icon: Activity, match: ['postpartum'] },
   { id: 'stage5', label: '5. Perimenopause', icon: Sparkles, match: ['perimenopause'] },
   { id: 'stage6', label: '6. Menopause', icon: Flame, match: ['menopause'] },
-  { id: 'stage7', label: '7. Wise Woman', icon: Crown, match: ['post-menopause', 'wise-woman'] },
+  { id: 'stage7', label: '7. Wise Woman', icon: Crown, match: ['post-menopause', 'wise-woman', 'mobility', 'golden_years'] },
 ];
 
 const ContentLibrary = () => {
@@ -546,28 +546,26 @@ const ContentLibrary = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="w-full border-b pb-4 mb-8">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 flex flex-wrap gap-y-3 gap-x-2">
+          <div className="w-full mb-8">
+            <TabsList className="w-full justify-start h-auto bg-transparent p-0 flex flex-nowrap overflow-x-auto scrollbar-hide gap-3 pb-2">
               <TabsTrigger 
                 value="all"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-2"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
               >
                 All Content
               </TabsTrigger>
               <TabsTrigger 
                 value="favorites"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-2"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
               >
                 <Heart className="w-4 h-4 mr-2" /> Favorites
               </TabsTrigger>
-              
-              <div className="w-px h-8 bg-border mx-2" />
               
               {libraryStages.map(stage => (
                 <TabsTrigger 
                   key={stage.id}
                   value={stage.id}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-full px-6 py-2"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
                 >
                   <stage.icon className="w-4 h-4 mr-2" /> {stage.label}
                 </TabsTrigger>
@@ -593,35 +591,7 @@ const ContentLibrary = () => {
             </div>
           </div>
 
-          {/* Dosha Filter Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-white/50 backdrop-blur-sm p-1 rounded-full border border-wellness-sage/20 shadow-sm">
-              <button 
-                onClick={() => setActiveDosha('all')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'all' ? 'bg-gray-800 text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}
-              >
-                All Doshas
-              </button>
-              <button 
-                onClick={() => setActiveDosha('vata')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'vata' ? 'bg-blue-500 text-white shadow' : 'text-gray-600 hover:text-blue-600'}`}
-              >
-                Vata
-              </button>
-              <button 
-                onClick={() => setActiveDosha('pitta')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'pitta' ? 'bg-red-500 text-white shadow' : 'text-gray-600 hover:text-red-600'}`}
-              >
-                Pitta
-              </button>
-              <button 
-                onClick={() => setActiveDosha('kapha')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${activeDosha === 'kapha' ? 'bg-green-600 text-white shadow' : 'text-gray-600 hover:text-green-700'}`}
-              >
-                Kapha
-              </button>
-            </div>
-          </div>
+          {/* Dosha Filter removed per Lumen UI Redesign */}
 
           {loading ? (
             <ContentGridSkeleton count={6} />

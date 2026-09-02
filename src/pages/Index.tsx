@@ -107,7 +107,13 @@ export default function Index() {
                   </h2>
                   <div className="w-12 h-[2px] rounded-full bg-slate-900/20 mb-4"></div>
                   
-                  <div className="flex items-center justify-between cursor-pointer group" onClick={() => navigate(`/content-library?stage=${config.id === 'menarche' ? 'menstrual' : config.id}`)}>
+                  <div className="flex items-center justify-between cursor-pointer group" onClick={() => {
+                    const stage =
+                      config.id === 'menarche' ? 'menstrual' :
+                      config.id === 'mobility' ? 'wise-woman' :
+                      config.id;
+                    navigate(`/content-library?stage=${stage}`);
+                  }}>
                     <span className="text-sm font-semibold text-[#1D1C1C] group-hover:underline underline-offset-4 decoration-2">{config.action}</span>
                     <button className={`w-12 h-12 rounded-full ${config.accentBg} text-white flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-black/10`}>
                       <ArrowRight className="w-5 h-5 text-white" />
