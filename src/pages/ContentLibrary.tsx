@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowLeft, BookOpen, Heart, Sparkles, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
+import { ArrowLeft, BookOpen, Heart, Sparkles, Play, Apple, Filter, CheckCircle2, Circle, Flame, Wind, Mountain, Flower2, Leaf, Calendar, Users, Lightbulb, Info, HelpCircle, Lock, Crown, Bell, Droplet, AlertTriangle, Search, X, Baby, Salad, Brain, Activity, ChevronDown, ExternalLink } from "lucide-react";
 
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -88,6 +88,7 @@ import compassPose from "@/assets/poses/compass-pose.jpeg";
 import revolvedHeadToKnee from "@/assets/poses/revolved-head-to-knee.jpeg";
 import legsUpTheWall from "@/assets/poses/legs-up-the-wall.png";
 import { Navigation } from "@/components/Navigation";
+import { Logo } from "@/components/Logo";
 import { ContentGridSkeleton } from "@/components/ContentSkeleton";
 import { DailyReminderButton } from "@/components/DailyReminderButton";
 import { PoseSequenceGuide } from "@/components/PoseSequenceGuide";
@@ -174,13 +175,13 @@ const getDoshaMovementTags = (primaryDosha: string | null): string[] => {
 
 
 const libraryStages = [
-  { id: 'stage1', label: '1. Cycle Health', icon: Flower2, match: ['menstrual', 'follicular', 'ovulatory', 'luteal', 'cycle-health'] },
-  { id: 'stage2', label: '2. Fertility', icon: Heart, match: ['fertility', 'pre-conception', 'ttc'] },
-  { id: 'stage3', label: '3. Pregnancy', icon: Baby, match: ['pregnancy', 'pregnant', 'trimester-1', 'trimester-2', 'trimester-3'] },
-  { id: 'stage4', label: '4. Postpartum', icon: Activity, match: ['postpartum'] },
-  { id: 'stage5', label: '5. Perimenopause', icon: Sparkles, match: ['perimenopause'] },
-  { id: 'stage6', label: '6. Menopause', icon: Flame, match: ['menopause'] },
-  { id: 'stage7', label: '7. Wise Woman', icon: Crown, match: ['post-menopause', 'wise-woman', 'mobility', 'golden_years'] },
+  { id: 'stage1', label: 'Period', icon: Flower2, match: ['menstrual', 'follicular', 'ovulatory', 'luteal', 'cycle-health', 'menarche', 'period'] },
+  { id: 'stage2', label: 'Fertility', icon: Heart, match: ['fertility', 'pre-conception', 'ttc'] },
+  { id: 'stage3', label: 'Pregnancy', icon: Baby, match: ['pregnancy', 'pregnant', 'trimester-1', 'trimester-2', 'trimester-3'] },
+  { id: 'stage4', label: 'Postpartum', icon: Activity, match: ['postpartum'] },
+  { id: 'stage5', label: 'Perimenopause', icon: Sparkles, match: ['perimenopause'] },
+  { id: 'stage6', label: 'Menopause', icon: Flame, match: ['menopause'] },
+  { id: 'stage7', label: 'Wise Woman', icon: Crown, match: ['post-menopause', 'wise-woman', 'mobility', 'golden_years'] },
 ];
 
 const ContentLibrary = () => {
@@ -411,7 +412,7 @@ const ContentLibrary = () => {
   const renderContentCard = (item: WellnessContent) => {
     const isPremiumItem = isPremiumContent(item);
     const isLocked = !isPremium && isPremiumItem;
-    
+    const hasVideo = Boolean(item.video_url && String(item.video_url).trim());
     const description = item.description?.trim() || "A short practice for this moment. Take what serves you.";
     const openCard = (e?: { stopPropagation: () => void }) => {
       e?.stopPropagation();
@@ -429,37 +430,76 @@ const ContentLibrary = () => {
       }
     };
 
+    const ctaLabel = isLocked
+      ? 'Continue with Premium'
+      : hasVideo
+        ? 'Start practice'
+        : 'Read';
+
+    const typeLabel = hasVideo
+      ? 'VIDEO'
+      : (item.content_type?.trim()
+          ? item.content_type.trim().toUpperCase()
+          : 'ARTICLE');
+
     return (
-      <Card key={item.id} className={`overflow-hidden transition-shadow relative cursor-pointer ${isLocked ? 'opacity-60 hover:shadow-none' : 'hover:shadow-lg'}`} onClick={() => openCard()}>
-        <div className="h-40 overflow-hidden bg-muted relative group">
-          <img 
-            src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
-            alt={item.title}
-            className={`w-full h-full object-cover ${isLocked ? '' : 'transition-transform duration-500 group-hover:scale-105'}`}
-          />
-          <Badge className={`absolute top-2 left-2 text-xs shadow-sm ${isPremiumItem ? 'bg-white/80 text-slate-600' : 'bg-slate-800/80 text-white'}`}>
-            {isPremiumItem ? 'Premium' : 'Free Taste'}
-          </Badge>
+      <Card
+        key={item.id}
+        className={`overflow-hidden transition-shadow relative cursor-pointer bg-white border-slate-100 ${isLocked ? 'opacity-60 hover:shadow-none' : 'hover:shadow-lg'}`}
+        onClick={() => openCard()}
+      >
+        <div className="flex flex-row items-stretch min-h-[168px]">
+          {/* Text left */}
+          <div className="flex-1 min-w-0 p-4 sm:p-5 flex flex-col justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.14em] uppercase text-mumtaz-plum mb-1.5">
+                {typeLabel}
+              </p>
+              <CardTitle className="text-[16px] leading-snug line-clamp-2 text-slate-800 font-serif mb-1.5">
+                {item.title}
+              </CardTitle>
+              {item.duration_minutes ? (
+                <p className="text-xs text-muted-foreground mb-1.5">{item.duration_minutes} min</p>
+              ) : null}
+              <CardDescription className="line-clamp-3 text-sm">{description}</CardDescription>
+            </div>
+            <Button
+              className={`w-full sm:w-auto self-start rounded-full px-5 ${
+                isLocked
+                  ? 'bg-slate-100 text-slate-500 hover:bg-slate-100'
+                  : hasVideo
+                    ? 'bg-mumtaz-plum hover:bg-mumtaz-plum/90 text-white'
+                    : 'bg-transparent border border-mumtaz-plum text-mumtaz-plum hover:bg-mumtaz-plum/5'
+              }`}
+              variant={isLocked ? 'secondary' : hasVideo ? 'default' : 'outline'}
+              size="sm"
+              onClick={openCard}
+            >
+              {ctaLabel}
+            </Button>
+          </div>
+
+          {/* Tall image right */}
+          <div className="relative w-[38%] max-w-[160px] sm:max-w-[180px] shrink-0 self-stretch bg-muted overflow-hidden">
+            <img
+              src={getContentImage(item.content_type, item.tags, item.image_url, item.title)}
+              alt={item.title}
+              className={`absolute inset-0 w-full h-full object-cover object-center ${isLocked ? '' : 'transition-transform duration-500 group-hover:scale-105'}`}
+            />
+            {hasVideo && !isLocked && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <div className="h-11 w-11 rounded-full bg-white/90 text-mumtaz-plum flex items-center justify-center shadow-md">
+                  <Play className="h-5 w-5 fill-current ml-0.5" />
+                </div>
+              </div>
+            )}
+            {isPremiumItem && (
+              <Badge className="absolute top-2 left-2 text-[10px] shadow-sm bg-white/85 text-slate-600 border-0">
+                Premium
+              </Badge>
+            )}
+          </div>
         </div>
-        
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base line-clamp-2 text-slate-800 font-serif">{item.title}</CardTitle>
-          {item.duration_minutes ? (
-            <p className="text-xs text-muted-foreground">{item.duration_minutes} min</p>
-          ) : null}
-          <CardDescription className="line-clamp-2 text-sm">{description}</CardDescription>
-        </CardHeader>
-        
-        <CardContent className="pt-0">
-          <Button 
-            className={`w-full ${isLocked ? 'bg-slate-100 text-slate-500 hover:bg-slate-100' : 'bg-wellness-plum hover:bg-wellness-plum/90 text-white'}`}
-            variant={isLocked ? 'secondary' : 'default'}
-            size="sm"
-            onClick={openCard}
-          >
-            {isLocked ? 'Continue with Premium' : 'Start Practice'}
-          </Button>
-        </CardContent>
       </Card>
     );
   };
@@ -483,7 +523,7 @@ const ContentLibrary = () => {
               {stageEmpty ? (
                 <>
                   <h3 className="text-xl font-serif mb-2">Nothing here yet for this stage.</h3>
-                  <p className="text-muted-foreground mb-6">Foundational practices live under Free Taste Journey.</p>
+                  <p className="text-muted-foreground mb-6">Foundational practices live under All.</p>
                   <Button
                     onClick={() => {
                       setActiveTab('all');
@@ -491,12 +531,12 @@ const ContentLibrary = () => {
                       setSearchQuery('');
                     }}
                   >
-                    Show Free Taste Journey
+                    Show all practices
                   </Button>
                 </>
               ) : (
                 <>
-                  <h3 className="text-xl font-serif mb-2">Your Taste Journey videos will appear here.</h3>
+                  <h3 className="text-xl font-serif mb-2">Practices will appear here.</h3>
                   <p className="text-muted-foreground">Foundational practices, in my voice. Nothing on this list is behind a wall.</p>
                 </>
               )}
@@ -514,7 +554,7 @@ const ContentLibrary = () => {
            <Leaf className="h-5 w-5 text-wellness-sage" />}
           <h3 className="text-xl font-serif text-slate-800">{title}</h3>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {tierItems.map(renderContentCard)}
         </div>
       </div>
@@ -524,18 +564,19 @@ const ContentLibrary = () => {
   const filteredContent = getFilteredContent();
 
   return (
-    <div className="min-h-screen bg-wellness-sand/30 pb-20">
+    <div className="min-h-screen bg-[#FDFBF7] pb-36">
       <Navigation />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-24">
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 font-serif">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Logo size="lg" showText={false} className="max-w-[220px] mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 font-serif">
             The Content Library
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl font-serif">
+          <p className="text-base text-muted-foreground max-w-2xl font-serif">
             Practices in my voice, for the body you have today.
           </p>
-          <p className="text-sm text-muted-foreground/80 max-w-2xl mt-3">
+          <p className="text-sm text-muted-foreground/80 max-w-2xl mt-2">
             Holistic suggestions only. Not medical advice.
           </p>
         </div>
@@ -547,27 +588,21 @@ const ContentLibrary = () => {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="w-full mb-8">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 flex flex-nowrap overflow-x-auto scrollbar-hide gap-3 pb-2">
+            <TabsList className="w-full justify-start h-auto bg-transparent p-0 flex flex-nowrap overflow-x-auto scrollbar-hide gap-2.5 pb-2">
               <TabsTrigger 
                 value="all"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
+                className="data-[state=active]:bg-mumtaz-plum data-[state=active]:text-white bg-white border border-slate-200 text-slate-600 rounded-full px-5 min-h-[44px] whitespace-nowrap shadow-sm transition-all"
               >
-                All Content
-              </TabsTrigger>
-              <TabsTrigger 
-                value="favorites"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
-              >
-                <Heart className="w-4 h-4 mr-2" /> Favorites
+                All
               </TabsTrigger>
               
               {libraryStages.map(stage => (
                 <TabsTrigger 
                   key={stage.id}
                   value={stage.id}
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-white border border-slate-200 text-slate-600 rounded-full px-6 py-2.5 whitespace-nowrap shadow-sm transition-all"
+                  className="data-[state=active]:bg-mumtaz-plum data-[state=active]:text-white bg-white border border-slate-200 text-slate-600 rounded-full px-5 min-h-[44px] whitespace-nowrap shadow-sm transition-all"
                 >
-                  <stage.icon className="w-4 h-4 mr-2" /> {stage.label}
+                  {stage.label}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -597,8 +632,8 @@ const ContentLibrary = () => {
             <ContentGridSkeleton count={6} />
           ) : (
             <div>
-              {renderTierGroup('free', 'Free Taste Journey', filteredContent)}
-              {renderTierGroup('premium', 'Premium Access', filteredContent)}
+              {renderTierGroup('free', 'Practices', filteredContent)}
+              {renderTierGroup('premium', 'Premium', filteredContent)}
             </div>
           )}
         </Tabs>

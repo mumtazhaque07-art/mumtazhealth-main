@@ -1,28 +1,18 @@
-import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { GlobalLoadingIndicator } from "@/components/GlobalLoadingIndicator";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Menu,
   Heart,
   BookOpen,
   Settings,
   BarChart3,
   Clock,
-  ChevronDown,
   Home,
   Moon,
   Sun,
   Users,
-  BookMarked,
+  MessageCircle,
   LogOut,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +29,6 @@ export function Navigation({ className }: NavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { islamicMode, setIslamicMode } = useLifeMap();
 
   const handleSignOut = async () => {
@@ -53,7 +42,8 @@ export function Navigation({ className }: NavigationProps) {
     }
   };
 
-  const navItems = [
+  // Desktop still has fuller set; mobile bottom bar is Home / Library / Journal / Chat only.
+  const desktopNavItems = [
     { label: "Home", icon: Home, href: "/", description: "Your dashboard" },
     { label: "Journal", icon: Heart, href: "/tracker", description: "How are you feeling?" },
     { label: "Library", icon: BookOpen, href: "/content-library", description: "Explore practices" },
@@ -62,20 +52,34 @@ export function Navigation({ className }: NavigationProps) {
     { label: "Insights", icon: BarChart3, href: "/insights", description: "Your patterns" },
   ];
 
+  const mobileTabItems = [
+    { label: "Home", icon: Home, href: "/" },
+    { label: "Library", icon: BookOpen, href: "/content-library" },
+    { label: "Journal", icon: Heart, href: "/tracker" },
+    { label: "Chat", icon: MessageCircle, href: "/chat" },
+  ];
+
+  const hideTopLogoOnMobile =
+    isMobile && (location.pathname === "/" || location.pathname === "/content-library");
+
   return (
     <>
     <nav className={cn(
       "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border/50",
       className
     )}>
-      {/* Global Loading Indicator */}
       <GlobalLoadingIndicator />
 
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
+        {/* Logo — minimized/hidden on Home + Library mobile so page-centred logo wins */}
         <Link
           to="/"
-          className="flex items-center transition-all duration-300 hover:scale-105 hover:opacity-80"
+          className={cn(
+            "flex items-center transition-all duration-300 hover:scale-105 hover:opacity-80",
+            hideTopLogoOnMobile && "opacity-0 pointer-events-none w-0 overflow-hidden"
+          )}
+          aria-hidden={hideTopLogoOnMobile}
+          tabIndex={hideTopLogoOnMobile ? -1 : undefined}
         >
           <Logo size="nav" showText={false} />
         </Link>
@@ -83,7 +87,7 @@ export function Navigation({ className }: NavigationProps) {
         {/* Desktop Navigation */}
         {!isMobile && (
           <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
+            {desktopNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
               return (
@@ -137,22 +141,21 @@ export function Navigation({ className }: NavigationProps) {
           </div>
         )}
 
-        {/* Mobile Top Navigation (Logo only) */}
         {isMobile && (
-          <div className="flex items-center gap-2">
-            {/* The bottom nav handles the rest. Just logo at the top. */}
-          </div>
+          <div className="flex items-center gap-2" />
         )}
       </div>
     </nav>
     
-    {/* Mobile Bottom Tab Bar */}
+    {/* Mobile Bottom Tab Bar — Home / Library / Journal / Chat only */}
     {isMobile && (
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-slate-100 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
         <div className="flex justify-around items-center h-16 px-2">
-          {navItems.slice(0, 4).map((item) => {
+          {mobileTabItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
+            const isActive =
+              location.pathname === item.href ||
+              (item.href !== "/" && location.pathname.startsWith(item.href));
             return (
               <button
                 key={item.href}
@@ -163,20 +166,12 @@ export function Navigation({ className }: NavigationProps) {
                 )}
               >
                 <Icon className={cn("h-6 w-6 transition-transform duration-200", isActive && "scale-110")} />
-                <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+                <span className={cn("text-[10px] font-medium tracking-wide", isActive && "font-semibold")}>
+                  {item.label}
+                </span>
               </button>
             );
           })}
-          <button
-            onClick={() => navigate("/settings")}
-            className={cn(
-              "flex flex-col items-center justify-center w-full h-full space-y-1",
-              location.pathname.startsWith("/settings") ? "text-mumtaz-plum" : "text-slate-400 hover:text-slate-600"
-            )}
-          >
-            <Settings className={cn("h-6 w-6 transition-transform duration-200", location.pathname.startsWith("/settings") && "scale-110")} />
-            <span className="text-[10px] font-medium tracking-wide">Settings</span>
-          </button>
         </div>
       </div>
     )}
