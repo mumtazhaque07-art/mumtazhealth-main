@@ -75,13 +75,9 @@ export function Navigation({ className }: NavigationProps) {
         {/* Logo */}
         <Link
           to="/"
-          className="flex items-center gap-3 transition-all duration-300 hover:scale-105 hover:opacity-80"
+          className="flex items-center transition-all duration-300 hover:scale-105 hover:opacity-80"
         >
-          <Logo size="md" showText={false} />
-          <div className="flex flex-col leading-tight">
-            <span className="font-bold text-mumtaz-plum text-2xl sm:text-3xl tracking-tight font-accent">Mumtaz Health</span>
-            <span className="text-muted-foreground text-[10px] sm:text-xs hidden sm:block tracking-wide uppercase">Empowering Your Journey</span>
-          </div>
+          <Logo size="nav" showText={false} />
         </Link>
 
         {/* Desktop Navigation */}

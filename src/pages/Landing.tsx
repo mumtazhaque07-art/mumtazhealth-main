@@ -1084,10 +1084,6 @@ const Landing = () => {
               {/* Logo — branded lockup with name visible */}
               <div className="flex flex-col lg:items-start items-center gap-4">
                 <Logo size="xl" showText={false} className="opacity-100" />
-                <div className="flex flex-col leading-tight text-center lg:text-left">
-                  <span className="font-bold text-mumtaz-plum text-3xl sm:text-4xl tracking-tight font-accent">Mumtaz Health</span>
-                  <span className="text-muted-foreground text-sm sm:text-base tracking-wide">Empowering Your Journey</span>
-                </div>
               </div>
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
                 Your Body. Your Phase.<br />Your Journey.
