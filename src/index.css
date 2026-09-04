@@ -67,53 +67,26 @@ All colors MUST be HSL.
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 300 34% 27%;
   }
-
-.dark {
-    /* Deep Sanctuary Plum/Charcoal Shadow */
-    --background: 240 10% 10%;
-    --foreground: 40 20% 96%;
-
-    --card: 240 10% 13%;
-    --card-foreground: 40 20% 96%;
-
-    --popover: 240 10% 13%;
-    --popover-foreground: 40 20% 96%;
-
-    --primary: 300 34% 60%;
-    --primary-foreground: 0 0% 10%;
-
-    --secondary: 240 10% 18%;
-    --secondary-foreground: 40 20% 96%;
-
-    --muted: 240 10% 18%;
-    --muted-foreground: 240 10% 70%;
-
-    --accent: 300 25% 65%;
+  .dark {
+    --background: 40 40% 98%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    --primary: 300 34% 27%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 30% 94%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 40 20% 94%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 300 25% 71%;
     --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 60% 45%;
-    --destructive-foreground: 40 20% 96%;
-
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
-    --ring: 300 34% 60%;
-    --sidebar-background: 240 10% 10%;
-    --sidebar-foreground: 40 20% 96%;
-    --sidebar-primary: 300 34% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 10% 18%;
-    --sidebar-accent-foreground: 40 20% 96%;
-    --sidebar-border: 240 10% 20%;
-    --sidebar-ring: 300 34% 60%;
-
-    /* Soft Dark Mode Gradients */
-    --mumtaz-sage-light: 102 12% 20%;
-    --mumtaz-lilac-light: 282 15% 22%;
-
-    /* Softer Dosha Colors for High Contrast Text in Dark Mode */
-    --dosha-pitta: 25 80% 65%;
-    --dosha-vata: 200 70% 70%;
-    --dosha-kapha: 120 20% 60%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 300 34% 27%;
   }
 }
 
