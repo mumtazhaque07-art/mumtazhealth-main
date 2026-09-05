@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { PERSONA_CONFIG } from "@/config/personas";
 import { useLifeMap } from "@/contexts/LifeMapContext";
 import { VoiceInput } from "@/components/VoiceInput";
+import { Navigation } from "@/components/Navigation";
 
 interface Message {
   role: "user" | "assistant";
@@ -281,9 +282,10 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-full h-[100dvh] flex flex-col bg-slate-50/50 relative overflow-hidden">
+    <div className="w-full h-[100dvh] flex flex-col bg-[#FDFBF7] relative overflow-hidden">
+      <Navigation />
       {/* Chat Header */}
-      <div className="px-6 py-4 pt-12 border-b border-slate-100 bg-white flex flex-col gap-3 shrink-0">
+      <div className="px-6 py-4 pt-20 border-b border-slate-100 bg-white flex flex-col gap-3 shrink-0">
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-full ${config.color} flex items-center justify-center`}>
             <Sparkles className={`w-6 h-6 ${config.accent}`} />
@@ -378,31 +380,7 @@ export default function Chat() {
         </div>
       </div>
 
-      {/* Visual Bottom Navigation */}
-      <nav className="absolute inset-x-0 bottom-0 bg-white/90 backdrop-blur-lg border-t border-slate-100 px-8 py-5 flex justify-between items-center pb-8 z-40">
-        {[
-          { id: 'home', icon: <Leaf />, path: '/' },
-          { id: 'journal', icon: <BookOpen />, path: '/tracker' },
-          { id: 'bookings', icon: <Users />, path: '/bookings' },
-          { id: 'chat', icon: <MessageCircle />, path: '/chat' },
-        ].map((item) => {
-          const isActive = item.id === 'chat';
-          return (
-            <button 
-              key={item.id}
-              onClick={() => navigate(item.path)}
-              className={`transition-all duration-300 relative ${
-                isActive ? `${config.accent} scale-110` : 'text-slate-300 hover:text-slate-400'
-              }`}
-            >
-              {React.cloneElement(item.icon as React.ReactElement, { className: 'w-7 h-7 stroke-[1.5]' })}
-              {isActive && (
-                <span className={`absolute -bottom-3 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${config.accentBg}`} />
-              )}
-            </button>
-          )
-        })}
-      </nav>
+      {/* Visual Bottom Navigation Removed - Handled by Global Navigation */}
     </div>
   );
 }

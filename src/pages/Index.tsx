@@ -37,7 +37,7 @@ export default function Index() {
     <div className="w-full h-[100dvh] flex flex-col bg-[#FDFBF7] relative overflow-hidden">
       <Navigation />
       
-      <div className="flex-1 overflow-y-auto pb-32 pt-16">
+      <div className="flex-1 overflow-y-auto pb-48 pt-16">
         {/* Centred official logo — no HTML wordmark */}
         <div className="flex justify-center px-6 pt-4 pb-2">
           <Logo size="lg" showText={false} className="max-w-[220px]" />

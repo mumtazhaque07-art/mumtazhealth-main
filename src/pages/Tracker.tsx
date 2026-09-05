@@ -44,6 +44,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Navigation } from "@/components/Navigation";
+import { Logo } from "@/components/Logo";
 import { CyclePhaseHelper } from "@/components/CyclePhaseHelper";
 import { CyclePhaseEducation } from "@/components/CyclePhaseEducation";
 import { MenopauseEducation } from "@/components/MenopauseEducation";
@@ -798,7 +799,7 @@ export default function Tracker() {
 
   if (!isPremium && !hasAnyCheckIn && !startedCheckIn) {
     return (
-      <div className="min-h-screen bg-wellness-beige animate-fade-in pb-24 md:pb-0">
+      <div className="min-h-screen bg-[#FDFBF7] animate-fade-in pb-24 md:pb-0">
         <Navigation />
         <div className="max-w-2xl mx-auto p-4 pt-24">
           <TrackerFirstCheckInEmpty onCheckIn={() => setStartedCheckIn(true)} />
@@ -808,7 +809,7 @@ export default function Tracker() {
   }
 
   return (
-    <div className="min-h-screen bg-wellness-beige animate-fade-in pb-24 md:pb-0">
+    <div className="min-h-screen bg-[#FDFBF7] animate-fade-in pb-24 md:pb-0">
       <Navigation />
       
       <GentleSignInPrompt
@@ -818,18 +819,19 @@ export default function Tracker() {
         returnPath="/tracker"
       />
       
-      <div className="max-w-2xl mx-auto p-4 pt-24 space-y-6">
-        <Card className={`mb-6 border-${config.theme.primary}/20 shadow-sm overflow-hidden relative group`}>
-          <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${config.theme.gradient}`}></div>
-          <CardHeader className="text-center pb-8 pt-10">
-            <div className="flex justify-center mb-4">
-              <div className={`p-4 rounded-full bg-gradient-to-br ${config.theme.gradient} shadow-lg ring-4 ring-white dark:ring-black animate-pulse-gentle`}>
-                <config.icon className={`w-8 h-8 text-${config.theme.primary}`} />
-              </div>
-            </div>
-            <CardTitle className={`text-3xl font-bold text-foreground mb-4`}>
-              {config.title} Journal
-            </CardTitle>
+      <div className="max-w-2xl mx-auto p-4 pt-20 space-y-6">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Logo size="lg" showText={false} className="max-w-[220px] mb-4" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2 font-serif">
+            {config.title} Journal
+          </h1>
+          <p className="text-base text-muted-foreground max-w-2xl font-serif">
+            Tune in to how you feel.
+          </p>
+        </div>
+        
+        <Card className={`mb-6 border-slate-100 shadow-sm overflow-hidden relative bg-white`}>
+          <CardHeader className="text-center pb-6 pt-6">
             
             <div className="flex flex-col items-center gap-4">
               <Popover>

@@ -42,17 +42,8 @@ export function Navigation({ className }: NavigationProps) {
     }
   };
 
-  // Desktop still has fuller set; mobile bottom bar is Home / Library / Journal / Chat only.
-  const desktopNavItems = [
-    { label: "Home", icon: Home, href: "/", description: "Your dashboard" },
-    { label: "Journal", icon: Heart, href: "/tracker", description: "How are you feeling?" },
-    { label: "Library", icon: BookOpen, href: "/content-library", description: "Explore practices" },
-    { label: "Sanctuary", icon: Users, href: "/sanctuary", description: "Sisterhood community" },
-    { label: "Bookings", icon: Clock, href: "/bookings", description: "Consult with Mumtaz" },
-    { label: "Insights", icon: BarChart3, href: "/insights", description: "Your patterns" },
-  ];
-
-  const mobileTabItems = [
+  // Desktop and Mobile now align on the core four-tab model to reduce clutter
+  const coreNavItems = [
     { label: "Home", icon: Home, href: "/" },
     { label: "Library", icon: BookOpen, href: "/content-library" },
     { label: "Journal", icon: Heart, href: "/tracker" },
@@ -87,7 +78,7 @@ export function Navigation({ className }: NavigationProps) {
         {/* Desktop Navigation */}
         {!isMobile && (
           <div className="hidden md:flex items-center gap-1">
-            {desktopNavItems.map((item) => {
+            {coreNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href || (item.href !== "/" && location.pathname.startsWith(item.href));
               return (
@@ -151,7 +142,7 @@ export function Navigation({ className }: NavigationProps) {
     {isMobile && (
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-t border-slate-100 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
         <div className="flex justify-around items-center h-16 px-2">
-          {mobileTabItems.map((item) => {
+          {coreNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               location.pathname === item.href ||
